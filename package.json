@@ -3,14 +3,16 @@
   "scripts": {
     "dev": "ts-node-dev --notify --respawn --transpile-only src/server.ts",
     "migrate": "npm -s run migrate:save && npm -s run migrate:up",
-    "generate": "npm -s run generate:prisma && npm -s run generate:nexus",
+    "generate": "npm -s run generate:prisma && npm -s run generate:nexus:app && npm -s run generate:nexus:admin && npm -s run generate:nexus:partner",
     "build": "npm -s run clean && npm -s run generate && tsc",
     "start": "cross-env NODE_ENV=production node dist/server",
     "clean": "rm -rf dist",
     "migrate:save": "prisma migrate save --name init --experimental",
     "migrate:up": "prisma migrate up --experimental",
     "generate:prisma": "prisma generate",
-    "generate:nexus": "cross-env NODE_ENV=development ts-node --transpile-only src/schema",
+    "generate:nexus:app": "cross-env NODE_ENV=development ts-node --transpile-only src/schemas/app",
+    "generate:nexus:admin": "cross-env NODE_ENV=development ts-node --transpile-only src/schemas/admin",
+    "generate:nexus:partner": "cross-env NODE_ENV=development ts-node --transpile-only src/schemas/partner"
   },
   "dependencies": {
     "@nexus/schema": "^0.19.2",
