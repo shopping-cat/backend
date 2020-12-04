@@ -1,9 +1,37 @@
-# Graphql query/mutation list
+# Graphql api
 
+- [Types](#Types)
+- [Enum](#Enum)
 - [App](#App)
 - [Partner](#Partner)
 - [Admin](#Admin)
 
+## Types
+--------
+- User
+- UserRefundBankAccount
+- SearchKeyword
+- Coupon
+- CartItem
+- Order
+- Payment
+- ItemReview
+- ItemReviewImage
+- Item
+- ItemImage
+- Partner
+
+## Enum
+-------
+- Category
+    -  feed
+- RefundMethod
+    - cardCancel
+    - RefundAccout
+- ItemState 
+    - sale # 판매중
+    - stop # 판매중지
+    - noStock # 재고 없음
 ## App
 ------
 ### `User`
