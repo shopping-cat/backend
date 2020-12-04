@@ -4,6 +4,7 @@
     "dev": "ts-node-dev --notify --respawn --transpile-only src/server.ts",
     "migrate": "npm -s run migrate:save && npm -s run migrate:up",
     "generate": "npm -s run generate:prisma && npm -s run generate:nexus:app && npm -s run generate:nexus:admin && npm -s run generate:nexus:partner",
+    "studio": "prisma studio",
     "build": "npm -s run clean && npm -s run generate && tsc",
     "start": "cross-env NODE_ENV=production node dist/server",
     "clean": "rm -rf dist",

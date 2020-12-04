@@ -8,6 +8,10 @@ export const Item = objectType({
         t.model.updatedAt()
         t.model.name()
         t.model.price()
-        t.model.Orders()
+        // t.model.Orders() // iOrders insted
+        t.field('isNew', {
+            type: 'Boolean',
+            resolve: ({ createdAt }) => Date.now() - createdAt > 1000
+        })
     }
 })
