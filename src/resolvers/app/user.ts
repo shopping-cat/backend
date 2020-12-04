@@ -1,29 +1,17 @@
 /* 
  *
  */
-import { idArg, mutationField, nonNull, queryField, stringArg } from "@nexus/schema"
+import { idArg, intArg, mutationField, nonNull, queryField, stringArg } from "@nexus/schema"
 
 // 
-export const user = queryField(t => t.field('user', {
+export const IUser = queryField(t => t.field('user', {
     type: 'User',
     args: {
-        id: nonNull(idArg()),
+        id: nonNull(intArg()),
     },
     resolve: (_, { id }, ctx) => {
         return ctx.prisma.user.findUnique({
             where: { id }
-        })
-    }
-}))
-
-export const createUser = mutationField(t => t.field('createUser', {
-    type: 'User',
-    args: {
-        email: nonNull(stringArg())
-    },
-    resolve: (_, { email }, ctx) => {
-        return ctx.prisma.user.create({
-            data: { email }
         })
     }
 }))

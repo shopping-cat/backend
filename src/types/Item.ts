@@ -13,12 +13,12 @@ export const Item = objectType({
         t.model.option()
         t.model.html()
         t.model.category()
-        t.model.Images()
-        t.model.Orders()
-        t.model.Reviews()
-        t.model.Cart()
-        t.model.UserLikes()
-        t.model.Partner()
+        t.model.images()
+        t.model.orders()
+        t.model.reviews()
+        t.model.cart()
+        t.model.userLikes()
+        t.model.partner()
         t.model.partnerId()
 
         t.field('isNew', {

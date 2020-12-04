@@ -12,8 +12,8 @@ export const Coupon = objectType({
         t.model.maxSalePrice()
         t.model.salePercent()
         t.model.salePrice()
-        t.model.User()
-        t.model.Order()
+        t.model.user()
+        t.model.order()
         t.model.userId()
         t.model.orderId()
     }

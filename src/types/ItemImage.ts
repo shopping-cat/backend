@@ -6,7 +6,7 @@ export const ItemImage = objectType({
         t.model.id()
         t.model.createdAt()
         t.model.uri()
-        t.model.Item()
+        t.model.item()
         t.model.itemId()
     }
 })

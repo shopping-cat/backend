@@ -6,7 +6,7 @@ export const SearchKeyword = objectType({
         t.model.id()
         t.model.createdAt()
         t.model.keyword()
-        t.model.User()
+        t.model.user()
         t.model.userId()
     }
 })

@@ -10,6 +10,6 @@ export const Partner = objectType({
         t.model.shopName()
         t.model.licenseNumber()
         t.model.shopImage()
-        t.model.Item()
+        t.model.item()
     }
 })

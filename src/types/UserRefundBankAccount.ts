@@ -9,7 +9,7 @@ export const UserRefundBankAccount = objectType({
         t.model.bankName()
         t.model.accountNumber()
         t.model.ownerName()
-        t.model.User()
+        t.model.user()
         t.model.userId()
     }
 })

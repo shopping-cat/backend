@@ -6,7 +6,7 @@ export const ItemReviewImage = objectType({
         t.model.id()
         t.model.createdAt()
         t.model.uri()
-        t.model.ItemReview()
+        t.model.itemReview()
         t.model.itemReviewId()
     }
 })

@@ -16,8 +16,8 @@ export const Payment = objectType({
         t.model.couponSale()
         t.model.pointSale()
         t.model.totalPrice()
-        t.model.Orders()
-        t.model.User()
+        t.model.orders()
+        t.model.user()
         t.model.userId()
     }
 })

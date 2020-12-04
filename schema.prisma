@@ -12,16 +12,16 @@ model User {
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
   email             String                 @unique
-  Coupons           Coupon[]
-  Orders            Order[]
-  Payments          Payment[]
-  RefundBankAccount UserRefundBankAccount?
-  ItemReviews       ItemReview[] // 내가 쓴 리뷰
-  ItemReviewLikes   ItemReview[]           @relation("UserItemReviewLike") // 좋아요 누른 리뷰
-  ItemReviewUnlikes ItemReview[]           @relation("UserItemReviewUnlike") // 싫어요 누른 리뷰
-  ItemLikes         Item[]
-  Cart              CartItem[]
-  SearchKeywords    SearchKeyword[]
+  coupons           Coupon[]
+  orders            Order[]
+  payments          Payment[]
+  refundBankAccount UserRefundBankAccount?
+  itemReviews       ItemReview[] // 내가 쓴 리뷰
+  itemReviewLikes   ItemReview[]           @relation("UserItemReviewLike") // 좋아요 누른 리뷰
+  itemReviewUnlikes ItemReview[]           @relation("UserItemReviewUnlike") // 싫어요 누른 리뷰
+  itemLikes         Item[]
+  cart              CartItem[]
+  searchKeywords    SearchKeyword[]
 }
 
 model UserRefundBankAccount {
@@ -31,7 +31,7 @@ model UserRefundBankAccount {
   bankName      String
   accountNumber Int
   ownerName     String
-  User          User     @relation(fields: [userId], references: [id])
+  user          User     @relation(fields: [userId], references: [id])
   userId        Int
 }
 
@@ -39,7 +39,7 @@ model SearchKeyword {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   keyword   String
-  User      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
   userId    Int
 }
 
@@ -53,8 +53,8 @@ model Coupon {
   maxSalePrice Int?
   salePercent  Int?
   salePrice    Int?
-  User         User     @relation(fields: [userId], references: [id])
-  Order        Order?   @relation(fields: [orderId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
+  order        Order?   @relation(fields: [orderId], references: [id])
   userId       Int
   orderId      Int?
 }
@@ -63,8 +63,8 @@ model CartItem {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   option    Json
-  Item      Item     @relation(fields: [itemId], references: [id])
-  User      User     @relation(fields: [userId], references: [id])
+  item      Item     @relation(fields: [itemId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
   itemId    Int
   userId    Int
 }
@@ -80,11 +80,11 @@ model Order {
   deliveryMessage String?
   itemOption      String?
   pointSale       Int
-  Coupon          Coupon?
-  ItemReview      ItemReview?
-  Items           Item[]
-  User            User        @relation(fields: [userId], references: [id])
-  Payment         Payment     @relation(fields: [paymentId], references: [id])
+  coupon          Coupon?
+  itemReview      ItemReview?
+  items           Item[]
+  user            User        @relation(fields: [userId], references: [id])
+  payment         Payment     @relation(fields: [paymentId], references: [id])
   userId          Int
   paymentId       Int
 }
@@ -103,8 +103,8 @@ model Payment {
   couponSale      Int
   pointSale       Int
   totalPrice      Int
-  Orders          Order[]
-  User            User          @relation(fields: [userId], references: [id])
+  orders          Order[]
+  user            User          @relation(fields: [userId], references: [id])
   userId          Int
 }
 
@@ -114,12 +114,12 @@ model ItemReview {
   updatedAt   DateTime          @updatedAt
   content     String?
   rate        Int
-  UserLikes   User[]            @relation("UserItemReviewLike")
-  UserUnlikes User[]            @relation("UserItemReviewUnlike")
-  Images      ItemReviewImage[]
-  User        User              @relation(fields: [userId], references: [id])
-  Item        Item              @relation(fields: [itemId], references: [id])
-  Order       Order             @relation(fields: [orderId], references: [id])
+  userLikes   User[]            @relation("UserItemReviewLike")
+  userUnlikes User[]            @relation("UserItemReviewUnlike")
+  images      ItemReviewImage[]
+  user        User              @relation(fields: [userId], references: [id])
+  item        Item              @relation(fields: [itemId], references: [id])
+  order       Order             @relation(fields: [orderId], references: [id])
   userId      Int
   itemId      Int
   orderId     Int
@@ -129,7 +129,7 @@ model ItemReviewImage {
   id           Int        @id @default(autoincrement())
   createdAt    DateTime   @default(now())
   uri          String
-  ItemReview   ItemReview @relation(fields: [itemReviewId], references: [id])
+  itemReview   ItemReview @relation(fields: [itemReviewId], references: [id])
   itemReviewId Int
 }
 
@@ -144,12 +144,12 @@ model Item {
   option    Json
   html      String
   category  Category
-  Images    ItemImage[]
-  Orders    Order[]
-  Reviews   ItemReview[]
-  Cart      CartItem[]
-  UserLikes User[]
-  Partner   Partner      @relation(fields: [partnerId], references: [id])
+  images    ItemImage[]
+  orders    Order[]
+  reviews   ItemReview[]
+  cart      CartItem[]
+  userLikes User[]
+  partner   Partner      @relation(fields: [partnerId], references: [id])
   partnerId Int
 }
 
@@ -157,7 +157,7 @@ model ItemImage {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   uri       String
-  Item      Item     @relation(fields: [itemId], references: [id])
+  item      Item     @relation(fields: [itemId], references: [id])
   itemId    Int
 }
 
@@ -169,7 +169,7 @@ model Partner {
   shopName      String   @unique
   licenseNumber String
   shopImage     String
-  Item          Item[]
+  item          Item[]
 }
 
 enum Category {

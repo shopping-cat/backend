@@ -6,8 +6,8 @@ export const CartItem = objectType({
         t.model.id()
         t.model.createdAt()
         t.model.option()
-        t.model.User()
-        t.model.Item()
+        t.model.user()
+        t.model.item()
         t.model.userId()
         t.model.itemId()
     }
