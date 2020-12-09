@@ -43,5 +43,3 @@ migrations는 git에 올라가지는 않지만 지우면 다음번 prisma migrat
 
 ## TODO
 * router 별로 cors 다르게
-* prisma.schema 작성
-* 제작할 query mutation들 리스트 작성

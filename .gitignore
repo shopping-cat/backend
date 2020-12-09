@@ -6,3 +6,4 @@ dist
 **/.DS_Store
 schema.graphql
 **.graphql
+serviceAccountKey.json

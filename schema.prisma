@@ -8,10 +8,9 @@ datasource db {
 }
 
 model User {
-  id                Int                    @id @default(autoincrement())
+  id                String                 @id
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
-  email             String                 @unique
   coupons           Coupon[]
   orders            Order[]
   payments          Payment[]
@@ -32,7 +31,7 @@ model UserRefundBankAccount {
   accountNumber Int
   ownerName     String
   user          User     @relation(fields: [userId], references: [id])
-  userId        Int
+  userId        String
 }
 
 model SearchKeyword {
@@ -40,7 +39,7 @@ model SearchKeyword {
   createdAt DateTime @default(now())
   keyword   String
   user      User     @relation(fields: [userId], references: [id])
-  userId    Int
+  userId    String
 }
 
 model Coupon {
@@ -55,7 +54,7 @@ model Coupon {
   salePrice    Int?
   user         User     @relation(fields: [userId], references: [id])
   order        Order?   @relation(fields: [orderId], references: [id])
-  userId       Int
+  userId       String
   orderId      Int?
 }
 
@@ -66,7 +65,7 @@ model CartItem {
   item      Item     @relation(fields: [itemId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
   itemId    Int
-  userId    Int
+  userId    String
 }
 
 model Order {
@@ -85,7 +84,7 @@ model Order {
   items           Item[]
   user            User        @relation(fields: [userId], references: [id])
   payment         Payment     @relation(fields: [paymentId], references: [id])
-  userId          Int
+  userId          String
   paymentId       Int
 }
 
@@ -105,7 +104,7 @@ model Payment {
   totalPrice      Int
   orders          Order[]
   user            User          @relation(fields: [userId], references: [id])
-  userId          Int
+  userId          String
 }
 
 model ItemReview {
@@ -120,7 +119,7 @@ model ItemReview {
   user        User              @relation(fields: [userId], references: [id])
   item        Item              @relation(fields: [itemId], references: [id])
   order       Order             @relation(fields: [orderId], references: [id])
-  userId      Int
+  userId      String
   itemId      Int
   orderId     Int
 }

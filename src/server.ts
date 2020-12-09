@@ -56,19 +56,19 @@ const partnerServer = new ApolloServer({
 
 adminServer.applyMiddleware({
   app,
-  path: '/admin',
+  path: '/graphql/admin',
   cors: false
 })
 
 appServer.applyMiddleware({
   app,
-  path: '/app',
+  path: '/graphql/app',
   cors: false
 })
 
 partnerServer.applyMiddleware({
   app,
-  path: '/partner',
+  path: '/graphql/partner',
   cors: false
 })
 
