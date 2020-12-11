@@ -40,18 +40,16 @@ export const kakaoTokenToFirebaseToken = queryField(t => t.nonNull.field('kakaoT
             }
 
             // 파이어베이스에 유저 생성 or 업데이트
-            let firebaseUserId: string
             try {
-                const { uid } = await userAuth.updateUser(kakaoUserId, properties)
-                firebaseUserId = uid
+                await userAuth.updateUser(kakaoUserId, properties)
             } catch (error) {
                 if (error.code !== 'auth/user-not-found') throw error
-                const { uid } = await userAuth.createUser(properties)
-                firebaseUserId = uid
+                console.log('create')
+                await userAuth.createUser({ ...properties, uid: kakaoUserId })
             }
 
             // 파이어베이스 토큰 생성
-            const firebaseToken = await userAuth.createCustomToken(firebaseUserId, { provider: 'KAKAO' })
+            const firebaseToken = await userAuth.createCustomToken(kakaoUserId, { provider: 'KAKAO' })
             return firebaseToken
         } catch (error) {
             console.log(error)
@@ -68,7 +66,6 @@ export const User = queryField(t => t.field('User', {
         id: nonNull(stringArg())
     },
     resolve: async (_, { id }, ctx) => {
-
         return prisma.user.findFirst({ where: { id } })
     }
 }))
