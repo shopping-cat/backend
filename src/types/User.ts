@@ -20,13 +20,14 @@ export const User = objectType({
         // oauth에 있는 유저 정보들 가져오기
         t.field('userDetail', {
             type: 'UserDetail',
-            resolve: async ({ id }) => {
+            resolve: async ({ id, phone }) => {
                 try {
                     const { email, displayName, photoURL } = await userAuth.getUser(id)
                     return {
                         email: email || null,
                         displayName: displayName || null,
-                        photoURL: photoURL || null
+                        photoURL: photoURL || null,
+                        phone: phone || null
                     }
                 } catch (error) {
                     console.log(error)
@@ -34,7 +35,8 @@ export const User = objectType({
                     return {
                         email: null,
                         displayName: null,
-                        photoURL: null
+                        photoURL: null,
+                        phone: null
                     }
                 }
             }
@@ -49,5 +51,6 @@ export const UserDetail = objectType({
         t.nullable.string('email') // 이메일
         t.nullable.string('displayName') // 이름
         t.nullable.string('photoURL') // 프로필 사진
+        t.nullable.string('phone') // 전화번호
     }
 })

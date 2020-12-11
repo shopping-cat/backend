@@ -31,7 +31,6 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser(process.env.COOKIE_SECRET))
 app.get('/isRunning', (req, res) => res.send('Server is running')) // 서버 구동 확인용 router
 
-
 // apollo 설정
 const adminServer = new ApolloServer({
   schema: adminSchema,

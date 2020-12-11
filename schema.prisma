@@ -11,6 +11,7 @@ model User {
   id                String                 @id
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
+  phone             String?
   coupons           Coupon[]
   orders            Order[]
   payments          Payment[]

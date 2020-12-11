@@ -2,7 +2,7 @@ import { Context, prisma } from '../context'
 import { userAuth } from '../lib'
 
 
-export const getUser = async (ctx: Context) => {
+export const getIUser = async (ctx: Context) => {
     try {
         let token = ctx.expressContext.req.headers.authorization
         if (!token) throw new Error('No Access')
@@ -25,4 +25,4 @@ export const getUser = async (ctx: Context) => {
 }
 
 
-export default getUser
+export default getIUser
