@@ -12,7 +12,6 @@ export const iUser = queryField(t => t.field('iUser', {
     type: 'User',
     resolve: async (_, { }, ctx) => {
         const user = await getIUser(ctx)
-
         return user
     }
 }))
@@ -55,17 +54,5 @@ export const kakaoTokenToFirebaseToken = queryField(t => t.nonNull.field('kakaoT
             console.log(error)
             throw error
         }
-    }
-}))
-
-
-
-export const User = queryField(t => t.field('User', {
-    type: 'User',
-    args: {
-        id: nonNull(stringArg())
-    },
-    resolve: async (_, { id }, ctx) => {
-        return prisma.user.findFirst({ where: { id } })
     }
 }))

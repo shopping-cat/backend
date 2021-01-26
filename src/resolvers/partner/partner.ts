@@ -16,14 +16,18 @@ export const user = queryField(t => t.field('user', {
     }
 }))
 
-export const createUser = mutationField(t => t.field('deleteUser', {
-    type: 'User',
+export const createUser = mutationField(t => t.field('createUser', {
+    type: 'Partner',
     args: {
-        id: nonNull(idArg())
     },
-    resolve: (_, { id }, ctx) => {
-        return ctx.prisma.user.delete({
-            where: { id }
+    resolve: (_, { }, ctx) => {
+        return ctx.prisma.partner.create({
+            data: {
+                email: '123@gmail.com',
+                licenseNumber: '1292041-2124',
+                shopImage: '',
+                shopName: 'shop1'
+            }
         })
     }
 }))

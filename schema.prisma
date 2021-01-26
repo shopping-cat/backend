@@ -12,16 +12,16 @@ model User {
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
   phone             String?
+  cart              CartItem[]
   coupons           Coupon[]
+  itemReviews       ItemReview[]
   orders            Order[]
   payments          Payment[]
-  refundBankAccount UserRefundBankAccount?
-  itemReviews       ItemReview[] // 내가 쓴 리뷰
-  itemReviewLikes   ItemReview[]           @relation("UserItemReviewLike") // 좋아요 누른 리뷰
-  itemReviewUnlikes ItemReview[]           @relation("UserItemReviewUnlike") // 싫어요 누른 리뷰
-  itemLikes         Item[]
-  cart              CartItem[]
   searchKeywords    SearchKeyword[]
+  refundBankAccount UserRefundBankAccount?
+  itemLikes         Item[]
+  itemReviewLikes   ItemReview[]           @relation("UserItemReviewLike")
+  itemReviewUnlikes ItemReview[]           @relation("UserItemReviewUnlike")
 }
 
 model UserRefundBankAccount {
@@ -31,16 +31,18 @@ model UserRefundBankAccount {
   bankName      String
   accountNumber Int
   ownerName     String
+  userId        String   @unique
   user          User     @relation(fields: [userId], references: [id])
-  userId        String
 }
 
 model SearchKeyword {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   keyword   String
-  user      User     @relation(fields: [userId], references: [id])
   userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId], name: "userId")
 }
 
 model Coupon {
@@ -53,20 +55,25 @@ model Coupon {
   maxSalePrice Int?
   salePercent  Int?
   salePrice    Int?
-  user         User     @relation(fields: [userId], references: [id])
-  order        Order?   @relation(fields: [orderId], references: [id])
   userId       String
-  orderId      Int?
+  orderId      Int?     @unique
+  order        Order?   @relation(fields: [orderId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@index([userId], name: "userId")
 }
 
 model CartItem {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   option    Json
-  item      Item     @relation(fields: [itemId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
   itemId    Int
   userId    String
+  item      Item     @relation(fields: [itemId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([itemId], name: "itemId")
+  @@index([userId], name: "userId")
 }
 
 model Order {
@@ -80,13 +87,16 @@ model Order {
   deliveryMessage String?
   itemOption      String?
   pointSale       Int
+  userId          String
+  paymentId       Int
+  payment         Payment     @relation(fields: [paymentId], references: [id])
+  user            User        @relation(fields: [userId], references: [id])
   coupon          Coupon?
   itemReview      ItemReview?
   items           Item[]
-  user            User        @relation(fields: [userId], references: [id])
-  payment         Payment     @relation(fields: [paymentId], references: [id])
-  userId          String
-  paymentId       Int
+
+  @@index([paymentId], name: "paymentId")
+  @@index([userId], name: "userId")
 }
 
 model Payment {
@@ -103,62 +113,75 @@ model Payment {
   couponSale      Int
   pointSale       Int
   totalPrice      Int
-  orders          Order[]
-  user            User          @relation(fields: [userId], references: [id])
   userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  orders          Order[]
+
+  @@index([userId], name: "userId")
 }
 
 model ItemReview {
   id          Int               @id @default(autoincrement())
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
+  likeNum     Int               @default(0)
   content     String?
   rate        Int
-  userLikes   User[]            @relation("UserItemReviewLike")
-  userUnlikes User[]            @relation("UserItemReviewUnlike")
-  images      ItemReviewImage[]
-  user        User              @relation(fields: [userId], references: [id])
-  item        Item              @relation(fields: [itemId], references: [id])
-  order       Order             @relation(fields: [orderId], references: [id])
   userId      String
   itemId      Int
-  orderId     Int
+  orderId     Int               @unique
+  item        Item              @relation(fields: [itemId], references: [id])
+  order       Order             @relation(fields: [orderId], references: [id])
+  user        User              @relation(fields: [userId], references: [id])
+  images      ItemReviewImage[]
+  userLikes   User[]            @relation("UserItemReviewLike")
+  userUnlikes User[]            @relation("UserItemReviewUnlike")
+
+  @@index([itemId], name: "itemId")
+  @@index([userId], name: "userId")
 }
 
 model ItemReviewImage {
   id           Int        @id @default(autoincrement())
   createdAt    DateTime   @default(now())
   uri          String
-  itemReview   ItemReview @relation(fields: [itemReviewId], references: [id])
   itemReviewId Int
+  itemReview   ItemReview @relation(fields: [itemReviewId], references: [id])
+
+  @@index([itemReviewId], name: "itemReviewId")
 }
 
 model Item {
   id        Int          @id @default(autoincrement())
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
-  state     ItemState
+  likeNum   Int          @default(0)
+  state     ItemState    @default(sale)
   name      String
   price     Int
-  sale      Int
-  option    Json?
+  sale      Int          @default(0)
+  option    Json
   html      String
-  category  Category
-  images    ItemImage[]
-  orders    Order[]
-  reviews   ItemReview[]
-  cart      CartItem[]
-  userLikes User[]
-  partner   Partner      @relation(fields: [partnerId], references: [id])
+  category  String
   partnerId Int
+  partner   Partner      @relation(fields: [partnerId], references: [id])
+  cart      CartItem[]
+  images    ItemImage[]
+  reviews   ItemReview[]
+  orders    Order[]
+  userLikes User[]
+
+  @@index([partnerId], name: "partnerId")
 }
 
 model ItemImage {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   uri       String
-  item      Item     @relation(fields: [itemId], references: [id])
   itemId    Int
+  item      Item     @relation(fields: [itemId], references: [id])
+
+  @@index([itemId], name: "itemId")
 }
 
 model Partner {
@@ -170,10 +193,6 @@ model Partner {
   licenseNumber String
   shopImage     String
   item          Item[]
-}
-
-enum Category {
-  feed
 }
 
 enum RefundMethod {

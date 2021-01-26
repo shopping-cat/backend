@@ -6,7 +6,7 @@
 * typescript
 * graphql
 * apollo-express
-* nexus-schema
+* nexus
 * prisma
 
 ## 초기 입력 커맨드

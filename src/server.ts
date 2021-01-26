@@ -72,7 +72,7 @@ partnerServer.applyMiddleware({
 })
 
 
-const port = process.env.NODE_ENV === 'production' ? 80 : 4000
+const port = process.env.NODE_ENV === 'production' ? 80 : 8080
 
 app.listen({ port }, () => {
   console.log(`🚀  Server ready at [http://localhost:${port}${adminServer.graphqlPath}, http://localhost:${port}${appServer.graphqlPath}, http://localhost:${port}${partnerServer.graphqlPath}]`)

@@ -6,6 +6,7 @@ export const Item = objectType({
         t.model.id()
         t.model.createdAt()
         t.model.updatedAt()
+        t.model.likeNum()
         t.model.state()
         t.model.name()
         t.model.price()
@@ -30,7 +31,7 @@ export const Item = objectType({
         })
         t.field('isNew', {
             type: 'Boolean',
-            resolve: ({ createdAt }) => Date.now() - createdAt > 1000
+            resolve: ({ createdAt }) => (Date.now() - createdAt.getTime()) > 1000
         })
     }
 })

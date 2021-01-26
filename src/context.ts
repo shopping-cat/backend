@@ -9,7 +9,7 @@ export interface Context {
     expressContext: ExpressContext
 }
 
-export const createContext = (expressContext: ExpressContext) => {
+export const createContext = (expressContext: ExpressContext): Context => {
     return {
         prisma,
         expressContext

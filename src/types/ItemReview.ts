@@ -6,6 +6,7 @@ export const ItemReview = objectType({
         t.model.id()
         t.model.createdAt()
         t.model.updatedAt()
+        t.model.likeNum()
         t.model.content()
         t.model.rate()
         t.model.userLikes()
