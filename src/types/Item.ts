@@ -1,4 +1,4 @@
-import { objectType } from "@nexus/schema"
+import { objectType } from "nexus"
 
 export const Item = objectType({
     name: 'Item',
@@ -20,7 +20,14 @@ export const Item = objectType({
         t.model.userLikes()
         t.model.partner()
         t.model.partnerId()
-
+        t.field('rate', { //TODO
+            type: 'Float',
+            resolve: () => 4.5
+        })
+        t.field('sellingPrice', {
+            type: 'Int',
+            resolve: ({ sale, price }) => Math.floor(price * sale / 100)
+        })
         t.field('isNew', {
             type: 'Boolean',
             resolve: ({ createdAt }) => Date.now() - createdAt > 1000

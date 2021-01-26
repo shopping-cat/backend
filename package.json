@@ -16,10 +16,9 @@
     "generate:nexus:partner": "cross-env NODE_ENV=development ts-node --transpile-only src/schemas/partner"
   },
   "dependencies": {
-    "@nexus/schema": "^0.19.2",
-    "@prisma/client": "^2.12.1",
+    "@prisma/client": "2.14.0",
     "apollo-server-express": "^2.17.0",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.5",
@@ -35,11 +34,12 @@
     "jsonwebtoken": "^8.5.1",
     "migrate": "^1.7.0",
     "morgan": "^1.10.0",
-    "nexus-plugin-prisma": "^0.25.0",
+    "nexus": "^1.0.0",
+    "nexus-plugin-prisma": "^0.28.0",
     "typescript": "^4.0.2"
   },
   "devDependencies": {
-    "@prisma/cli": "^2.12.1",
+    "@prisma/cli": "2.14.0",
     "@types/bcrypt": "^3.0.0",
     "@types/cookie-parser": "^1.4.2",
     "@types/graphql": "^14.5.0",

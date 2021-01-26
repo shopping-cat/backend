@@ -141,7 +141,7 @@ model Item {
   name      String
   price     Int
   sale      Int
-  option    Json
+  option    Json?
   html      String
   category  Category
   images    ItemImage[]

@@ -1,7 +1,7 @@
 /* 
  *
  */
-import { idArg, mutationField, nonNull, queryField, stringArg } from "@nexus/schema"
+import { idArg, mutationField, nonNull, queryField, stringArg } from "nexus"
 
 // 
 export const user = queryField(t => t.field('user', {

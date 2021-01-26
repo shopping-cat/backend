@@ -1,7 +1,7 @@
 /* 
  *
  */
-import { idArg, intArg, mutationField, nonNull, queryField, stringArg } from "@nexus/schema"
+import { idArg, intArg, mutationField, nonNull, queryField, stringArg } from "nexus"
 import Axios from "axios"
 import { prisma } from "../../context"
 import { userAuth } from "../../lib"

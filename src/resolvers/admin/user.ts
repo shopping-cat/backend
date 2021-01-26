@@ -1,5 +1,5 @@
 /* 
  *
  */
-import { idArg, mutationField, nonNull, queryField, stringArg } from "@nexus/schema"
+import { idArg, mutationField, nonNull, queryField, stringArg } from "nexus"
 
