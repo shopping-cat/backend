@@ -8,6 +8,8 @@ export const User = objectType({
         t.model.createdAt()
         t.model.updatedAt()
         t.model.coupons()
+        t.model.name()
+        t.model.photo()
         t.model.orders()
         t.model.payments()
         t.model.refundBankAccount()

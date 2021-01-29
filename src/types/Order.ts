@@ -15,9 +15,10 @@ export const Order = objectType({
         t.model.pointSale()
         t.model.coupon()
         t.model.itemReview()
-        t.model.items()
+        t.model.item()
         t.model.user()
         t.model.payment()
+        t.model.itemId()
         t.model.userId()
         t.model.paymentId()
     }

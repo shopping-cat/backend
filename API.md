@@ -23,8 +23,6 @@
 
 ## Enum
 -------
-- Category
-    -  feed
 - RefundMethod
     - cardCancel
     - RefundAccout
@@ -43,9 +41,10 @@
 | Type | Name | List | Nullable | Params |
 |:----:|:----:|:----:|:--------:|:------:|
 | Query | item |  | ✓ | id |
-| Query | recommendedItems | ✓ |  | offset?: 0, limit?: 10 |
-| Query | shopItems | ✓ |  | partnerId, offset?: 0, limit?: 10 |
-| Query | filteredItems | ✓ |  | category?: '전체', keyword?, orderBy?: '인기순', offset?: 0, limit?: 10 |
+| Query | recommendedItems | ✓ |  | offset?: 0, limit?: 15 |
+| Query | zzimItems | ✓ |  | offset?: 0, limit?: 15, category?: '전체' |
+| Query | shopItems | ✓ |  | partnerId, offset?: 0, limit?: 15 |
+| Query | filteredItems | ✓ |  | category?: '전체', keyword?, orderBy?: '인기순', offset?: 0, limit?: 15 |
 ### `ItemReview`
 | Type | Name | List | Nullable | Params |
 |:----:|:----:|:----:|:--------:|:------:|

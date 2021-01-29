@@ -11,6 +11,8 @@ model User {
   id                String                 @id
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
+  name              String?
+  photo             String?
   phone             String?
   cart              CartItem[]
   coupons           Coupon[]
@@ -85,15 +87,16 @@ model Order {
   state           String
   reason          String?
   deliveryMessage String?
-  itemOption      String?
+  itemOption      Json?
   pointSale       Int
   userId          String
   paymentId       Int
+  itemId          Int
   payment         Payment     @relation(fields: [paymentId], references: [id])
   user            User        @relation(fields: [userId], references: [id])
   coupon          Coupon?
   itemReview      ItemReview?
-  items           Item[]
+  item            Item        @relation(fields: [itemId], references: [id])
 
   @@index([paymentId], name: "paymentId")
   @@index([userId], name: "userId")
@@ -152,24 +155,26 @@ model ItemReviewImage {
 }
 
 model Item {
-  id        Int          @id @default(autoincrement())
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  likeNum   Int          @default(0)
-  state     ItemState    @default(sale)
-  name      String
-  price     Int
-  sale      Int          @default(0)
-  option    Json
-  html      String
-  category  String
-  partnerId Int
-  partner   Partner      @relation(fields: [partnerId], references: [id])
-  cart      CartItem[]
-  images    ItemImage[]
-  reviews   ItemReview[]
-  orders    Order[]
-  userLikes User[]
+  id                 Int          @id @default(autoincrement())
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  likeNum            Int          @default(0)
+  state              ItemState    @default(sale)
+  isFreeDelivery     Boolean
+  name               String
+  price              Int
+  sale               Int          @default(0)
+  option             Json?
+  requireInformation Json
+  html               String
+  category           String
+  partnerId          Int
+  partner            Partner      @relation(fields: [partnerId], references: [id])
+  cart               CartItem[]
+  images             ItemImage[]
+  reviews            ItemReview[]
+  orders             Order[]
+  userLikes          User[]
 
   @@index([partnerId], name: "partnerId")
 }
