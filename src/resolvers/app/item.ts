@@ -104,17 +104,18 @@ export const recommendedItems = queryField(t => t.list.field('recommendedItems',
 export const shopItems = queryField(t => t.list.field('shopItems', {
     type: 'Item',
     args: {
-        shopId: nonNull(idArg()),
+        shopId: nonNull(intArg()),
         orderBy: nullable(stringArg({ default: '인기순' })),
         offset: nullable(intArg({ default: 0 })),
         limit: nullable(intArg({ default: 15 }))
     },
     resolve: async (_, { shopId, orderBy, offset, limit }, ctx) => {
+        await asyncDelay()
         const items = await ctx.prisma.item.findMany({
             take: limit,
             skip: offset,
             where: {
-                partnerId: Number(shopId)
+                partnerId: shopId
             },
             orderBy: {
                 createdAt: orderBy === '최신순' ? 'desc' : undefined,

@@ -197,7 +197,7 @@ model Partner {
   shopName      String   @unique
   licenseNumber String
   shopImage     String
-  item          Item[]
+  items         Item[]
 }
 
 enum RefundMethod {

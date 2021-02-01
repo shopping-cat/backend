@@ -48,7 +48,7 @@
 ### `ItemReview`
 | Type | Name | List | Nullable | Params |
 |:----:|:----:|:----:|:--------:|:------:|
-| Query | ItemReviews | ✓ |  | orderBy?: '추천순', offset?: 0, limit?: 10 |
+| Query | itemReviews | ✓ |  | itemId, orderBy?: '추천순', offset?: 0, limit?: 10 |
 
 ### `Payment`
 | Type | Name | List | Nullable | Params |
@@ -61,6 +61,7 @@
 ### `Partner`
 | Type | Name | List | Nullable | Params |
 |:----:|:----:|:----:|:--------:|:------:|
+| Query | partner | ✓ |  | id |
 
 ## Partner
 ----------

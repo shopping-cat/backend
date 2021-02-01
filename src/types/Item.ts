@@ -1,3 +1,4 @@
+import { create } from "domain"
 import { objectType } from "nexus"
 import getIUser from "../utils/getIUser"
 
@@ -122,11 +123,13 @@ export const Item = objectType({
         })
         t.field('rate', { //TODO
             type: 'Float',
-            resolve: () => 4.5
+            resolve: () => Number((4.535).toFixed(1))
         })
         t.field('isNew', {
             type: 'Boolean',
-            resolve: ({ createdAt }) => (Date.now() - createdAt.getTime()) > 1000
+            resolve: ({ createdAt }) => {
+                return (Date.now() - createdAt.getTime()) > 1000
+            }
         })
     }
 })
