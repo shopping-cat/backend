@@ -68,7 +68,7 @@ model Coupon {
 model CartItem {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-  option    Json
+  option    Json? // { data:number[] }
   itemId    Int
   userId    String
   item      Item     @relation(fields: [itemId], references: [id])

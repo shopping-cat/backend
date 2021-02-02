@@ -50,6 +50,13 @@
 |:----:|:----:|:----:|:--------:|:------:|
 | Query | itemReviews | ✓ |  | itemId, orderBy?: '추천순', offset?: 0, limit?: 10 |
 
+### `CartITem`
+| Type | Name | List | Nullable | Params |
+|:----:|:----:|:----:|:--------:|:------:|
+| Query | cartItems | ✓ |  |  |
+| Mutation | addToCart | ✓ |  | itemId: int, number: int, option?: string |
+
+
 ### `Payment`
 | Type | Name | List | Nullable | Params |
 |:----:|:----:|:----:|:--------:|:------:|

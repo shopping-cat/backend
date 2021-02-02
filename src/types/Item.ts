@@ -133,3 +133,13 @@ export const Item = objectType({
         })
     }
 })
+
+export type ItemOption = {
+    data: {
+        optionGroupName: string
+        optionDetails: {
+            name: string
+            price: number
+        }[]
+    }[]
+} | null
