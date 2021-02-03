@@ -1,4 +1,3 @@
-import { CartItem } from "@prisma/client"
 import { intArg, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
 import { prisma } from "../../context"
 import { ItemOption } from "../../types"
@@ -11,13 +10,16 @@ export const cartItems = queryField(t => t.list.field('cartItems', {
         await asyncDelay()
         const user = await getIUser(ctx)
         return ctx.prisma.cartItem.findMany({
-            where: { userId: user.id }
+            where: { userId: user.id },
+            orderBy: {
+                createdAt: 'desc'
+            }
         })
     }
 }))
 
 // Mutation - 카트에 담기
-export const addToCart = mutationField(t => t.list.field('addToCart', {
+export const addToCart = mutationField(t => t.field('addToCart', {
     type: 'CartItem',
     args: {
         itemId: nonNull(intArg()),
@@ -44,19 +46,31 @@ export const addToCart = mutationField(t => t.list.field('addToCart', {
                     if (option[i] >= itemOption.data[i].optionDetails.length) throw new Error('옵션 선택이 잘못되었습니다')
                 }
             }
-            // 수량만큼 cartItem생성
-            const cartItems: CartItem[] = []
-            for (let i = 0; i < number; i++) {
-                const cartItem = await prisma.cartItem.create({
+            const jsonOption = option ? { data: option } : null // json type으로 전환
+
+            // 이미 같은 옵션의 똑 같은 상품이 있다면 새로 만들지 말고 number만큼 추가만 함
+            const cartItem = await prisma.cartItem.findFirst({
+                where: {
+                    itemId,
+                    userId: user.id,
+                    option: { equals: jsonOption }
+                }
+            })
+            if (cartItem) {
+                return prisma.cartItem.update({
+                    where: { id: cartItem.id },
+                    data: { num: cartItem.num + number }
+                })
+            } else { // 없으면 생성
+                return prisma.cartItem.create({
                     data: {
                         item: { connect: { id: itemId } },
                         user: { connect: { id: user.id } },
-                        option: option ? { data: option } : null
-                    },
+                        option: jsonOption,
+                        num: number,
+                    }
                 })
-                cartItems.push(cartItem)
             }
-            return cartItems
         } catch (error) {
             throw error
         }

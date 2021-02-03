@@ -71,6 +71,7 @@ model CartItem {
   option    Json? // { data:number[] }
   itemId    Int
   userId    String
+  num       Int
   item      Item     @relation(fields: [itemId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
 
