@@ -1,4 +1,4 @@
-import { intArg, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
+import { arg, intArg, list, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
 import { prisma } from "../../context"
 import { ItemOption } from "../../types"
 import asyncDelay from "../../utils/asyncDelay"
@@ -24,9 +24,9 @@ export const addToCart = mutationField(t => t.field('addToCart', {
     args: {
         itemId: nonNull(intArg()),
         number: nonNull(intArg()),
-        option: nullable(stringArg())
+        option: nullable(list(intArg()))
     },
-    resolve: async (_, { itemId, number, option: stringifiedOption }, ctx) => {
+    resolve: async (_, { itemId, number, option }, ctx) => {
         try {
             await asyncDelay()
             // 유저 식별
@@ -37,10 +37,9 @@ export const addToCart = mutationField(t => t.field('addToCart', {
             if (!item) throw new Error('없는 상품입니다')
 
             // option 유효 확인
-            const option: number[] = JSON.parse(stringifiedOption)
             const itemOption = item.option as ItemOption
-            if (itemOption === null && !!stringifiedOption) throw new Error('옵션 선택이 잘못되었습니다')
-            if (itemOption !== null && stringifiedOption !== null) {
+            if ((!itemOption && option) || (itemOption && !option)) throw new Error('옵션 선택이 잘못되었습니다')
+            if (itemOption && option) {
                 if (option.length !== itemOption.data.length) throw new Error('옵션 선택이 잘못되었습니다')
                 for (let i = 0; i < option.length; i++) {
                     if (option[i] >= itemOption.data[i].optionDetails.length) throw new Error('옵션 선택이 잘못되었습니다')
@@ -74,5 +73,22 @@ export const addToCart = mutationField(t => t.field('addToCart', {
         } catch (error) {
             throw error
         }
+    }
+}))
+// MUTATION - 카트에서 삭제
+export const deleteCartItems = mutationField(t => t.field('deleteCartItems', {
+    type: 'Int',
+    args: {
+        itemIds: nonNull(list(intArg()))
+    },
+    resolve: async (_, { itemIds }, ctx) => {
+        const user = await getIUser(ctx)
+        const { count } = await ctx.prisma.cartItem.deleteMany({
+            where: {
+                userId: user.id,
+                id: { in: itemIds }
+            }
+        })
+        return count
     }
 }))

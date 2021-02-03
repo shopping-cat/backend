@@ -69,6 +69,13 @@ export const Item = objectType({
                 })
             }
         })
+        t.field('deliveryPrice', {
+            type: 'Int',
+            resolve: async ({ isFreeDelivery }, _, ctx) => {
+                if (isFreeDelivery) return 0
+                else return 2500
+            }
+        })
         t.field('reviewNum', {
             type: 'Int',
             resolve: async ({ id }, _, ctx) => {

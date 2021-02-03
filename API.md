@@ -54,7 +54,9 @@
 | Type | Name | List | Nullable | Params |
 |:----:|:----:|:----:|:--------:|:------:|
 | Query | cartItems | ✓ |  |  |
-| Mutation | addToCart | ✓ |  | itemId: int, number: int, option?: string |
+| Mutation | addToCart |  |  | itemId: int, number: int, option?: int[] |
+| Mutation | deleteCartItems |  |  | itemIds: int[] |
+
 
 
 ### `Payment`
