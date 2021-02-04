@@ -11,6 +11,7 @@ model User {
   id                String                 @id
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
+  point             Int                    @default(0)
   name              String?
   photo             String?
   phone             String?
@@ -161,7 +162,8 @@ model Item {
   updatedAt          DateTime     @updatedAt
   likeNum            Int          @default(0)
   state              ItemState    @default(sale)
-  isFreeDelivery     Boolean
+  deliveryPrice      Int
+  extraDeliveryPrice Int
   name               String
   price              Int
   sale               Int          @default(0)

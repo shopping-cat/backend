@@ -7,6 +7,7 @@ export const User = objectType({
         t.model.id()
         t.model.createdAt()
         t.model.updatedAt()
+        t.model.point()
         t.model.coupons()
         t.model.name()
         t.model.photo()

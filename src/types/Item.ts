@@ -1,6 +1,7 @@
 import { create } from "domain"
 import { objectType } from "nexus"
 import getIUser from "../utils/getIUser"
+import salePrice from "../utils/salePrice"
 
 export const Item = objectType({
     name: 'Item',
@@ -10,7 +11,8 @@ export const Item = objectType({
         t.model.updatedAt()
         t.model.likeNum()
         t.model.state()
-        t.model.isFreeDelivery()
+        t.model.deliveryPrice()
+        t.model.extraDeliveryPrice()
         t.model.name()
         t.model.price()
         t.model.sale()
@@ -69,11 +71,10 @@ export const Item = objectType({
                 })
             }
         })
-        t.field('deliveryPrice', {
-            type: 'Int',
-            resolve: async ({ isFreeDelivery }, _, ctx) => {
-                if (isFreeDelivery) return 0
-                else return 2500
+        t.field('isFreeDelivery', {
+            type: 'Boolean',
+            resolve: async ({ deliveryPrice }, _, ctx) => {
+                return deliveryPrice === 0
             }
         })
         t.field('reviewNum', {
@@ -98,7 +99,7 @@ export const Item = objectType({
         t.field('salePrice', {// 세일이 적용된 실제 판매 금액
             type: 'Int',
             resolve: ({ sale, price }) => {
-                return Math.floor(price * (1 - (sale / 100)))
+                return salePrice(sale, price)
             }
         })
         t.field('isILiked', { // 해당 유저가 좋아요 누른 상품인지
