@@ -22,6 +22,7 @@ model User {
   payments          Payment[]
   searchKeywords    SearchKeyword[]
   refundBankAccount UserRefundBankAccount?
+  deliveryInfo      UserDeliveryInfo?
   itemLikes         Item[]
   itemReviewLikes   ItemReview[]           @relation("UserItemReviewLike")
   itemReviewUnlikes ItemReview[]           @relation("UserItemReviewUnlike")
@@ -34,6 +35,19 @@ model UserRefundBankAccount {
   bankName      String
   accountNumber Int
   ownerName     String
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+}
+
+model UserDeliveryInfo {
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  postCode      String
+  address       String
+  addressDetail String
+  name          String
+  phone         String
   userId        String   @unique
   user          User     @relation(fields: [userId], references: [id])
 }
@@ -52,6 +66,7 @@ model Coupon {
   id           String   @id @default(uuid())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  image        String
   name         String
   period       DateTime
   minItemPrice Int?

@@ -6,6 +6,7 @@ export const Coupon = objectType({
         t.model.id()
         t.model.createdAt()
         t.model.updatedAt()
+        t.model.image()
         t.model.name()
         t.model.period()
         t.model.minItemPrice()

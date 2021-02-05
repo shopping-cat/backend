@@ -14,6 +14,7 @@ export const User = objectType({
         t.model.orders()
         t.model.payments()
         t.model.refundBankAccount()
+        t.model.deliveryInfo()
         t.model.itemReviews()
         t.model.itemReviewLikes()
         t.model.itemReviewUnlikes()

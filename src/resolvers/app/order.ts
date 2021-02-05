@@ -3,15 +3,22 @@ import { inputObjectType, intArg, list, nonNull, nullable, objectType, queryFiel
 import getIUser from "../../utils/getIUser";
 import salePrice from "../../utils/salePrice";
 
+export const ItemsCoupons = objectType({
+    name: 'ItemsCoupons',
+    definition: (t) => {
+        t.int('itemId')
+        t.list.field('coupon', { type: 'Coupon' })
+    }
+})
 
-export const orderCalculateType = objectType({
+export const OrderCalculateType = objectType({
     name: 'orderCalculateType',
     definition: (t) => {
         t.list.field('orderItems', { type: 'CartItem' }) // 주문 상품
-        t.field('user', { type: 'User', }) // 배송지 정보 + 환불계좌 + 포인트 참조용
-        t.list.list.field('itemsCoupons', { type: 'Coupon' }) // 아이템별 적용가능 쿠폰들
+        t.field('user', { type: 'User' }) // 배송지 정보 + 환불계좌 + 포인트 참조용
+        t.list.field('itemsCoupons', { type: ItemsCoupons }) // 아이템별 적용가능 쿠폰들
         t.int('totalItemPrice') // 총 상품 금액
-        t.int('totalSaledPrice')  // 상품 세일 적용 총 금액
+        t.int('totalSaledPrice') // 상품 세일 적용 총 금액
         t.int('totalCouponedPrice') // 쿠폰 적용 총 금액
         t.int('totalDeliveryPrice') // 배송비
         t.int('totalExtraDeliveryPrice') // 산간지역 추가 배송비 TODO
@@ -23,12 +30,12 @@ export const orderCalculateType = objectType({
 })
 
 // QUERY - 앱 주문/결제 페이지
-export const orderCalculate = queryField('orderCaculate', {
-    type: orderCalculateType,
+export const orderCalculate = queryField('orderCalculate', {
+    type: OrderCalculateType,
     args: {
         cartItemIds: nonNull(list(intArg())),
+        couponIds: nullable(list(nullable(stringArg()))),
         point: nonNull(intArg()),
-        couponIds: nullable(list(nullable(stringArg())))
     },
     resolve: async (_, { cartItemIds, point, couponIds }, ctx) => {
         try {
@@ -38,7 +45,7 @@ export const orderCalculate = queryField('orderCaculate', {
                 include: { item: true }
             })
 
-            const itemsCoupons: Coupon[][] = []
+            const itemsCoupons: { itemId: number, coupons: Coupon[] }[] = []
 
 
             let totalItemPrice = 0
@@ -50,22 +57,28 @@ export const orderCalculate = queryField('orderCaculate', {
             for (const i in orderItems) {
                 const orderItem = orderItems[i]
 
-                totalItemPrice += orderItem.item.price
-                const saledPrice = salePrice(orderItem.item.sale, orderItem.item.price)
+                const itemPrice = orderItem.item.price * orderItem.num
+                totalItemPrice += itemPrice
+                const saledPrice = salePrice(orderItem.item.sale, itemPrice)
                 totalSaledPrice += saledPrice
                 totalDeliveryPrice += orderItem.item.deliveryPrice
                 totalExtraDeliveryPrice += orderItem.item.extraDeliveryPrice
 
                 // 쿠폰
-                const couponId = couponIds[i]
-                const coupon = await ctx.prisma.coupon.findUnique({ where: { id: couponId } })
-                if (!coupon) continue
-                if (coupon.period.getTime() > Date.now()) throw new Error(`기간이 지난 쿠폰 입니다 (${coupon.name})`)
-                if (coupon.minItemPrice && coupon.minItemPrice > totalSaledPrice) throw new Error(`쿠폰 최소 금액보다 상품 가격이 낮습니다 (${coupon.name})`)
                 let couponSalePrice = 0
-                if (coupon.salePrice) couponSalePrice = couponSalePrice
-                else if (coupon.salePercent) couponSalePrice = saledPrice - salePrice(coupon.salePercent, saledPrice)
-                if (coupon.maxSalePrice) couponSalePrice = couponSalePrice > coupon.maxSalePrice ? coupon.maxSalePrice : couponSalePrice
+                if (couponIds) {
+                    const couponId = couponIds[i]
+                    if (couponId) {
+                        const coupon = await ctx.prisma.coupon.findUnique({ where: { id: couponId } })
+                        if (coupon) {
+                            if (coupon.period.getTime() > Date.now()) throw new Error(`기간이 지난 쿠폰 입니다 (${coupon.name})`)
+                            if (coupon.minItemPrice && coupon.minItemPrice > totalSaledPrice) throw new Error(`쿠폰 최소 금액보다 상품 가격이 낮습니다 (${coupon.name})`)
+                            if (coupon.salePrice) couponSalePrice = couponSalePrice
+                            else if (coupon.salePercent) couponSalePrice = saledPrice - salePrice(coupon.salePercent, saledPrice)
+                            if (coupon.maxSalePrice) couponSalePrice = couponSalePrice > coupon.maxSalePrice ? coupon.maxSalePrice : couponSalePrice
+                        }
+                    }
+                }
                 totalCouponedPrice += saledPrice - couponSalePrice
             }
 
@@ -90,6 +103,7 @@ export const orderCalculate = queryField('orderCaculate', {
                 totalPaymentPrice
             }
         } catch (error) {
+            console.error(error)
             throw error
         }
     }
