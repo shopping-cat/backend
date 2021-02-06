@@ -37,6 +37,7 @@
 |:----:|:----:|:----:|:--------:|:------:|
 | Query | iUser |  |  |  |
 | Mutation | updateRefundBankAccount |  |  | ownerName: string, bankName: string, accountNumber: string |
+| Mutation | updateDeliveryInfo |  |  | postCode: string, address: string, addressDetail: string, name: string, phone: string |
 ### `Item`
 | Type | Name | List | Nullable | Params |
 |:----:|:----:|:----:|:--------:|:------:|

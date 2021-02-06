@@ -58,7 +58,7 @@ export const kakaoTokenToFirebaseToken = queryField(t => t.nonNull.field('kakaoT
     }
 }))
 
-// Query - 환불 계좌 업데이트
+// MUTATION - 환불 계좌 업데이트
 export const updateRefundBankAccount = mutationField(t => t.field('updateRefundBankAccount', {
     type: 'User',
     args: {
@@ -85,6 +85,47 @@ export const updateRefundBankAccount = mutationField(t => t.field('updateRefundB
                     bankName,
                     ownerName,
                     accountNumber,
+                    user: { connect: { id: user.id } }
+                }
+            })
+        }
+        return user
+    }
+}))
+
+// MUTATION - 배송지 업데이트
+export const updateDeliveryInfo = mutationField(t => t.field('updateDeliveryInfo', {
+    type: 'User',
+    args: {
+        postCode: stringArg(),
+        address: stringArg(),
+        addressDetail: stringArg(),
+        name: stringArg(),
+        phone: stringArg()
+    },
+    resolve: async (_, { postCode, address, addressDetail, name, phone }, ctx) => {
+        await asyncDelay()
+        const user = await getIUser(ctx)
+        const deliveryInfo = await ctx.prisma.userDeliveryInfo.findUnique({ where: { userId: user.id } })
+        if (deliveryInfo) { // update
+            await ctx.prisma.userDeliveryInfo.update({
+                where: { userId: user.id },
+                data: {
+                    postCode,
+                    address,
+                    addressDetail,
+                    name,
+                    phone
+                }
+            })
+        } else { // create
+            await ctx.prisma.userDeliveryInfo.create({
+                data: {
+                    postCode,
+                    address,
+                    addressDetail,
+                    name,
+                    phone,
                     user: { connect: { id: user.id } }
                 }
             })
