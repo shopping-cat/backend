@@ -6,6 +6,7 @@ import Axios from "axios"
 import { prisma } from "../../context"
 import { userAuth } from "../../lib"
 import getIUser from "../../utils/getIUser"
+import asyncDelay from "../../utils/asyncDelay"
 
 // Query - 내 정보를 가져옴
 export const iUser = queryField(t => t.field('iUser', {
@@ -54,5 +55,40 @@ export const kakaoTokenToFirebaseToken = queryField(t => t.nonNull.field('kakaoT
             console.log(error)
             throw error
         }
+    }
+}))
+
+// Query - 환불 계좌 업데이트
+export const updateRefundBankAccount = mutationField(t => t.field('updateRefundBankAccount', {
+    type: 'User',
+    args: {
+        ownerName: stringArg(),
+        bankName: stringArg(),
+        accountNumber: stringArg()
+    },
+    resolve: async (_, { ownerName, bankName, accountNumber }, ctx) => {
+        await asyncDelay()
+        const user = await getIUser(ctx)
+        const refundBankAccount = await ctx.prisma.userRefundBankAccount.findUnique({ where: { userId: user.id } })
+        if (refundBankAccount) { // update
+            await ctx.prisma.userRefundBankAccount.update({
+                where: { userId: user.id },
+                data: {
+                    bankName,
+                    ownerName,
+                    accountNumber
+                }
+            })
+        } else { // create
+            await ctx.prisma.userRefundBankAccount.create({
+                data: {
+                    bankName,
+                    ownerName,
+                    accountNumber,
+                    user: { connect: { id: user.id } }
+                }
+            })
+        }
+        return user
     }
 }))

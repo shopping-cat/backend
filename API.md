@@ -36,7 +36,7 @@
 | Type | Name | List | Nullable | Params |
 |:----:|:----:|:----:|:--------:|:------:|
 | Query | iUser |  |  |  |
-| Mutation |  | ✓ | ✓ | |
+| Mutation | updateRefundBankAccount |  |  | ownerName: string, bankName: string, accountNumber: string |
 ### `Item`
 | Type | Name | List | Nullable | Params |
 |:----:|:----:|:----:|:--------:|:------:|

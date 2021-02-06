@@ -33,7 +33,7 @@ model UserRefundBankAccount {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   bankName      String
-  accountNumber Int
+  accountNumber String
   ownerName     String
   userId        String   @unique
   user          User     @relation(fields: [userId], references: [id])

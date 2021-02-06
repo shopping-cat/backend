@@ -1,7 +1,9 @@
 import { Coupon } from "@prisma/client";
 import { inputObjectType, intArg, list, nonNull, nullable, objectType, queryField, stringArg } from "nexus";
+import asyncDelay from "../../utils/asyncDelay";
 import getIUser from "../../utils/getIUser";
 import salePrice from "../../utils/salePrice";
+import { MIN_PAYMENT_PRICE } from "../../values";
 
 export const ItemsCoupons = objectType({
     name: 'ItemsCoupons',
@@ -26,6 +28,7 @@ export const OrderCalculateType = objectType({
         t.int('totalCouponSale') // 쿠폰 할인
         t.int('totalPointSale') // 포인트 할인
         t.int('totalPaymentPrice') // 총 결제 금액
+        t.int('maxPointPrice') // 최대 사용가능 포인트
     }
 })
 
@@ -39,6 +42,7 @@ export const orderCalculate = queryField('orderCalculate', {
     },
     resolve: async (_, { cartItemIds, point, couponIds }, ctx) => {
         try {
+            await asyncDelay()
             const user = await getIUser(ctx)
             const orderItems = await ctx.prisma.cartItem.findMany({
                 where: { id: { in: cartItemIds } },
@@ -84,9 +88,12 @@ export const orderCalculate = queryField('orderCalculate', {
 
             const totalSale = totalItemPrice - totalSaledPrice
             const totalCouponSale = totalSaledPrice - totalCouponedPrice
-            const totalPaymentPriceWithoutPoint = totalCouponSale + totalDeliveryPrice + totalExtraDeliveryPrice
-            const totalPointSale = totalPaymentPriceWithoutPoint < point ? totalPaymentPriceWithoutPoint : point // clamp
-            const totalPaymentPrice = totalCouponedPrice - totalPointSale
+            const totalPaymentPriceWithoutPoint = totalCouponedPrice + totalDeliveryPrice + totalExtraDeliveryPrice
+            const maxPointPrice = totalPaymentPriceWithoutPoint < user.point ? totalPaymentPriceWithoutPoint - MIN_PAYMENT_PRICE : user.point
+            const totalPointSale = point > maxPointPrice ? maxPointPrice : point
+            const totalPaymentPrice = totalPaymentPriceWithoutPoint - totalPointSale
+
+
 
             return {
                 orderItems,
@@ -100,7 +107,8 @@ export const orderCalculate = queryField('orderCalculate', {
                 totalSale,
                 totalCouponSale,
                 totalPointSale,
-                totalPaymentPrice
+                totalPaymentPrice,
+                maxPointPrice
             }
         } catch (error) {
             console.error(error)
