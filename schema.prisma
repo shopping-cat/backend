@@ -73,12 +73,10 @@ model Coupon {
   maxSalePrice Int?
   salePercent  Int?
   salePrice    Int?
-  userId       String
+  userId       String?
   orderId      Int?     @unique
   order        Order?   @relation(fields: [orderId], references: [id])
-  user         User     @relation(fields: [userId], references: [id])
-
-  @@index([userId], name: "userId")
+  user         User?    @relation(fields: [userId], references: [id])
 }
 
 model CartItem {

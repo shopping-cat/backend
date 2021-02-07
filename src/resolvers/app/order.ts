@@ -1,14 +1,15 @@
 import { Coupon } from "@prisma/client";
 import { inputObjectType, intArg, list, nonNull, nullable, objectType, queryField, stringArg } from "nexus";
+import { CartItemOption, ItemOption } from "../../types";
 import asyncDelay from "../../utils/asyncDelay";
 import getIUser from "../../utils/getIUser";
 import salePrice from "../../utils/salePrice";
 import { MIN_PAYMENT_PRICE } from "../../values";
 
-export const ItemsCoupons = objectType({
-    name: 'ItemsCoupons',
+export const OrderItemsCoupons = objectType({
+    name: 'OrderItemsCoupons',
     definition: (t) => {
-        t.int('itemId')
+        t.int('orderItemId')
         t.list.field('coupon', { type: 'Coupon' })
     }
 })
@@ -18,7 +19,7 @@ export const OrderCalculateType = objectType({
     definition: (t) => {
         t.list.field('orderItems', { type: 'CartItem' }) // 주문 상품
         t.field('user', { type: 'User' }) // 배송지 정보 + 환불계좌 + 포인트 참조용
-        t.list.field('itemsCoupons', { type: ItemsCoupons }) // 아이템별 적용가능 쿠폰들
+        t.list.field('orderItemsCoupons', { type: OrderItemsCoupons }) // 아이템별 적용가능 쿠폰들
         t.int('totalItemPrice') // 총 상품 금액
         t.int('totalSaledPrice') // 상품 세일 적용 총 금액
         t.int('totalCouponedPrice') // 쿠폰 적용 총 금액
@@ -49,9 +50,13 @@ export const orderCalculate = queryField('orderCalculate', {
                 include: { item: true }
             })
 
-            const itemsCoupons: { itemId: number, coupons: Coupon[] }[] = []
+            // 아이템별 적용 가능 쿠폰 리스트 찾기
+            const orderItemsCoupons: { orderItemId: number, coupons: Coupon[] }[] = []
+            for (const item of orderItems) {
 
+            }
 
+            // 가격 계산
             let totalItemPrice = 0
             let totalSaledPrice = 0
             let totalCouponedPrice = 0
@@ -60,32 +65,47 @@ export const orderCalculate = queryField('orderCalculate', {
 
             for (const i in orderItems) {
                 const orderItem = orderItems[i]
-
-                const itemPrice = orderItem.item.price * orderItem.num
-                totalItemPrice += itemPrice
-                const saledPrice = salePrice(orderItem.item.sale, itemPrice)
-                totalSaledPrice += saledPrice
+                // 옵션 적용 가격
+                let optionedPrice = orderItem.item.price // 기본금
+                let optionedSaledPrice = salePrice(orderItem.item.sale, orderItem.item.price) // 기본금에 세일 적용
+                const itemOption = orderItem.item.option as ItemOption
+                const orderItemOption = orderItem.option as CartItemOption
+                if (itemOption && orderItemOption) { // 옵션이 있다면 옵션 계산
+                    for (const i in itemOption.data) {
+                        const optionPrice = itemOption.data[i].optionDetails[orderItemOption.data[i]].price
+                        optionedPrice += optionPrice
+                        optionedSaledPrice += optionPrice
+                    }
+                }
+                // 수량 적용 가격
+                const itemPrice = optionedPrice
+                totalItemPrice += itemPrice * orderItem.num
+                // 수량 + 세일 적용 가격
+                const saledPrice = optionedSaledPrice
+                totalSaledPrice += saledPrice * orderItem.num
+                // 배송비 적용
                 totalDeliveryPrice += orderItem.item.deliveryPrice
-                totalExtraDeliveryPrice += orderItem.item.extraDeliveryPrice
+                if (true /* 산간지역이라면 */) {
+                    totalExtraDeliveryPrice += orderItem.item.extraDeliveryPrice
+                }
 
                 // 쿠폰
                 let couponSalePrice = 0
-                if (couponIds) {
-                    const couponId = couponIds[i]
-                    if (couponId) {
-                        const coupon = await ctx.prisma.coupon.findUnique({ where: { id: couponId } })
-                        if (coupon) {
-                            if (coupon.period.getTime() > Date.now()) throw new Error(`기간이 지난 쿠폰 입니다 (${coupon.name})`)
-                            if (coupon.minItemPrice && coupon.minItemPrice > totalSaledPrice) throw new Error(`쿠폰 최소 금액보다 상품 가격이 낮습니다 (${coupon.name})`)
-                            if (coupon.salePrice) couponSalePrice = couponSalePrice
-                            else if (coupon.salePercent) couponSalePrice = saledPrice - salePrice(coupon.salePercent, saledPrice)
-                            if (coupon.maxSalePrice) couponSalePrice = couponSalePrice > coupon.maxSalePrice ? coupon.maxSalePrice : couponSalePrice
-                        }
-                    }
-                }
-                totalCouponedPrice += saledPrice - couponSalePrice
+                // if (couponIds) {
+                //     const couponId = couponIds[i]
+                //     if (couponId) {
+                //         const coupon = await ctx.prisma.coupon.findUnique({ where: { id: couponId } })
+                //         if (coupon) {
+                //             if (coupon.period.getTime() > Date.now()) throw new Error(`기간이 지난 쿠폰 입니다 (${coupon.name})`)
+                //             if (coupon.minItemPrice && coupon.minItemPrice > totalSaledPrice) throw new Error(`쿠폰 최소 금액보다 상품 가격이 낮습니다 (${coupon.name})`)
+                //             if (coupon.salePrice) couponSalePrice = couponSalePrice
+                //             else if (coupon.salePercent) couponSalePrice = saledPrice - salePrice(coupon.salePercent, saledPrice)
+                //             if (coupon.maxSalePrice) couponSalePrice = couponSalePrice > coupon.maxSalePrice ? coupon.maxSalePrice : couponSalePrice
+                //         }
+                //     }
+                // }
+                totalCouponedPrice += saledPrice * orderItem.num - couponSalePrice
             }
-
             const totalSale = totalItemPrice - totalSaledPrice
             const totalCouponSale = totalSaledPrice - totalCouponedPrice
             const totalPaymentPriceWithoutPoint = totalCouponedPrice + totalDeliveryPrice + totalExtraDeliveryPrice
@@ -98,7 +118,7 @@ export const orderCalculate = queryField('orderCalculate', {
             return {
                 orderItems,
                 user,
-                itemsCoupons,
+                orderItemsCoupons,
                 totalItemPrice,
                 totalSaledPrice,
                 totalCouponedPrice,

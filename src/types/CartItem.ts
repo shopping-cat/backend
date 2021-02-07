@@ -1,4 +1,5 @@
 import { objectType } from 'nexus'
+import salePrice from '../utils/salePrice'
 import { ItemOption } from './Item'
 
 export const CartItem = objectType({
@@ -12,6 +13,34 @@ export const CartItem = objectType({
         t.model.userId()
         t.model.itemId()
         t.model.num()
+        t.int('optionedSaledPrice', {  // 세일 + 옵션 적용 가격
+            resolve: async ({ num, option, itemId }, _, ctx) => {
+                const item = await ctx.prisma.item.findUnique({ where: { id: itemId } })
+                if (!item) throw new Error
+                const itemOption = item.option as ItemOption
+                const cartItemOption = option as CartItemOption
+                let optionedPrice = salePrice(item.sale, item.price)
+                if (!itemOption || !cartItemOption) return optionedPrice
+                for (const i in itemOption.data) {
+                    optionedPrice += itemOption.data[i].optionDetails[cartItemOption.data[i]].price
+                }
+                return optionedPrice
+            }
+        })
+        t.int('optionedPrice', { // 옵션 적용 가격
+            resolve: async ({ num, option, itemId }, _, ctx) => {
+                const item = await ctx.prisma.item.findUnique({ where: { id: itemId } })
+                if (!item) throw new Error
+                const itemOption = item.option as ItemOption
+                const cartItemOption = option as CartItemOption
+                let optionedPrice = item.price
+                if (!itemOption || !cartItemOption) return optionedPrice
+                for (const i in itemOption.data) {
+                    optionedPrice += itemOption.data[i].optionDetails[cartItemOption.data[i]].price
+                }
+                return optionedPrice
+            }
+        })
         t.nullable.field('stringOption', {
             type: 'String',
             async resolve({ option, itemId }, _, { prisma }) {
