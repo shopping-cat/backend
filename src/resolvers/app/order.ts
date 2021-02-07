@@ -9,27 +9,27 @@ import { MIN_PAYMENT_PRICE } from "../../values";
 export const OrderItemsCoupons = objectType({
     name: 'OrderItemsCoupons',
     definition: (t) => {
-        t.int('orderItemId')
-        t.list.field('coupon', { type: 'Coupon' })
+        t.nonNull.int('orderItemId')
+        t.nonNull.list.field('coupons', { type: 'Coupon' })
     }
 })
 
 export const OrderCalculateType = objectType({
     name: 'orderCalculateType',
     definition: (t) => {
-        t.list.field('orderItems', { type: 'CartItem' }) // 주문 상품
-        t.field('user', { type: 'User' }) // 배송지 정보 + 환불계좌 + 포인트 참조용
-        t.list.field('orderItemsCoupons', { type: OrderItemsCoupons }) // 아이템별 적용가능 쿠폰들
-        t.int('totalItemPrice') // 총 상품 금액
-        t.int('totalSaledPrice') // 상품 세일 적용 총 금액
-        t.int('totalCouponedPrice') // 쿠폰 적용 총 금액
-        t.int('totalDeliveryPrice') // 배송비
-        t.int('totalExtraDeliveryPrice') // 산간지역 추가 배송비 TODO
-        t.int('totalSale') // 상품 할인
-        t.int('totalCouponSale') // 쿠폰 할인
-        t.int('totalPointSale') // 포인트 할인
-        t.int('totalPaymentPrice') // 총 결제 금액
-        t.int('maxPointPrice') // 최대 사용가능 포인트
+        t.nonNull.list.field('orderItems', { type: 'CartItem' }) // 주문 상품
+        t.nonNull.field('user', { type: 'User' }) // 배송지 정보 + 환불계좌 + 포인트 참조용
+        t.nonNull.list.field('orderItemsCoupons', { type: OrderItemsCoupons }) // 아이템별 적용가능 쿠폰들
+        t.nonNull.int('totalItemPrice') // 총 상품 금액
+        t.nonNull.int('totalSaledPrice') // 상품 세일 적용 총 금액
+        t.nonNull.int('totalCouponedPrice') // 쿠폰 적용 총 금액
+        t.nonNull.int('totalDeliveryPrice') // 배송비
+        t.nonNull.int('totalExtraDeliveryPrice') // 산간지역 추가 배송비 TODO
+        t.nonNull.int('totalSale') // 상품 할인
+        t.nonNull.int('totalCouponSale') // 쿠폰 할인
+        t.nonNull.int('totalPointSale') // 포인트 할인
+        t.nonNull.int('totalPaymentPrice') // 총 결제 금액
+        t.nonNull.int('maxPointPrice') // 최대 사용가능 포인트
     }
 })
 
@@ -52,10 +52,6 @@ export const orderCalculate = queryField('orderCalculate', {
 
             // 아이템별 적용 가능 쿠폰 리스트 찾기
             const orderItemsCoupons: { orderItemId: number, coupons: Coupon[] }[] = []
-            for (const item of orderItems) {
-
-            }
-
             // 가격 계산
             let totalItemPrice = 0
             let totalSaledPrice = 0
@@ -78,18 +74,31 @@ export const orderCalculate = queryField('orderCalculate', {
                     }
                 }
                 // 수량 적용 가격
-                const itemPrice = optionedPrice
-                totalItemPrice += itemPrice * orderItem.num
+                totalItemPrice += optionedPrice * orderItem.num
                 // 수량 + 세일 적용 가격
-                const saledPrice = optionedSaledPrice
-                totalSaledPrice += saledPrice * orderItem.num
+                totalSaledPrice += optionedSaledPrice * orderItem.num
                 // 배송비 적용
                 totalDeliveryPrice += orderItem.item.deliveryPrice
                 if (true /* 산간지역이라면 */) {
                     totalExtraDeliveryPrice += orderItem.item.extraDeliveryPrice
                 }
+                // 적용가능 쿠폰 리스트 
+                const coupons = await ctx.prisma.coupon.findMany({
+                    where: {
+                        userId: user.id,
+                        period: { gt: new Date() },
+                        OR: [{ minItemPrice: null }, { minItemPrice: { lte: optionedSaledPrice } }],
+                    },
+                    orderBy: {
+                        period: 'asc'
+                    }
+                })
+                orderItemsCoupons.push({
+                    coupons,
+                    orderItemId: orderItem.id
+                })
 
-                // 쿠폰
+                // 쿠폰 적용
                 let couponSalePrice = 0
                 // if (couponIds) {
                 //     const couponId = couponIds[i]
@@ -104,15 +113,17 @@ export const orderCalculate = queryField('orderCalculate', {
                 //         }
                 //     }
                 // }
-                totalCouponedPrice += saledPrice * orderItem.num - couponSalePrice
+                totalCouponedPrice += optionedSaledPrice * orderItem.num - couponSalePrice
             }
+
+            console.log(orderItemsCoupons)
+
             const totalSale = totalItemPrice - totalSaledPrice
             const totalCouponSale = totalSaledPrice - totalCouponedPrice
             const totalPaymentPriceWithoutPoint = totalCouponedPrice + totalDeliveryPrice + totalExtraDeliveryPrice
             const maxPointPrice = totalPaymentPriceWithoutPoint < user.point ? totalPaymentPriceWithoutPoint - MIN_PAYMENT_PRICE : user.point
             const totalPointSale = point > maxPointPrice ? maxPointPrice : point
             const totalPaymentPrice = totalPaymentPriceWithoutPoint - totalPointSale
-
 
 
             return {
