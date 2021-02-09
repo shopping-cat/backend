@@ -14,6 +14,14 @@ export const OrderItemsCoupons = objectType({
     }
 })
 
+export const OrderCouponArg = inputObjectType({
+    name: 'OrderCouponArg',
+    definition: (t) => {
+        t.nonNull.int('orderItemId')
+        t.nonNull.string('couponId')
+    }
+})
+
 export const OrderCalculateType = objectType({
     name: 'orderCalculateType',
     definition: (t) => {
@@ -38,11 +46,12 @@ export const orderCalculate = queryField('orderCalculate', {
     type: OrderCalculateType,
     args: {
         cartItemIds: nonNull(list(intArg())),
-        couponIds: nullable(list(nullable(stringArg()))),
+        coupons: nonNull(list(OrderCouponArg)),
         point: nonNull(intArg()),
     },
-    resolve: async (_, { cartItemIds, point, couponIds }, ctx) => {
+    resolve: async (_, { cartItemIds, point, coupons }, ctx) => {
         try {
+            console.log(coupons)
             await asyncDelay()
             const user = await getIUser(ctx)
             const orderItems = await ctx.prisma.cartItem.findMany({
@@ -79,14 +88,38 @@ export const orderCalculate = queryField('orderCalculate', {
                 totalSaledPrice += optionedSaledPrice * orderItem.num
                 // 배송비 적용
                 totalDeliveryPrice += orderItem.item.deliveryPrice
-                if (true /* 산간지역이라면 */) {
+                if (false /* 산간지역이라면 */) {
                     totalExtraDeliveryPrice += orderItem.item.extraDeliveryPrice
                 }
+                // 쿠폰 적용 가격
+                for (let i = 0; i < orderItem.num; i++) {
+                    let basicPrice = optionedSaledPrice
+                    const currentOrderItemCoupons = coupons.filter((v: any) => v.orderItemId === orderItem.id)
+                    if (currentOrderItemCoupons.length > i) {
+                        const currentCouponId = currentOrderItemCoupons[i].couponId
+                        const coupon = await ctx.prisma.coupon.findUnique({ where: { id: currentCouponId } })
+                        if (coupon) {
+                            if (coupon.salePrice) {
+                                basicPrice -= coupon.salePrice
+                                if (basicPrice < 0) basicPrice = 0 // clamp
+                            }
+                            if (coupon.salePercent) {
+                                basicPrice = salePrice(coupon.salePercent, basicPrice)
+                                if (coupon.maxSalePrice && optionedSaledPrice - basicPrice > coupon.maxSalePrice) { // maxSalePrice 처리
+                                    basicPrice = optionedSaledPrice - coupon.maxSalePrice
+                                }
+                            }
+                        }
+                    }
+                    totalCouponedPrice += basicPrice
+                }
+
                 // 적용가능 쿠폰 리스트 
-                const coupons = await ctx.prisma.coupon.findMany({
+                const coupon = await ctx.prisma.coupon.findMany({
                     where: {
                         userId: user.id,
                         period: { gt: new Date() },
+                        orderId: null,
                         OR: [{ minItemPrice: null }, { minItemPrice: { lte: optionedSaledPrice } }],
                     },
                     orderBy: {
@@ -94,29 +127,10 @@ export const orderCalculate = queryField('orderCalculate', {
                     }
                 })
                 orderItemsCoupons.push({
-                    coupons,
+                    coupons: coupon,
                     orderItemId: orderItem.id
                 })
-
-                // 쿠폰 적용
-                let couponSalePrice = 0
-                // if (couponIds) {
-                //     const couponId = couponIds[i]
-                //     if (couponId) {
-                //         const coupon = await ctx.prisma.coupon.findUnique({ where: { id: couponId } })
-                //         if (coupon) {
-                //             if (coupon.period.getTime() > Date.now()) throw new Error(`기간이 지난 쿠폰 입니다 (${coupon.name})`)
-                //             if (coupon.minItemPrice && coupon.minItemPrice > totalSaledPrice) throw new Error(`쿠폰 최소 금액보다 상품 가격이 낮습니다 (${coupon.name})`)
-                //             if (coupon.salePrice) couponSalePrice = couponSalePrice
-                //             else if (coupon.salePercent) couponSalePrice = saledPrice - salePrice(coupon.salePercent, saledPrice)
-                //             if (coupon.maxSalePrice) couponSalePrice = couponSalePrice > coupon.maxSalePrice ? coupon.maxSalePrice : couponSalePrice
-                //         }
-                //     }
-                // }
-                totalCouponedPrice += optionedSaledPrice * orderItem.num - couponSalePrice
             }
-
-            console.log(orderItemsCoupons)
 
             const totalSale = totalItemPrice - totalSaledPrice
             const totalCouponSale = totalSaledPrice - totalCouponedPrice

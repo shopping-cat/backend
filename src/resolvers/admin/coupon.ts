@@ -23,7 +23,7 @@ export const createCoupon = mutationField(t => t.field('createCoupon', {
                 image,
                 name,
                 user: userId ? { connect: { id: userId } } : undefined,
-                period: dayjs(period + '235959', 'YYYYMMDDHHmmss').toDate(),
+                period: dayjs(period + '235959', 'YYYYMMDDHHmmss').toDate(), // 해당 날짜의 마지막 시간
                 salePercent,
                 salePrice,
                 minItemPrice,

@@ -21,6 +21,20 @@ export const User = objectType({
         t.model.itemLikes()
         t.model.cart()
         t.model.searchKeywords()
+        t.field('couponNum', {
+            type: 'Int',
+            resolve: async ({ id }, _, ctx) => {
+                const coupon = await ctx.prisma.coupon.aggregate({
+                    count: true,
+                    where: {
+                        userId: id,
+                        period: { gt: new Date() },
+                        orderId: null
+                    },
+                })
+                return coupon.count
+            }
+        })
         // oauth에 있는 유저 정보들 가져오기
         t.field('userDetail', {
             type: 'UserDetail',
