@@ -133,3 +133,18 @@ export const updateDeliveryInfo = mutationField(t => t.field('updateDeliveryInfo
         return user
     }
 }))
+// MUTATION - 검색어 삭제
+export const removeAllSearchKeywords = mutationField(t => t.field('removeAllSearchKeywords',
+    {
+        type: 'User',
+        resolve: async (_, { }, ctx) => {
+            const user = await getIUser(ctx)
+            await ctx.prisma.searchKeyword.deleteMany({
+                where: {
+                    userId: user.id
+                }
+            })
+            return user
+        }
+    }
+))

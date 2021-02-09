@@ -21,7 +21,20 @@ export const User = objectType({
         t.model.itemLikes()
         t.model.cart()
         t.model.searchKeywords()
-        t.field('couponNum', {
+        t.list.field('recentSearchKeywords', {
+            type: 'SearchKeyword',
+            resolve: async ({ id }, _, ctx) => {
+                const searchKeywords = await ctx.prisma.searchKeyword.findMany({
+                    where: { userId: id },
+                    orderBy: {
+                        createdAt: 'desc'
+                    },
+                    take: 20
+                })
+                return searchKeywords
+            }
+        })
+        t.nonNull.field('couponNum', {
             type: 'Int',
             resolve: async ({ id }, _, ctx) => {
                 const coupon = await ctx.prisma.coupon.aggregate({

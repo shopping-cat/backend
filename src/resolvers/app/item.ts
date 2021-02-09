@@ -27,6 +27,26 @@ export const filteredItems = queryField(t => t.list.field('filteredItems', {
         limit: nullable(intArg({ default: 15 }))
     },
     resolve: async (_, { category, keyword, orderBy, offset, limit }, ctx) => {
+        if (keyword) { // 최근 검색어에 추가
+            const user = await getIUser(ctx)
+            const searchKeyword = await ctx.prisma.searchKeyword.findFirst({
+                where: {
+                    keyword,
+                    userId: user.id
+                }
+            })
+            if (searchKeyword) { // 이미 똑같은 키워드가 있다면 삭제
+                await ctx.prisma.searchKeyword.delete({
+                    where: { id: searchKeyword.id }
+                })
+            }
+            await ctx.prisma.searchKeyword.create({
+                data: {
+                    keyword,
+                    user: { connect: { id: user.id } }
+                }
+            })
+        }
         const items = await ctx.prisma.item.findMany({
             take: limit,
             skip: offset,
