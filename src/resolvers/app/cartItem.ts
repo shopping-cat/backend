@@ -1,4 +1,4 @@
-import { arg, intArg, list, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
+import { arg, booleanArg, intArg, list, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
 import { prisma } from "../../context"
 import { ItemOption } from "../../types"
 import asyncDelay from "../../utils/asyncDelay"
@@ -24,9 +24,10 @@ export const addToCart = mutationField(t => t.field('addToCart', {
     args: {
         itemId: nonNull(intArg()),
         number: nonNull(intArg()),
-        option: nullable(list(intArg()))
+        option: nullable(list(intArg())),
+        isDirectBuy: nullable(booleanArg({ default: false })) // 바로구매 버튼을 눌렀는지
     },
-    resolve: async (_, { itemId, number, option }, ctx) => {
+    resolve: async (_, { itemId, number, option, isDirectBuy }, ctx) => {
         try {
             await asyncDelay()
             // 유저 식별
@@ -58,7 +59,7 @@ export const addToCart = mutationField(t => t.field('addToCart', {
             if (cartItem) {
                 return prisma.cartItem.update({
                     where: { id: cartItem.id },
-                    data: { num: cartItem.num + number }
+                    data: { num: isDirectBuy ? number : cartItem.num + number }
                 })
             } else { // 없으면 생성
                 return prisma.cartItem.create({
