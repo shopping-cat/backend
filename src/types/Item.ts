@@ -129,14 +129,20 @@ export const Item = objectType({
                 return itemImage.uri
             }
         })
-        t.field('rate', { //TODO
+        t.field('rate', {
             type: 'Float',
-            resolve: () => Number((4.535).toFixed(1))
+            resolve: async ({ id }, _, ctx) => {
+                const { avg } = await ctx.prisma.itemReview.aggregate({
+                    avg: { rate: true },
+                    where: { itemId: id }
+                })
+                return Number(avg.rate.toFixed(1))
+            }
         })
         t.field('isNew', {
             type: 'Boolean',
             resolve: ({ createdAt }) => {
-                return (Date.now() - createdAt.getTime()) > 1000
+                return (Date.now() - createdAt.getTime()) > 1000 // TODO
             }
         })
     }

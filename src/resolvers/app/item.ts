@@ -1,4 +1,4 @@
-import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable, extendType } from "nexus"
+import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable, extendType, booleanArg } from "nexus"
 import asyncDelay from "../../utils/asyncDelay"
 import getIUser from "../../utils/getIUser"
 
@@ -143,5 +143,58 @@ export const shopItems = queryField(t => t.list.field('shopItems', {
             }
         })
         return items
+    }
+}))
+
+// Mutation - 아이템 좋아요
+export const likeItem = mutationField(t => t.field('likeItem', {
+    type: 'Item',
+    args: {
+        itemId: nonNull(intArg()),
+        like: nonNull(booleanArg()) // 좋아요 누른거면 true 아니면 false
+    },
+    resolve: async (_, { itemId, like }, ctx) => {
+        await asyncDelay()
+        const user = await getIUser(ctx)
+        if (like) {
+            await ctx.prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    itemLikes: {
+                        connect: {
+                            id: itemId
+                        }
+                    }
+                }
+            })
+        } else {
+            await ctx.prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    itemLikes: {
+                        disconnect: {
+                            id: itemId
+                        }
+                    }
+                }
+            })
+        }
+
+        const likeNum = await ctx.prisma.user.count({
+            where: {
+                itemLikes: {
+                    some: {
+                        id: itemId
+                    }
+                }
+            }
+        })
+        const item = await ctx.prisma.item.update({
+            where: { id: itemId },
+            data: {
+                likeNum
+            }
+        })
+        return item
     }
 }))
