@@ -46,10 +46,12 @@
 | Query | zzimItems | ✓ |  | offset?: 0, limit?: 15, category?: '전체' |
 | Query | shopItems | ✓ |  | partnerId, offset?: 0, limit?: 15 |
 | Query | filteredItems | ✓ |  | category?: '전체', keyword?, orderBy?: '인기순', offset?: 0, limit?: 15 |
+| Mutation | itemLike |  | ✓ | itemId: int, like: boolean |
 ### `ItemReview`
 | Type | Name | List | Nullable | Params |
 |:----:|:----:|:----:|:--------:|:------:|
 | Query | itemReviews | ✓ |  | itemId, orderBy?: '추천순', offset?: 0, limit?: 10 |
+| Mutation | itemReviewRecommend |  | ✓ | itemReviewItem: int, recommendState: string |
 
 ### `CartITem`
 | Type | Name | List | Nullable | Params |
