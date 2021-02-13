@@ -66,6 +66,25 @@ export const filteredItems = queryField(t => t.list.field('filteredItems', {
     }
 }))
 
+// Query - 필터링된 아이템 갯수
+export const filteredItemsCount = queryField(t => t.field('filteredItemsCount', {
+    type: 'Int',
+    args: {
+        category: nullable(stringArg({ default: '전체' })),
+        keyword: nullable(stringArg()),
+    },
+    resolve: async (_, { category, keyword }, ctx) => {
+        const count = await ctx.prisma.item.count({
+            where: {
+                category: category && category !== '전체' ? category : undefined,
+                name: keyword ? { contains: keyword } : undefined,
+                state: 'sale'
+            }
+        })
+        return count
+    }
+}))
+
 // Query - 찜한 아이템 아이템
 export const zzimItems = queryField(t => t.list.field('zzimItems', {
     type: 'Item',

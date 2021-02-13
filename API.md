@@ -46,6 +46,7 @@
 | Query | zzimItems | ✓ |  | offset?: 0, limit?: 15, category?: '전체' |
 | Query | shopItems | ✓ |  | partnerId, offset?: 0, limit?: 15 |
 | Query | filteredItems | ✓ |  | category?: '전체', keyword?, orderBy?: '인기순', offset?: 0, limit?: 15 |
+| Query | filteredItemsCount | ✓ |  | category?: '전체', keyword? |
 | Mutation | itemLike |  | ✓ | itemId: int, like: boolean |
 ### `ItemReview`
 | Type | Name | List | Nullable | Params |
