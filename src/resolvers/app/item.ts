@@ -1,4 +1,6 @@
-import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable, extendType, booleanArg } from "nexus"
+import { Item } from "@prisma/client"
+import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable, extendType, booleanArg, list } from "nexus"
+import { off } from "process"
 import asyncDelay from "../../utils/asyncDelay"
 import getIUser from "../../utils/getIUser"
 
@@ -94,6 +96,8 @@ export const zzimItems = queryField(t => t.list.field('zzimItems', {
         limit: nullable(intArg({ default: 15 }))
     },
     resolve: async (_, { category, offset, limit }, ctx) => {
+        await asyncDelay()
+        console.log('zzim')
         const { id } = await getIUser(ctx)
         const user = await ctx.prisma.user.findUnique({
             where: { id },
@@ -215,5 +219,56 @@ export const likeItem = mutationField(t => t.field('likeItem', {
             }
         })
         return item
+    }
+}))
+
+// Mutation -  zzim리스트 삭제
+export const unlikeItems = mutationField(t => t.list.field('unlikeItems', {
+    type: 'Item',
+    args: {
+        itemIds: list(intArg())
+    },
+    resolve: async (_, { itemIds }, ctx) => {
+        try {
+            await asyncDelay()
+            const user = await getIUser(ctx)
+            const items: Item[] = []
+            for (const itemId of itemIds) {
+                try {
+                    await ctx.prisma.item.update({
+                        where: { id: itemId },
+                        data: {
+                            userLikes: {
+                                disconnect: {
+                                    id: user.id
+                                }
+                            }
+                        }
+                    })
+                } catch (error) {
+
+                }
+                const likeNum = await ctx.prisma.user.count({
+                    where: {
+                        itemLikes: {
+                            some: {
+                                id: itemId
+                            }
+                        }
+                    }
+                })
+                const item = await ctx.prisma.item.update({
+                    where: { id: itemId },
+                    data: {
+                        likeNum
+                    }
+                })
+                items.push(item)
+            }
+            return items
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
     }
 }))
