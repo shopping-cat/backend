@@ -1,5 +1,5 @@
 import { Context, prisma } from '../context'
-import { userAuth } from '../lib'
+import { userAuth } from '../lib/firebase'
 
 
 export const getIUser = async (ctx: Context) => {

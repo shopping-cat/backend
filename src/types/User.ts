@@ -1,5 +1,5 @@
 import { objectType } from "nexus"
-import { userAuth } from "../lib"
+import { userAuth } from "../lib/firebase"
 
 export const User = objectType({
     name: 'User',
@@ -21,6 +21,12 @@ export const User = objectType({
         t.model.itemLikes()
         t.model.cart()
         t.model.searchKeywords()
+        t.field('notificationNum', {
+            type: 'Int',
+            resolve: async ({ id }, _, ctx) => {
+                return 5
+            }
+        })
         t.list.field('recentSearchKeywords', {
             type: 'SearchKeyword',
             resolve: async ({ id }, _, ctx) => {

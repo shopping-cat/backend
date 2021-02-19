@@ -1,12 +1,13 @@
 /* 
  *
  */
-import { idArg, intArg, mutationField, nonNull, queryField, stringArg } from "nexus"
+import { idArg, intArg, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
 import Axios from "axios"
 import { prisma } from "../../context"
-import { userAuth } from "../../lib"
+import { userAuth } from "../../lib/firebase"
 import getIUser from "../../utils/getIUser"
 import asyncDelay from "../../utils/asyncDelay"
+import { uploadImage } from "../../lib/googleCloudStorage"
 
 // Query - 내 정보를 가져옴
 export const iUser = queryField(t => t.field('iUser', {
@@ -89,6 +90,30 @@ export const updateRefundBankAccount = mutationField(t => t.field('updateRefundB
                 }
             })
         }
+        return user
+    }
+}))
+
+// MUTATION - 유저 프로필 업데이트
+export const updateUserProfile = mutationField(t => t.field('updateUserProfile', {
+    type: 'User',
+    args: {
+        photo: nullable('Upload'),
+        name: nullable('String')
+    },
+    resolve: async (_, { photo, name }, ctx) => {
+        const { id } = await getIUser(ctx)
+
+        const uri = photo ? await uploadImage(photo, 'user-profile-image/') : undefined
+
+        const user = await ctx.prisma.user.update({
+            where: { id },
+            data: {
+                name,
+                photo: uri
+            }
+        })
+
         return user
     }
 }))

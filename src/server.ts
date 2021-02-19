@@ -35,21 +35,21 @@ app.get('/isRunning', (req, res) => res.send('Server is running')) // 서버 구
 const adminServer = new ApolloServer({
   schema: adminSchema,
   context: createContext,
-  uploads: { maxFileSize: 10000000, maxFiles: 10 },
+  uploads: { maxFileSize: 5 * 1024 * 1024, maxFiles: 10 },
   playground: process.env.NODE_ENV === 'production' ? false : { settings: { "request.credentials": 'include' } }
 })
 
 const appServer = new ApolloServer({
   schema: appSchema,
   context: createContext,
-  uploads: { maxFileSize: 10000000, maxFiles: 10 },
+  uploads: { maxFileSize: 5 * 1024 * 1024, maxFiles: 10 },
   playground: process.env.NODE_ENV === 'production' ? false : { settings: { "request.credentials": 'include' } }
 })
 
 const partnerServer = new ApolloServer({
   schema: partnerSchema,
   context: createContext,
-  uploads: { maxFileSize: 10000000, maxFiles: 10 },
+  uploads: { maxFileSize: 5 * 1024 * 1024, maxFiles: 10 },
   playground: process.env.NODE_ENV === 'production' ? false : { settings: { "request.credentials": 'include' } }
 })
 
