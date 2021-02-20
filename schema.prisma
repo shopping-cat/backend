@@ -162,11 +162,11 @@ model ItemReview {
 }
 
 model ItemReviewImage {
-  id           Int        @id @default(autoincrement())
-  createdAt    DateTime   @default(now())
+  id           Int         @id @default(autoincrement())
+  createdAt    DateTime    @default(now())
   uri          String
-  itemReviewId Int
-  itemReview   ItemReview @relation(fields: [itemReviewId], references: [id])
+  itemReviewId Int?
+  itemReview   ItemReview? @relation(fields: [itemReviewId], references: [id])
 
   @@index([itemReviewId], name: "itemReviewId")
 }

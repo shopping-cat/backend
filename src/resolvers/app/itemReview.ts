@@ -1,4 +1,4 @@
-import { intArg, nullable, queryField, stringArg, nonNull, mutationField } from "nexus"
+import { intArg, nullable, queryField, stringArg, nonNull, mutationField, list } from "nexus"
 import asyncDelay from "../../utils/asyncDelay"
 import getIUser from "../../utils/getIUser"
 
@@ -13,7 +13,7 @@ export const itemReviews = queryField(t => t.list.field('itemReviews', {
     },
     resolve: async (_, { itemId, orderBy, offset, limit }, ctx) => {
         await asyncDelay()
-        const itemReviews = ctx.prisma.itemReview.findMany({
+        const itemReviews = await ctx.prisma.itemReview.findMany({
             take: limit,
             skip: offset,
             where: { itemId },
@@ -36,21 +36,6 @@ export const createableItemReviews = queryField(t => t.list.field('createableIte
     resolve: async (_, { offset, limit }, ctx) => {
         await asyncDelay()
         const user = await getIUser(ctx)
-        // await ctx.prisma.order.create({
-        //     data: {
-        //         address: 'dummy',
-        //         item: { connect: { id: 3 } },
-        //         num: 1,
-        //         payment: { connect: { id: 1 } },
-        //         phone: 'dummy',
-        //         pointSale: 0,
-        //         state: '배송완료',
-        //         user: {
-        //             connect: { id: user.id }
-        //         },
-        //         deliveryCompletionDate: new Date
-        //     }
-        // })
         const orders = await ctx.prisma.order.findMany({
             take: limit,
             skip: offset,
@@ -64,6 +49,49 @@ export const createableItemReviews = queryField(t => t.list.field('createableIte
             }
         })
         return orders
+    }
+}))
+
+// Mutation - 리뷰 작성
+export const createItemReview = mutationField(t => t.field('createItemReview', {
+    type: 'ItemReview',
+    args: {
+        orderId: nonNull(intArg()),
+        rate: nonNull(intArg()),
+        content: nonNull(stringArg()),
+        imageIds: nullable(list(nonNull(intArg())))
+    },
+    resolve: async (_, { orderId, rate, content, imageIds }, ctx) => {
+
+        const user = await getIUser(ctx)
+        const order = await ctx.prisma.order.findUnique({
+            where: { id: orderId },
+            include: {
+                itemReview: true,
+                item: true
+            }
+        })
+
+        // 유효성 검사
+        if (!order) throw new Error('존재하지 않는 주문 입니다.')
+        if (user.id !== order.userId) throw new Error('해당 주문에 대해 수정 권한이 없는 계정입니다')
+        if (order.state !== '배송완료') throw new Error('해당 주문은 리뷰를 작성할 수 있는 상태가 아닙니다')
+        if (order.itemReview) throw new Error('이미 리뷰가 작성 되어 있습니다')
+
+        const itemReview = await ctx.prisma.itemReview.create({
+            data: {
+                item: { connect: { id: order.item.id } },
+                order: { connect: { id: order.id } },
+                user: { connect: { id: user.id } },
+                rate,
+                content,
+                images: imageIds ? {
+                    connect: imageIds.map((v: any) => ({ id: v }))
+                } : undefined
+            }
+        })
+
+        return itemReview
     }
 }))
 

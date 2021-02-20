@@ -25,6 +25,7 @@ export const uploadImage = async (file: Promise<FileUpload>, path?: string): Pro
         })
         return uri
     } catch (error) {
+        console.error(error)
         throw new Error('이미지 업로드 실패')
     }
 }
