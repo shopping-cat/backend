@@ -2,7 +2,7 @@ import { intArg, nullable, queryField, stringArg, nonNull, mutationField } from 
 import asyncDelay from "../../utils/asyncDelay"
 import getIUser from "../../utils/getIUser"
 
-// Query - 내 정보를 가져옴
+// Query - 해당 상품의 리뷰들 가져오기
 export const itemReviews = queryField(t => t.list.field('itemReviews', {
     type: 'ItemReview',
     args: {
@@ -23,6 +23,47 @@ export const itemReviews = queryField(t => t.list.field('itemReviews', {
             }
         })
         return itemReviews
+    }
+}))
+
+// Query - 내 작성가능한 리뷰들을 가져옴
+export const createableItemReviews = queryField(t => t.list.field('createableItemReviews', {
+    type: 'Order',
+    args: {
+        offset: nullable(intArg({ default: 0 })),
+        limit: nullable(intArg({ default: 10 }))
+    },
+    resolve: async (_, { offset, limit }, ctx) => {
+        await asyncDelay()
+        const user = await getIUser(ctx)
+        // await ctx.prisma.order.create({
+        //     data: {
+        //         address: 'dummy',
+        //         item: { connect: { id: 3 } },
+        //         num: 1,
+        //         payment: { connect: { id: 1 } },
+        //         phone: 'dummy',
+        //         pointSale: 0,
+        //         state: '배송완료',
+        //         user: {
+        //             connect: { id: user.id }
+        //         },
+        //         deliveryCompletionDate: new Date
+        //     }
+        // })
+        const orders = await ctx.prisma.order.findMany({
+            take: limit,
+            skip: offset,
+            where: {
+                userId: user.id,
+                itemReview: null,
+                state: '배송완료'
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        })
+        return orders
     }
 }))
 

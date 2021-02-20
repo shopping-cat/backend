@@ -94,24 +94,26 @@ model CartItem {
 }
 
 model Order {
-  id              Int         @id @default(autoincrement())
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  address         String
-  phone           String
-  state           String
-  reason          String?
-  deliveryMessage String?
-  itemOption      Json?
-  pointSale       Int
-  userId          String
-  paymentId       Int
-  itemId          Int
-  payment         Payment     @relation(fields: [paymentId], references: [id])
-  user            User        @relation(fields: [userId], references: [id])
-  coupon          Coupon?
-  itemReview      ItemReview?
-  item            Item        @relation(fields: [itemId], references: [id])
+  id                     Int         @id @default(autoincrement())
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+  deliveryCompletionDate DateTime?
+  num                    Int
+  address                String
+  phone                  String
+  state                  String
+  reason                 String?
+  deliveryMessage        String?
+  itemOption             Json?
+  pointSale              Int
+  userId                 String
+  paymentId              Int
+  itemId                 Int
+  payment                Payment     @relation(fields: [paymentId], references: [id])
+  user                   User        @relation(fields: [userId], references: [id])
+  coupon                 Coupon?
+  itemReview             ItemReview?
+  item                   Item        @relation(fields: [itemId], references: [id])
 
   @@index([paymentId], name: "paymentId")
   @@index([userId], name: "userId")
