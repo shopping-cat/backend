@@ -26,6 +26,30 @@ export const itemReviews = queryField(t => t.list.field('itemReviews', {
     }
 }))
 
+// Query - 내가 작성한 리뷰들을 가져옴
+export const myItemReviews = queryField(t => t.list.field('myItemReviews', {
+    type: 'ItemReview',
+    args: {
+        offset: nullable(intArg({ default: 0 })),
+        limit: nullable(intArg({ default: 10 }))
+    },
+    resolve: async (_, { offset, limit }, ctx) => {
+        const user = await getIUser(ctx)
+        const itemReviews = ctx.prisma.itemReview.findMany({
+            take: limit,
+            skip: offset,
+            where: {
+                userId: user.id,
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        })
+
+        return itemReviews
+    }
+}))
+
 // Query - 내 작성가능한 리뷰들을 가져옴
 export const createableItemReviews = queryField(t => t.list.field('createableItemReviews', {
     type: 'Order',
@@ -34,6 +58,7 @@ export const createableItemReviews = queryField(t => t.list.field('createableIte
         limit: nullable(intArg({ default: 10 }))
     },
     resolve: async (_, { offset, limit }, ctx) => {
+
         await asyncDelay()
         const user = await getIUser(ctx)
         const orders = await ctx.prisma.order.findMany({
@@ -59,7 +84,7 @@ export const createItemReview = mutationField(t => t.field('createItemReview', {
         orderId: nonNull(intArg()),
         rate: nonNull(intArg()),
         content: nonNull(stringArg()),
-        imageIds: nullable(list(nonNull(intArg())))
+        imageIds: nonNull(list(nonNull(intArg())))
     },
     resolve: async (_, { orderId, rate, content, imageIds }, ctx) => {
 
@@ -78,6 +103,7 @@ export const createItemReview = mutationField(t => t.field('createItemReview', {
         if (order.state !== '배송완료') throw new Error('해당 주문은 리뷰를 작성할 수 있는 상태가 아닙니다')
         if (order.itemReview) throw new Error('이미 리뷰가 작성 되어 있습니다')
 
+        // 리뷰 생성
         const itemReview = await ctx.prisma.itemReview.create({
             data: {
                 item: { connect: { id: order.item.id } },
@@ -85,9 +111,57 @@ export const createItemReview = mutationField(t => t.field('createItemReview', {
                 user: { connect: { id: user.id } },
                 rate,
                 content,
-                images: imageIds ? {
+                images: {
                     connect: imageIds.map((v: any) => ({ id: v }))
-                } : undefined
+                }
+            }
+        })
+
+        // 구매확정
+        await ctx.prisma.order.update({
+            where: { id: order.id },
+            data: {
+                state: '구매확정'
+            }
+        })
+
+        return itemReview
+    }
+}))
+
+// Mutation - 리뷰 작성
+export const updateItemReview = mutationField(t => t.field('updateItemReview', {
+    type: 'ItemReview',
+    args: {
+        id: nonNull(intArg()),
+        rate: nonNull(intArg()),
+        content: nonNull(stringArg()),
+        imageIds: nonNull(list(nonNull(intArg())))
+    },
+    resolve: async (_, { id, rate, content, imageIds }, ctx) => {
+        await asyncDelay()
+        const user = await getIUser(ctx)
+        const preItemReview = await ctx.prisma.itemReview.findUnique({
+            where: { id },
+            include: {
+                images: true
+            }
+        })
+
+        // 유효성 검사
+        if (!preItemReview) throw new Error('존재하지 않는 리뷰 입니다.')
+        if (user.id !== preItemReview.userId) throw new Error('해당 주문에 대해 수정 권한이 없는 계정입니다')
+
+        // 리뷰 수정
+        const itemReview = await ctx.prisma.itemReview.update({
+            where: { id },
+            data: {
+                rate,
+                content,
+                images: {
+                    disconnect: preItemReview.images.length !== 0 ? preItemReview.images.map(v => ({ id: v.id })) : undefined,
+                    connect: imageIds.map((v: any) => ({ id: v })),
+                }
             }
         })
 
