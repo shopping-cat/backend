@@ -141,7 +141,7 @@ export const updateItemReview = mutationField(t => t.field('updateItemReview', {
     resolve: async (_, { id, rate, content, imageIds }, ctx) => {
         await asyncDelay()
         const user = await getIUser(ctx)
-        const preItemReview = await ctx.prisma.itemReview.findUnique({
+        const prevItemReview = await ctx.prisma.itemReview.findUnique({
             where: { id },
             include: {
                 images: true
@@ -149,8 +149,8 @@ export const updateItemReview = mutationField(t => t.field('updateItemReview', {
         })
 
         // 유효성 검사
-        if (!preItemReview) throw new Error('존재하지 않는 리뷰 입니다.')
-        if (user.id !== preItemReview.userId) throw new Error('해당 주문에 대해 수정 권한이 없는 계정입니다')
+        if (!prevItemReview) throw new Error('존재하지 않는 리뷰 입니다.')
+        if (user.id !== prevItemReview.userId) throw new Error('해당 주문에 대해 수정 권한이 없는 계정입니다')
 
         // 리뷰 수정
         const itemReview = await ctx.prisma.itemReview.update({
@@ -159,7 +159,7 @@ export const updateItemReview = mutationField(t => t.field('updateItemReview', {
                 rate,
                 content,
                 images: {
-                    disconnect: preItemReview.images.length !== 0 ? preItemReview.images.map(v => ({ id: v.id })) : undefined,
+                    disconnect: prevItemReview.images.length !== 0 ? prevItemReview.images.map(v => ({ id: v.id })) : undefined,
                     connect: imageIds.map((v: any) => ({ id: v })),
                 }
             }

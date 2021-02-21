@@ -30,19 +30,6 @@ export const ItemReview = objectType({
                 return itemReview.images.map(v => v.uri)
             }
         })
-        t.field('itemNameOption', {
-            type: 'String',
-            async resolve({ orderId }, _, { prisma }) {
-                const order = await prisma.order.findUnique({
-                    where: { id: orderId },
-                    include: { item: true }
-                })
-                if (!order || !order.item) return ''
-                if (!order.itemOption) return order.item.name
-                const option = (order.itemOption as string[]).map((v, i) => `${i !== 0 ? ' | ' : ''}${v}`).join()
-                return order.item.name + ' (옵션 : ' + option + ')'
-            }
-        })
         t.field('recommendState', { // 해당 유저가 좋아요 누른 상품인지
             type: 'String',
             resolve: async ({ id }, _, ctx) => {
