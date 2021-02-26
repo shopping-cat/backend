@@ -7,4 +7,4 @@ export const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.react-gra
 export const COOKIE_PATH = '/'
 
 
-export const MIN_PAYMENT_PRICE = 100
+export const MIN_PAYMENT_PRICE = 300 // 원
