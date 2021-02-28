@@ -97,22 +97,21 @@ model Order {
   id                     Int         @id @default(autoincrement())
   createdAt              DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
-  deliveryCompletionDate DateTime?
-  num                    Int
-  address                String
-  phone                  String
   state                  String
-  reason                 String?
-  deliveryMessage        String?
-  itemOption             Json?
-  pointSale              Int
+  // 상품 상세
+  itemPrice              Int // 옵션 적용 가격
+  num                    Int
+  itemOption             Json? // { data:string[] }
+  //
+  deliveryCompletionDate DateTime? // 배송 도착일
+  reason                 String? // 환불 | 교환 사유
   userId                 String
-  paymentId              Int
+  paymentId              String
   itemId                 Int
+  coupons                Coupon[]
+  itemReview             ItemReview?
   payment                Payment     @relation(fields: [paymentId], references: [id])
   user                   User        @relation(fields: [userId], references: [id])
-  coupon                 Coupon?
-  itemReview             ItemReview?
   item                   Item        @relation(fields: [itemId], references: [id])
 
   @@index([paymentId], name: "paymentId")
@@ -120,22 +119,32 @@ model Order {
 }
 
 model Payment {
-  id              Int           @id @default(autoincrement())
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  state           String
-  paymentMethod   String
-  cashReceipt     String
-  cashReceiptData String?
-  refundMethod    RefundMethod?
-  price           Int
-  itemSale        Int
-  couponSale      Int
-  pointSale       Int
-  totalPrice      Int
-  userId          String
-  user            User          @relation(fields: [userId], references: [id])
-  orders          Order[]
+  id                 String   @id
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  name               String
+  state              String
+  // 결제 취소
+  cancelReason       String?
+  // 결제 정보
+  paymentMethod      String
+  price              Int
+  deliveryPrice      Int
+  extraDeliveryPrice Int
+  itemSale           Int
+  couponSale         Int
+  pointSale          Int
+  totalPrice         Int
+  // 배송지 정보
+  address            String
+  addressName        String
+  addressPhone       String
+  postCode           String
+  // 배송 매모
+  deliveryMemo       String
+  userId             String
+  user               User     @relation(fields: [userId], references: [id])
+  orders             Order[]
 
   @@index([userId], name: "userId")
 }
@@ -216,11 +225,6 @@ model Partner {
   licenseNumber String
   shopImage     String
   items         Item[]
-}
-
-enum RefundMethod {
-  cardCancel
-  refundAccout
 }
 
 enum ItemState {

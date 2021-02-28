@@ -17,9 +17,13 @@ export const createItem = mutationField(t => t.field('createItem', {
                 category,
                 html,
                 name,
-                option,
+                option: { "data": [{ "optionDetails": [{ "name": "빨간색", "price": 0 }, { "name": "주황색", "price": 0 }, { "name": "노란색", "price": 0 }, { "name": "초록색", "price": 0 }, { "name": "파란색", "price": 0 }, { "name": "남색", "price": -20000 }, { "name": "보라색", "price": 2300 }], "optionGroupName": "색상" }, { "optionDetails": [{ "name": "S", "price": -300 }, { "name": "M", "price": 0 }, { "name": "L", "price": 20000 }, { "name": "XL", "price": 50000 }], "optionGroupName": "사이즈" }] },
                 price,
-                partner: { connect: { email: '123@gmail.com' } }
+                partner: { connect: { id: 1 } },
+                deliveryPrice: 2500,
+                extraDeliveryPrice: 2500,
+                requireInformation: { "data": [] },
+                images: { create: { uri: "https://img.catpre.com/mobile/catpre/product/38/37549_originalView_01754973.jpg" } }
             }
         })
         return item
