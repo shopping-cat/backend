@@ -15,6 +15,7 @@ export const Order = objectType({
         t.model.userId()
         t.model.itemId()
         t.model.paymentId()
+        t.model.cartItemId()
         t.model.coupons()
         t.model.itemReview()
         t.model.item()

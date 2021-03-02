@@ -1,10 +1,10 @@
-import { intArg, list, mutationField, nonNull, queryField, stringArg } from "nexus"
-import { consoleWarn } from "nexus/dist/core"
+import axios from "axios"
+import { intArg, list, mutationField, nonNull, stringArg } from "nexus"
 import { CartItemOption, ItemOption } from "../../types"
+import asyncDelay from "../../utils/asyncDelay"
 import getIUser from "../../utils/getIUser"
 import salePrice from "../../utils/salePrice"
 import { MIN_PAYMENT_PRICE } from "../../values"
-import { item } from "./item"
 import { OrderCouponArg } from "./order"
 
 // Mutation - PG요청 직전
@@ -19,6 +19,7 @@ export const createPayment = mutationField(t => t.field('createPayment', {
     },
     resolve: async (_, { amount, cartItemIds, point, coupons, method }, ctx) => {
         try {
+            await asyncDelay()
             const { id } = await getIUser(ctx)
             const user = await ctx.prisma.user.findUnique({
                 where: { id },
@@ -36,6 +37,7 @@ export const createPayment = mutationField(t => t.field('createPayment', {
                 where: { id: { in: cartItemIds }, userId: user.id },
                 include: { item: true }
             })
+            const ordersTemp = []
             if (cartItems.length === 0) throw new Error('아이템이 존재하지 않습니다')
             const name = `${cartItems[0].item.name}${cartItems.length > 1 ? ` 외 ${cartItems.length - 1}가지 상품` : ''}`
 
@@ -53,17 +55,18 @@ export const createPayment = mutationField(t => t.field('createPayment', {
                 // 기본금에 세일 적용
                 let itemPrice = salePrice(cartItem.item.sale, cartItem.item.price)
                 let optionPrice = 0
+                const optionStringList: string[] = []
                 // 옵션이 있다면 옵션 적용
                 const itemOption = cartItem.item.option as ItemOption
                 const cartItemOption = cartItem.option as CartItemOption
                 if (itemOption && cartItemOption) {
                     for (const i in itemOption.data) {
-                        const option = itemOption.data[i].optionDetails[cartItemOption.data[i]].price
-                        itemPrice += option
-                        optionPrice += option
+                        const option = itemOption.data[i].optionDetails[cartItemOption.data[i]]
+                        optionStringList.push(option.name)
+                        itemPrice += option.price
+                        optionPrice += option.price
                     }
                 }
-                console.log(optionPrice)
                 // 쿠폰 적용
                 let totalCouponedPrice = 0 // 수량 적용된 가격
                 for (let i = 0; i < cartItem.num; i++) {
@@ -93,20 +96,28 @@ export const createPayment = mutationField(t => t.field('createPayment', {
                 // 영수증 계산
                 const currentDeliveryPrice = cartItem.item.deliveryPrice
                 const currentExtraDeliveryPrice = false ? cartItem.item.extraDeliveryPrice : 0 // TODO
-
+                // 적용
                 price += (cartItem.item.price + optionPrice) * cartItem.num
                 deliveryPrice += currentDeliveryPrice
                 extraDeliveryPrice += currentExtraDeliveryPrice
                 itemSale += (cartItem.item.price - salePrice(cartItem.item.sale, cartItem.item.price)) * cartItem.num
                 couponSale += (itemPrice * cartItem.num) - totalCouponedPrice
                 totalPrice += totalCouponedPrice + currentDeliveryPrice + currentExtraDeliveryPrice
+                // Order생성할때 사용할 데이터들
+                ordersTemp.push({
+                    itemId: cartItem.item.id,
+                    itemPrice: cartItem.item.price,
+                    itemSale: cartItem.item.sale,
+                    itemOptionPrice: optionPrice,
+                    cartItemId: cartItem.id,
+                    num: cartItem.num,
+                    option: optionStringList,
+                    coupons: coupons.filter((v: any) => v.orderItemId === cartItem.id)
+                })
             }
             // 포인트 적용
             if (point < 0) throw new Error('포인트는 0보다 작을수 없습니다')
             totalPrice -= point
-            console.log(price)
-            console.log(itemSale)
-            console.log(totalPrice)
             if (price + deliveryPrice + extraDeliveryPrice - itemSale - couponSale - pointSale !== totalPrice) throw new Error('계산 오류가 발생했습니다')
             if (totalPrice !== amount) throw new Error('계산 오류가 발생했습니다')
             if (totalPrice < MIN_PAYMENT_PRICE) throw new Error(`최소 결제 금액은 ${MIN_PAYMENT_PRICE}원 입니다`)
@@ -129,11 +140,120 @@ export const createPayment = mutationField(t => t.field('createPayment', {
                     addressPhone: user.deliveryInfo.phone,
                     postCode: user.deliveryInfo.postCode,
                     deliveryMemo: "", // TODO
-                    user: { connect: { id: user.id } }
+                    user: { connect: { id: user.id } },
+                    orders: {
+                        create: ordersTemp.map(v => ({
+                            item: { connect: { id: v.itemId } },
+                            user: { connect: { id: user.id } },
+                            itemOptionPrice: v.itemOptionPrice,
+                            itemPrice: v.itemPrice,
+                            itemSale: v.itemSale,
+                            num: v.num,
+                            state: '구매접수',
+                            itemOption: v.option.length > 0 ? { data: v.option } : undefined,
+                            coupons: { connect: v.coupons.map((i: any) => ({ id: i.couponId })) },
+                            cartItemId: v.cartItemId
+                        }))
+                    }
                 }
             })
 
-            console.log(payment)
+            return payment
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
+}))
+
+
+// Mutation - PG 요청 직후 오류 처리까지
+export const completePayment = mutationField(t => t.field('completePayment', {
+    type: 'Payment',
+    args: {
+        imp_uid: nonNull(stringArg()),
+        merchant_uid: nonNull(stringArg())
+    },
+    resolve: async (_, { imp_uid, merchant_uid }, ctx) => {
+        try {
+            await asyncDelay()
+            const user = await getIUser(ctx)
+
+            // 결제 정보 조회
+            const getToken = await axios.post(
+                'https://api.iamport.kr/users/getToken',
+                {
+                    imp_key: process.env.IAMPORT_REST_API_KEY,
+                    imp_secret: process.env.IAMPORT_REST_API_SECRET
+                }
+            )
+            if (!getToken?.data?.response) throw new Error('결제정보 조회 실패')
+            const { access_token } = getToken.data.response // 인증 토큰
+
+            const getPaymentData = await axios.get(
+                `https://api.iamport.kr/payments/${imp_uid}`,
+                {
+                    headers: { 'Authorization': access_token }
+                }
+            )
+            if (!getPaymentData?.data?.response) throw new Error('결제정보 조회 실패')
+            const paymentData = getPaymentData.data.response
+
+            const prevPayment = await ctx.prisma.payment.findUnique({
+                where: { id: merchant_uid },
+                include: { orders: true }
+            })
+            if (!prevPayment) throw new Error('없는 주문 입니다')
+            if (prevPayment.userId !== user.id) throw new Error('접근 권한이 없는 계정입니다')
+            if (prevPayment.state !== '결제요청') throw new Error('잘못된 주문 절차입니다')
+            if (prevPayment.totalPrice !== paymentData.amount) throw new Error('위조된 결제시도')
+            // 오류 처리
+
+            switch (paymentData.status) {
+                case 'failed': // 오류
+                    await ctx.prisma.payment.update({
+                        where: { id: merchant_uid },
+                        data: {
+                            cancelReason: paymentData.fail_reason || '알 수 없는 이유',
+                            state: '결제취소'
+                        }
+                    })
+                    break
+                case 'ready': // 가상계좌 발급
+                    const { vbank_num, vbank_date, vbank_name } = paymentData
+                    await ctx.prisma.payment.update({
+                        where: { id: merchant_uid },
+                        data: {
+                            vBankDate: vbank_date,
+                            vBankNum: vbank_num,
+                            vBankName: vbank_name,
+                            state: '입금대기'
+                        }
+                    })
+                    break
+                case 'paid': // 결제 성공
+                    await ctx.prisma.payment.update({
+                        where: { id: merchant_uid },
+                        data: {
+                            state: '구매접수'
+                        }
+                    })
+                    break
+            }
+
+            //카트에서 삭제
+            if (paymentData.status !== 'failed') {
+                await ctx.prisma.cartItem.deleteMany({
+                    where: {
+                        userId: user.id,
+                        id: { in: prevPayment.orders.map(v => v.cartItemId) }
+                    }
+                })
+            }
+
+            const payment = await ctx.prisma.payment.findUnique({
+                where: { id: merchant_uid }
+            })
 
             return payment
         } catch (error) {
