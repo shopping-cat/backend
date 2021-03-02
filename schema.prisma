@@ -17,6 +17,7 @@ model User {
   phone             String?
   cart              CartItem[]
   coupons           Coupon[]
+  pointReceipts     PointReceipt[]
   itemReviews       ItemReview[]
   orders            Order[]
   payments          Payment[]
@@ -77,6 +78,15 @@ model Coupon {
   orderId      Int?     @unique
   order        Order?   @relation(fields: [orderId], references: [id])
   user         User?    @relation(fields: [userId], references: [id])
+}
+
+model PointReceipt {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  name      String
+  point     Int
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model CartItem {

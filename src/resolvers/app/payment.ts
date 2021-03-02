@@ -1,6 +1,7 @@
 import axios from "axios"
 import { intArg, list, mutationField, nonNull, stringArg } from "nexus"
 import { CartItemOption, ItemOption } from "../../types"
+import addPoint from "../../utils/addPoint"
 import asyncDelay from "../../utils/asyncDelay"
 import getIUser from "../../utils/getIUser"
 import salePrice from "../../utils/salePrice"
@@ -241,14 +242,18 @@ export const completePayment = mutationField(t => t.field('completePayment', {
                     break
             }
 
-            //카트에서 삭제
             if (paymentData.status !== 'failed') {
+                //카트에서 삭제
                 await ctx.prisma.cartItem.deleteMany({
                     where: {
                         userId: user.id,
                         id: { in: prevPayment.orders.map(v => v.cartItemId) }
                     }
                 })
+                // 포인트 삭제
+                if (prevPayment.pointSale > 0) {
+                    await addPoint(-prevPayment.pointSale, '상품구매', user.id, ctx)
+                }
             }
 
             const payment = await ctx.prisma.payment.findUnique({

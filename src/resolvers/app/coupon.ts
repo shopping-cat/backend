@@ -21,7 +21,8 @@ export const coupons = queryField(t => t.list.field('coupons', {
             skip: offset,
             where: {
                 userId: user.id,
-                period: { gt: new Date() }
+                period: { gt: new Date() },
+                orderId: null
             },
             orderBy: {
                 createdAt: 'desc'

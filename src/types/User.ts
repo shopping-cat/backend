@@ -12,6 +12,7 @@ export const User = objectType({
         t.model.name()
         t.model.photo()
         t.model.orders()
+        t.model.pointReceipts()
         t.model.payments()
         t.model.refundBankAccount()
         t.model.deliveryInfo()
