@@ -1,5 +1,5 @@
 import axios from "axios"
-import { intArg, list, mutationField, nonNull, stringArg } from "nexus"
+import { intArg, list, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
 import { CartItemOption, ItemOption } from "../../types"
 import addPoint from "../../utils/addPoint"
 import asyncDelay from "../../utils/asyncDelay"
@@ -7,6 +7,53 @@ import getIUser from "../../utils/getIUser"
 import salePrice from "../../utils/salePrice"
 import { MIN_PAYMENT_PRICE } from "../../values"
 import { OrderCouponArg } from "./order"
+
+
+// Query - 주문 조회
+export const payment = queryField(t => t.field('payment', {
+    type: 'Payment',
+    args: {
+        id: nonNull(stringArg())
+    },
+    resolve: async (_, { id }, ctx) => {
+        await asyncDelay()
+
+        const user = await getIUser(ctx)
+
+        const payment = await ctx.prisma.payment.findUnique({
+            where: { id }
+        })
+        if (!payment) throw new Error('없는 주문 입니다')
+        if (payment.userId !== user.id) throw new Error('접근 권한이 없는 계정입니다')
+
+        return payment
+    }
+}))
+
+// Query - 내 주문 내역들
+export const payments = queryField(t => t.list.field('payments', {
+    type: 'Payment',
+    args: {
+        offset: nullable(intArg({ default: 0 })),
+        limit: nullable(intArg({ default: 10 }))
+    },
+    resolve: async (_, { offset, limit }, ctx) => {
+        await asyncDelay()
+        const user = await getIUser(ctx)
+        const payments = await ctx.prisma.payment.findMany({
+            skip: offset,
+            take: limit,
+            where: {
+                userId: user.id,
+                state: { notIn: ['결제요청', '결제취소'] }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        })
+        return payments
+    }
+}))
 
 // Mutation - PG요청 직전
 export const createPayment = mutationField(t => t.field('createPayment', {

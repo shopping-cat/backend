@@ -91,8 +91,7 @@ export const Item = objectType({
                     include: { images: true }
                 })
                 if (!item) return []
-                return ['https://mondomio.net/web/product/small/202007/144176988e089d0dce1d778c7dfd502b.jpg']
-                // return item.images.map(v => v.uri)
+                return item.images.map(v => v.uri)
             }
         })
         t.field('salePrice', {// 세일이 적용된 실제 판매 금액

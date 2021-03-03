@@ -8,6 +8,8 @@ export const Order = objectType({
         t.model.updatedAt()
         t.model.state()
         t.model.itemPrice()
+        t.model.itemOptionPrice()
+        t.model.itemSale()
         t.model.num()
         t.model.itemOption()
         t.model.deliveryCompletionDate()
