@@ -3,6 +3,7 @@ import { intArg, list, mutationField, nonNull, nullable, queryField, stringArg }
 import { CartItemOption, ItemOption } from "../../types"
 import addPoint from "../../utils/addPoint"
 import asyncDelay from "../../utils/asyncDelay"
+import bankNameToBankCode from "../../utils/bankNameToBankCode"
 import getIUser from "../../utils/getIUser"
 import salePrice from "../../utils/salePrice"
 import { MIN_PAYMENT_PRICE } from "../../values"
@@ -312,5 +313,82 @@ export const completePayment = mutationField(t => t.field('completePayment', {
             console.error(error)
             throw error
         }
+    }
+}))
+
+export const cancelPayment = mutationField(t => t.field('cancelPayment', {
+    type: 'Payment',
+    args: {
+        id: nonNull(stringArg())
+    },
+    resolve: async (_, { id }, ctx) => {
+        await asyncDelay()
+        const user = await getIUser(ctx)
+        const refundBankAccount = await ctx.prisma.userRefundBankAccount.findUnique({
+            where: { userId: user.id },
+        })
+        const payment = await ctx.prisma.payment.findUnique({
+            where: { id },
+            include: {
+                orders: { include: { coupons: true } }
+            }
+        })
+        if (!payment) throw new Error('존재하지 않는 주문 입니다')
+        if (payment.userId !== user.id) throw new Error('접근 권한 없는 계정입니다')
+        if (payment.state !== '구매접수' && payment.state !== '입금대기') throw new Error(`${payment.state} 상태에서는 취소하실 수 없습니다`)
+        if (payment.paymentMethod === '가상계좌' && !refundBankAccount) throw new Error('환불계좌 등록이 필요합니다. 프로필에서 변경가능합니다')
+
+
+        // 현금 환불 TODO 가상계좌 처리
+        const getToken = await axios.post(
+            'https://api.iamport.kr/users/getToken',
+            {
+                imp_key: process.env.IAMPORT_REST_API_KEY,
+                imp_secret: process.env.IAMPORT_REST_API_SECRET
+            }
+        )
+        if (!getToken?.data?.response) throw new Error('결제정보 조회 실패')
+        const { access_token } = getToken.data.response // 인증 토큰
+        const getCancelData = await axios.post(
+            'https://api.iamport.kr/payments/cancel',
+            {
+                merchant_uid: payment.id,
+                refund_holder: payment.paymentMethod === '가상계좌' ? refundBankAccount?.ownerName : undefined,
+                refund_bank: payment.paymentMethod === '가상계좌' && refundBankAccount ? bankNameToBankCode(refundBankAccount.bankName) : undefined,
+                refund_account: payment.paymentMethod === '가상계좌' ? refundBankAccount?.accountNumber : undefined
+            },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": access_token
+                }
+            }
+        )
+        const { response } = getCancelData.data // 환불 결과
+        if (!response) throw new Error(getCancelData.data.message || '환불 오류')
+
+        // 쿠폰 해제
+        for (const order of payment.orders) {
+            if (order.coupons.length === 0) continue
+            await ctx.prisma.order.update({
+                where: { id: order.id },
+                data: {
+                    coupons: { disconnect: order.coupons.map(v => ({ id: v.id })) }
+                }
+            })
+        }
+
+        // 포인트 환불
+        await addPoint(payment.pointSale, '주문 취소', user.id, ctx)
+
+        // 상태 변경
+        const newPayment = await ctx.prisma.payment.update({
+            where: { id },
+            data: {
+                state: '취소처리'
+            }
+        })
+
+        return newPayment
     }
 }))
