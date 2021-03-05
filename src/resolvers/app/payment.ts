@@ -64,9 +64,10 @@ export const createPayment = mutationField(t => t.field('createPayment', {
         cartItemIds: nonNull(list(intArg())),
         point: nonNull(intArg()),
         coupons: nonNull(list(OrderCouponArg)),
-        method: nonNull(stringArg())
+        method: nonNull(stringArg()),
+        deliveryMemo: nonNull(stringArg())
     },
-    resolve: async (_, { amount, cartItemIds, point, coupons, method }, ctx) => {
+    resolve: async (_, { amount, cartItemIds, point, coupons, method, deliveryMemo }, ctx) => {
         try {
             await asyncDelay()
             const { id } = await getIUser(ctx)
@@ -188,7 +189,7 @@ export const createPayment = mutationField(t => t.field('createPayment', {
                     addressName: user.deliveryInfo.name,
                     addressPhone: user.deliveryInfo.phone,
                     postCode: user.deliveryInfo.postCode,
-                    deliveryMemo: "", // TODO
+                    deliveryMemo,
                     user: { connect: { id: user.id } },
                     orders: {
                         create: ordersTemp.map(v => ({
@@ -385,7 +386,8 @@ export const cancelPayment = mutationField(t => t.field('cancelPayment', {
         const newPayment = await ctx.prisma.payment.update({
             where: { id },
             data: {
-                state: '취소처리'
+                state: '취소처리',
+                cancelReason: '없음' // 취소사유
             }
         })
 

@@ -1,4 +1,5 @@
 import { objectType } from "nexus"
+import salePrice from "../utils/salePrice"
 
 export const Order = objectType({
     name: 'Order',
@@ -29,6 +30,12 @@ export const Order = objectType({
                 const itemOption = itemOptionJson as OrderItemOption
                 if (!itemOption) return null
                 return [...itemOption.data, `${num}개`].map((v, i) => `${i !== 0 ? ' | ' : ''}${v}`).join('')
+            }
+        })
+        t.field('totalPrice', {
+            type: 'Int',
+            resolve: ({ num, itemPrice, itemSale, itemOptionPrice }) => {
+                return (itemPrice + itemOptionPrice) * num
             }
         })
     }
