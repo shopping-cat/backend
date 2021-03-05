@@ -3,10 +3,10 @@
  */
 import { idArg, intArg, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
 import Axios from "axios"
-import { prisma } from "../../context"
 import { userAuth } from "../../lib/firebase"
 import getIUser from "../../utils/getIUser"
 import asyncDelay from "../../utils/asyncDelay"
+import errorFormat from "../../utils/errorFormat";
 import { uploadImage } from "../../lib/googleCloudStorage"
 
 // Query - 내 정보를 가져옴
@@ -32,7 +32,7 @@ export const kakaoTokenToFirebaseToken = queryField(t => t.nonNull.field('kakaoT
                 { property_keys: ['kakao_account.email', 'properties.nickname', 'properties.profile_image'] },
                 { headers: { 'Authorization': `Bearer ${kakaoAccessToken}` } }
             )
-            if (!result.data.id) throw new Error('No Id')
+            if (!result.data.id) throw errorFormat('유효하지 않은 아이디')
             const kakaoUserId = `KAKAO:${result.data.id}`
             const properties = {
                 email: result?.data?.kakao_account?.email,

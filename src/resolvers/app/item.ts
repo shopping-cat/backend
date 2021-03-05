@@ -1,7 +1,7 @@
 import { Item } from "@prisma/client"
 import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable, extendType, booleanArg, list } from "nexus"
-import { off } from "process"
 import asyncDelay from "../../utils/asyncDelay"
+import errorFormat from "../../utils/errorFormat"
 import getIUser from "../../utils/getIUser"
 
 // Query - 아이템 세부 정보
@@ -111,7 +111,7 @@ export const zzimItems = queryField(t => t.list.field('zzimItems', {
                 }
             }
         })
-        if (!user) throw new Error('No User')
+        if (!user) throw errorFormat('로그인이 필요한 작업입니다')
         if (!user.itemLikes) return []
         return user.itemLikes
     }

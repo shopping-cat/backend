@@ -1,6 +1,7 @@
 import { Storage } from '@google-cloud/storage';
 import { FileUpload } from 'graphql-upload';
 import { v4 } from 'uuid';
+import errorFormat from '../utils/errorFormat';
 
 
 const storage = new Storage()
@@ -26,7 +27,7 @@ export const uploadImage = async (file: Promise<FileUpload>, path?: string): Pro
         return uri
     } catch (error) {
         console.error(error)
-        throw new Error('이미지 업로드 실패')
+        throw errorFormat('이미지 업로드 실패')
     }
 }
 

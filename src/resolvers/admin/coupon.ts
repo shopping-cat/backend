@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { intArg, mutationField, nonNull, nullable, stringArg } from "nexus";
+import errorFormat from "../../utils/errorFormat";
 
 const cc = require('coupon-code');
 
@@ -18,9 +19,9 @@ export const createCoupon = mutationField(t => t.field('createCoupon', {
     },
     resolve: async (_, { image, name, userId, period, minItemPrice, salePrice, maxSalePrice, salePercent }, ctx) => {
 
-        if (!salePrice && !salePercent) throw new Error('salePrice와 salePercent 둘 중에 하나는 있어야합니다')
-        if (salePercent && !maxSalePrice) throw new Error('salePercent는 maxSalePrice를 필요로 합니다')
-        if (salePrice && maxSalePrice) throw new Error('salePrice는 maxSalePrice와 같이 사용할 수 없습니다')
+        if (!salePrice && !salePercent) throw errorFormat('salePrice와 salePercent 둘 중에 하나는 있어야합니다')
+        if (salePercent && !maxSalePrice) throw errorFormat('salePercent는 maxSalePrice를 필요로 합니다')
+        if (salePrice && maxSalePrice) throw errorFormat('salePrice는 maxSalePrice와 같이 사용할 수 없습니다')
 
         const couponId = cc.generate()
 

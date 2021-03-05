@@ -1,5 +1,6 @@
 import { intArg, mutationField, nonNull, nullable, queryField, stringArg } from "nexus";
 import asyncDelay from "../../utils/asyncDelay";
+import errorFormat from "../../utils/errorFormat";
 import getIUser from "../../utils/getIUser";
 
 
@@ -46,8 +47,8 @@ export const registCoupon = mutationField(t => t.field('registCoupon', {
             where: { id: couponId },
         })
 
-        if (!prevCoupon) throw new Error('유효하지 않은 쿠폰 번호입니다')
-        if (prevCoupon.userId) throw new Error('이미 등록된 쿠폰 입니다')
+        if (!prevCoupon) throw errorFormat('유효하지 않은 쿠폰 번호입니다')
+        if (prevCoupon.userId) throw errorFormat('이미 등록된 쿠폰 입니다')
 
         const coupon = await ctx.prisma.coupon.update({
             where: { id: prevCoupon.id },

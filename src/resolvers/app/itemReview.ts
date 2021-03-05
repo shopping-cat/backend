@@ -1,6 +1,7 @@
 import { intArg, nullable, queryField, stringArg, nonNull, mutationField, list } from "nexus"
 import asyncDelay from "../../utils/asyncDelay"
 import getIUser from "../../utils/getIUser"
+import errorFormat from "../../utils/errorFormat";
 
 // Query - 해당 상품의 리뷰들 가져오기
 export const itemReviews = queryField(t => t.list.field('itemReviews', {
@@ -98,10 +99,10 @@ export const createItemReview = mutationField(t => t.field('createItemReview', {
         })
 
         // 유효성 검사
-        if (!order) throw new Error('존재하지 않는 주문 입니다.')
-        if (user.id !== order.userId) throw new Error('해당 주문에 대해 수정 권한이 없는 계정입니다')
-        if (order.state !== '배송완료') throw new Error('해당 주문은 리뷰를 작성할 수 있는 상태가 아닙니다')
-        if (order.itemReview) throw new Error('이미 리뷰가 작성 되어 있습니다')
+        if (!order) throw errorFormat('존재하지 않는 주문 입니다.')
+        if (user.id !== order.userId) throw errorFormat('해당 주문에 대해 수정 권한이 없는 계정입니다')
+        if (order.state !== '배송완료') throw errorFormat('해당 주문은 리뷰를 작성할 수 있는 상태가 아닙니다')
+        if (order.itemReview) throw errorFormat('이미 리뷰가 작성 되어 있습니다')
 
         // 리뷰 생성
         const itemReview = await ctx.prisma.itemReview.create({
@@ -149,8 +150,8 @@ export const updateItemReview = mutationField(t => t.field('updateItemReview', {
         })
 
         // 유효성 검사
-        if (!prevItemReview) throw new Error('존재하지 않는 리뷰 입니다.')
-        if (user.id !== prevItemReview.userId) throw new Error('해당 주문에 대해 수정 권한이 없는 계정입니다')
+        if (!prevItemReview) throw errorFormat('존재하지 않는 리뷰 입니다.')
+        if (user.id !== prevItemReview.userId) throw errorFormat('해당 주문에 대해 수정 권한이 없는 계정입니다')
 
         // 리뷰 수정
         const itemReview = await ctx.prisma.itemReview.update({

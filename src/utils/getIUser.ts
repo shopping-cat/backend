@@ -1,11 +1,12 @@
 import { Context, prisma } from '../context'
 import { userAuth } from '../lib/firebase'
+import errorFormat from './errorFormat'
 
 
 export const getIUser = async (ctx: Context) => {
     try {
         let token = ctx.expressContext.req.headers.authorization
-        if (!token) throw new Error('No Access')
+        if (!token) throw errorFormat('로그인이 필요한 작업입니다')
 
         token = token.replace('Bearer ', '')
 

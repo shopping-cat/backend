@@ -8,6 +8,7 @@ import getIUser from "../../utils/getIUser"
 import salePrice from "../../utils/salePrice"
 import { MIN_PAYMENT_PRICE } from "../../values"
 import { OrderCouponArg } from "./order"
+import errorFormat from "../../utils/errorFormat";
 
 
 // Query - 주문 조회
@@ -24,8 +25,8 @@ export const payment = queryField(t => t.field('payment', {
         const payment = await ctx.prisma.payment.findUnique({
             where: { id }
         })
-        if (!payment) throw new Error('없는 주문 입니다')
-        if (payment.userId !== user.id) throw new Error('접근 권한이 없는 계정입니다')
+        if (!payment) throw errorFormat('없는 주문 입니다')
+        if (payment.userId !== user.id) throw errorFormat('접근 권한이 없는 계정입니다')
 
         return payment
     }
@@ -78,9 +79,9 @@ export const createPayment = mutationField(t => t.field('createPayment', {
                     refundBankAccount: true
                 }
             })
-            if (!user) throw new Error('권한이 없습니다')
-            if (!user.deliveryInfo) throw new Error('배송지 정보를 입력해주세요')
-            if (!user.refundBankAccount) throw new Error('환불계좌 정보를 입력해주세요')
+            if (!user) throw errorFormat('권한이 없습니다')
+            if (!user.deliveryInfo) throw errorFormat('배송지 정보를 입력해주세요')
+            if (!user.refundBankAccount) throw errorFormat('환불계좌 정보를 입력해주세요')
             // TODO 본인인증
             const uid = `${new Date().getTime()}`
             const cartItems = await ctx.prisma.cartItem.findMany({
@@ -88,7 +89,7 @@ export const createPayment = mutationField(t => t.field('createPayment', {
                 include: { item: true }
             })
             const ordersTemp = []
-            if (cartItems.length === 0) throw new Error('아이템이 존재하지 않습니다')
+            if (cartItems.length === 0) throw errorFormat('아이템이 존재하지 않습니다')
             const name = `${cartItems[0].item.name}${cartItems.length > 1 ? ` 외 ${cartItems.length - 1}가지 상품` : ''}`
 
             // 가격 확인
@@ -125,10 +126,10 @@ export const createPayment = mutationField(t => t.field('createPayment', {
                     if (currentOrderItemCoupons.length > i) {
                         const currentCouponId = currentOrderItemCoupons[i].couponId
                         const coupon = await ctx.prisma.coupon.findUnique({ where: { id: currentCouponId } })
-                        if (!coupon) throw new Error('없는 쿠폰 입니다')
-                        if (coupon.userId !== user.id) throw new Error('사용 불가능한 쿠폰입니다')
-                        if (coupon.orderId) throw new Error('이미 사용된 쿠폰입니다')
-                        if (coupon.period.getTime() < new Date().getTime()) throw new Error('사용기간이 지난 쿠폰입니다')
+                        if (!coupon) throw errorFormat('없는 쿠폰 입니다')
+                        if (coupon.userId !== user.id) throw errorFormat('사용 불가능한 쿠폰입니다')
+                        if (coupon.orderId) throw errorFormat('이미 사용된 쿠폰입니다')
+                        if (coupon.period.getTime() < new Date().getTime()) throw errorFormat('사용기간이 지난 쿠폰입니다')
                         if (coupon.salePrice) {
                             basicPrice -= coupon.salePrice
                             if (basicPrice < 0) basicPrice = 0 // clamp
@@ -166,11 +167,11 @@ export const createPayment = mutationField(t => t.field('createPayment', {
                 })
             }
             // 포인트 적용
-            if (point < 0) throw new Error('포인트는 0보다 작을수 없습니다')
+            if (point < 0) throw errorFormat('포인트는 0보다 작을수 없습니다')
             totalPrice -= point
-            if (price + deliveryPrice + extraDeliveryPrice - itemSale - couponSale - pointSale !== totalPrice) throw new Error('계산 오류가 발생했습니다')
-            if (totalPrice !== amount) throw new Error('계산 오류가 발생했습니다')
-            if (totalPrice < MIN_PAYMENT_PRICE) throw new Error(`최소 결제 금액은 ${MIN_PAYMENT_PRICE}원 입니다`)
+            if (price + deliveryPrice + extraDeliveryPrice - itemSale - couponSale - pointSale !== totalPrice) throw errorFormat('계산 오류가 발생했습니다')
+            if (totalPrice !== amount) throw errorFormat('계산 오류가 발생했습니다')
+            if (totalPrice < MIN_PAYMENT_PRICE) throw errorFormat(`최소 결제 금액은 ${MIN_PAYMENT_PRICE}원 입니다`)
 
             const payment = await ctx.prisma.payment.create({
                 data: {
@@ -237,7 +238,7 @@ export const completePayment = mutationField(t => t.field('completePayment', {
                     imp_secret: process.env.IAMPORT_REST_API_SECRET
                 }
             )
-            if (!getToken?.data?.response) throw new Error('결제정보 조회 실패')
+            if (!getToken?.data?.response) throw errorFormat('결제정보 조회 실패')
             const { access_token } = getToken.data.response // 인증 토큰
 
             const getPaymentData = await axios.get(
@@ -246,17 +247,17 @@ export const completePayment = mutationField(t => t.field('completePayment', {
                     headers: { 'Authorization': access_token }
                 }
             )
-            if (!getPaymentData?.data?.response) throw new Error('결제정보 조회 실패')
+            if (!getPaymentData?.data?.response) throw errorFormat('결제정보 조회 실패')
             const paymentData = getPaymentData.data.response
 
             const prevPayment = await ctx.prisma.payment.findUnique({
                 where: { id: merchant_uid },
                 include: { orders: true }
             })
-            if (!prevPayment) throw new Error('없는 주문 입니다')
-            if (prevPayment.userId !== user.id) throw new Error('접근 권한이 없는 계정입니다')
-            if (prevPayment.state !== '결제요청') throw new Error('잘못된 주문 절차입니다')
-            if (prevPayment.totalPrice !== paymentData.amount) throw new Error('위조된 결제시도')
+            if (!prevPayment) throw errorFormat('없는 주문 입니다')
+            if (prevPayment.userId !== user.id) throw errorFormat('접근 권한이 없는 계정입니다')
+            if (prevPayment.state !== '결제요청') throw errorFormat('잘못된 주문 절차입니다')
+            if (prevPayment.totalPrice !== paymentData.amount) throw errorFormat('위조된 결제시도')
             // 오류 처리
 
             switch (paymentData.status) {
@@ -334,10 +335,10 @@ export const cancelPayment = mutationField(t => t.field('cancelPayment', {
                 orders: { include: { coupons: true } }
             }
         })
-        if (!payment) throw new Error('존재하지 않는 주문 입니다')
-        if (payment.userId !== user.id) throw new Error('접근 권한 없는 계정입니다')
-        if (payment.state !== '구매접수' && payment.state !== '입금대기') throw new Error(`${payment.state} 상태에서는 취소하실 수 없습니다`)
-        if (payment.paymentMethod === '가상계좌' && !refundBankAccount) throw new Error('환불계좌 등록이 필요합니다. 프로필에서 변경가능합니다')
+        if (!payment) throw errorFormat('존재하지 않는 주문 입니다')
+        if (payment.userId !== user.id) throw errorFormat('접근 권한 없는 계정입니다')
+        if (payment.state !== '구매접수' && payment.state !== '입금대기') throw errorFormat(`${payment.state} 상태에서는 취소하실 수 없습니다`)
+        if (payment.paymentMethod === '가상계좌' && !refundBankAccount) throw errorFormat('환불계좌 등록이 필요합니다. 프로필에서 변경가능합니다')
 
 
         // 현금 환불 TODO 가상계좌 처리
@@ -348,7 +349,7 @@ export const cancelPayment = mutationField(t => t.field('cancelPayment', {
                 imp_secret: process.env.IAMPORT_REST_API_SECRET
             }
         )
-        if (!getToken?.data?.response) throw new Error('결제정보 조회 실패')
+        if (!getToken?.data?.response) throw errorFormat('결제정보 조회 실패')
         const { access_token } = getToken.data.response // 인증 토큰
         const getCancelData = await axios.post(
             'https://api.iamport.kr/payments/cancel',
@@ -366,7 +367,7 @@ export const cancelPayment = mutationField(t => t.field('cancelPayment', {
             }
         )
         const { response } = getCancelData.data // 환불 결과
-        if (!response) throw new Error(getCancelData.data.message || '환불 오류')
+        if (!response) throw errorFormat(getCancelData.data.message || '환불 오류')
 
         // 쿠폰 해제
         for (const order of payment.orders) {

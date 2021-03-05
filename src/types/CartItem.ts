@@ -1,6 +1,8 @@
 import { objectType } from 'nexus'
+import errorFormat from '../utils/errorFormat'
 import salePrice from '../utils/salePrice'
 import { ItemOption } from './Item'
+
 
 export const CartItem = objectType({
     name: 'CartItem',
@@ -16,7 +18,7 @@ export const CartItem = objectType({
         t.int('optionedSaledPrice', {  // 세일 + 옵션 적용 가격
             resolve: async ({ num, option, itemId }, _, ctx) => {
                 const item = await ctx.prisma.item.findUnique({ where: { id: itemId } })
-                if (!item) throw new Error
+                if (!item) throw errorFormat('존재하지 않는 아이템 입니다')
                 const itemOption = item.option as ItemOption
                 const cartItemOption = option as CartItemOption
                 let optionedPrice = salePrice(item.sale, item.price)
@@ -30,7 +32,7 @@ export const CartItem = objectType({
         t.int('optionedPrice', { // 옵션 적용 가격
             resolve: async ({ num, option, itemId }, _, ctx) => {
                 const item = await ctx.prisma.item.findUnique({ where: { id: itemId } })
-                if (!item) throw new Error
+                if (!item) throw errorFormat('존재하지 않는 아이템 입니다')
                 const itemOption = item.option as ItemOption
                 const cartItemOption = option as CartItemOption
                 let optionedPrice = item.price

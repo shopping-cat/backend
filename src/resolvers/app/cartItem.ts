@@ -2,6 +2,7 @@ import { arg, booleanArg, intArg, list, mutationField, nonNull, nullable, queryF
 import { prisma } from "../../context"
 import { ItemOption } from "../../types"
 import asyncDelay from "../../utils/asyncDelay"
+import errorFormat from "../../utils/errorFormat"
 import getIUser from "../../utils/getIUser"
 
 export const cartItems = queryField(t => t.list.field('cartItems', {
@@ -35,15 +36,15 @@ export const addToCart = mutationField(t => t.field('addToCart', {
 
             // 상품 유효 확인
             const item = await ctx.prisma.item.findUnique({ where: { id: itemId } })
-            if (!item) throw new Error('없는 상품입니다')
+            if (!item) throw errorFormat('없는 상품입니다')
 
             // option 유효 확인
             const itemOption = item.option as ItemOption
-            if ((!itemOption && option) || (itemOption && !option)) throw new Error('옵션 선택이 잘못되었습니다')
+            if ((!itemOption && option) || (itemOption && !option)) throw errorFormat('옵션 선택이 잘못되었습니다')
             if (itemOption && option) {
-                if (option.length !== itemOption.data.length) throw new Error('옵션 선택이 잘못되었습니다')
+                if (option.length !== itemOption.data.length) throw errorFormat('옵션 선택이 잘못되었습니다')
                 for (let i = 0; i < option.length; i++) {
-                    if (option[i] >= itemOption.data[i].optionDetails.length) throw new Error('옵션 선택이 잘못되었습니다')
+                    if (option[i] >= itemOption.data[i].optionDetails.length) throw errorFormat('옵션 선택이 잘못되었습니다')
                 }
             }
             const jsonOption = option ? { data: option } : null // json type으로 전환
