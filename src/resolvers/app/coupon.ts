@@ -22,7 +22,10 @@ export const coupons = queryField(t => t.list.field('coupons', {
             where: {
                 userId: user.id,
                 period: { gt: new Date() },
-                orderId: null
+                OR: [
+                    { order: { payment: { state: { in: ['결제요청', '결제취소', '취소처리', '오류처리'] } } } },
+                    { orderId: null }
+                ]
             },
             orderBy: {
                 createdAt: 'desc'

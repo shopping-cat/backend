@@ -59,6 +59,32 @@ export const orderCalculate = queryField('orderCalculate', {
                 where: { id: { in: cartItemIds } },
                 include: { item: true }
             })
+            // 결제안된 쿠폰 해제
+            const prevCoupons = await ctx.prisma.coupon.findMany({
+                where: {
+                    userId: user.id,
+                    period: { gt: new Date() },
+                    order: { payment: { state: { in: ['결제요청', '결제취소', '취소처리', '오류처리'] } } }
+                },
+                include: {
+                    order: { include: { coupons: true } },
+                }
+            })
+            for (const { order } of prevCoupons) {
+                if (!order) continue
+                if (order.coupons.length === 0) continue
+                try {
+                    await ctx.prisma.order.update({
+                        where: { id: order.id },
+                        data: {
+                            coupons: { disconnect: order.coupons.map(v => ({ id: v.id })) }
+                        }
+                    })
+                } catch (error) {
+                    console.error(error)
+                }
+            }
+
 
             // 아이템별 적용 가능 쿠폰 리스트 찾기
             const orderItemsCoupons: { orderItemId: number, coupons: Coupon[] }[] = []
