@@ -59,6 +59,15 @@ export const kakaoTokenToFirebaseToken = queryField(t => t.nonNull.field('kakaoT
     }
 }))
 
+export const withdrawalUser = mutationField(t => t.field('withdrawalUser', {
+    type: 'User',
+    resolve: async (_, { }, ctx) => {
+        await asyncDelay()
+        const user = await getIUser(ctx)
+        return user
+    }
+}))
+
 // MUTATION - 환불 계좌 업데이트
 export const updateRefundBankAccount = mutationField(t => t.field('updateRefundBankAccount', {
     type: 'User',
