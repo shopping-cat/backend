@@ -14,7 +14,6 @@ model User {
   point             Int                    @default(0)
   name              String?
   photo             String?
-  phone             String?
   cart              CartItem[]
   coupons           Coupon[]
   pointReceipts     PointReceipt[]
@@ -22,11 +21,21 @@ model User {
   orders            Order[]
   payments          Payment[]
   searchKeywords    SearchKeyword[]
+  certificatedInfo  UserCertificatedInfo?
   refundBankAccount UserRefundBankAccount?
   deliveryInfo      UserDeliveryInfo?
   itemLikes         Item[]
   itemReviewLikes   ItemReview[]           @relation("UserItemReviewLike")
   itemReviewUnlikes ItemReview[]           @relation("UserItemReviewUnlike")
+}
+
+model UserCertificatedInfo {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  phone     String
+  name      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model UserRefundBankAccount {

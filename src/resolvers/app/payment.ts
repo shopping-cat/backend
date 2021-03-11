@@ -76,14 +76,16 @@ export const createPayment = mutationField(t => t.field('createPayment', {
                 where: { id },
                 include: {
                     deliveryInfo: true,
-                    refundBankAccount: true
+                    refundBankAccount: true,
+                    certificatedInfo: true
                 }
             })
             if (!user) throw errorFormat('권한이 없습니다')
+            if (!user.certificatedInfo) throw errorFormat('본인인증이 필요합니다')
             if (!user.deliveryInfo) throw errorFormat('배송지 정보를 입력해주세요')
             if (!user.refundBankAccount) throw errorFormat('환불계좌 정보를 입력해주세요')
-            // TODO 본인인증
-            const uid = `${new Date().getTime()}`
+
+            const uid = `${new Date().getTime()}` // payment id & 주문번호
             const cartItems = await ctx.prisma.cartItem.findMany({
                 where: { id: { in: cartItemIds }, userId: user.id },
                 include: { item: true }

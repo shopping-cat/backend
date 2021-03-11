@@ -14,6 +14,7 @@ export const User = objectType({
         t.model.orders()
         t.model.pointReceipts()
         t.model.payments()
+        t.model.certificatedInfo()
         t.model.refundBankAccount()
         t.model.deliveryInfo()
         t.model.itemReviews()
@@ -58,14 +59,13 @@ export const User = objectType({
         // oauth에 있는 유저 정보들 가져오기
         t.field('userDetail', {
             type: 'UserDetail',
-            resolve: async ({ id, phone }) => {
+            resolve: async ({ id }) => {
                 try {
                     const { email, displayName, photoURL } = await userAuth.getUser(id)
                     return {
                         email: email || null,
                         displayName: displayName || null,
-                        photoURL: photoURL || null,
-                        phone: phone || null
+                        photoURL: photoURL || null
                     }
                 } catch (error) {
                     console.log(error)
@@ -73,8 +73,7 @@ export const User = objectType({
                     return {
                         email: null,
                         displayName: null,
-                        photoURL: null,
-                        phone: null
+                        photoURL: null
                     }
                 }
             }
@@ -89,6 +88,5 @@ export const UserDetail = objectType({
         t.nullable.string('email') // 이메일
         t.nullable.string('displayName') // 이름
         t.nullable.string('photoURL') // 프로필 사진
-        t.nullable.string('phone') // 전화번호
     }
 })
