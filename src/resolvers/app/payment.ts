@@ -261,7 +261,7 @@ export const completePayment = mutationField(t => t.field('completePayment', {
             if (prevPayment.state !== '결제요청') throw errorFormat('잘못된 주문 절차입니다')
             if (prevPayment.totalPrice !== paymentData.amount) throw errorFormat('위조된 결제시도')
             // 오류 처리
-
+            console.log(paymentData.status)
             switch (paymentData.status) {
                 case 'failed': // 오류
                     await ctx.prisma.payment.update({
