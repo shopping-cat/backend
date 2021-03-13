@@ -24,8 +24,8 @@ export const Item = objectType({
         t.model.reviews()
         t.model.cart()
         t.model.userLikes()
-        t.model.partner()
-        t.model.partnerId()
+        t.model.shop()
+        t.model.shopId()
         t.list.field('bestItemReviews', {
             type: 'ItemReview',
             resolve: async ({ id }, _, ctx) => {

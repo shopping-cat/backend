@@ -194,8 +194,8 @@ Table Item {
   requireInformation Json [not null]
   html String [not null]
   category String [not null]
-  partnerId Int [not null]
-  partner Partner [not null]
+  shopId Int [not null, default: 1]
+  shop Shop [not null]
   cart CartItem
   images ItemImage
   reviews ItemReview
@@ -211,15 +211,35 @@ Table ItemImage {
   item Item [not null]
 }
 
+Table Shop {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  shopName String [unique, not null]
+  shopImage String [not null]
+  items Item
+  seller Seller
+  partner Partner
+}
+
+Table Seller {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  licenseNumber String [unique, not null]
+  email String [unique, not null]
+  shopId Int [not null]
+  shop Shop [not null]
+}
+
 Table Partner {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
+  licenseNumber String [unique, not null]
   email String [unique, not null]
-  shopName String [unique, not null]
-  licenseNumber String [not null]
-  shopImage String [not null]
-  items Item
+  shopId Int [not null]
+  shop Shop [not null]
 }
 
 Table ItemToUser {
@@ -277,6 +297,10 @@ Ref: ItemReview.userId > User.id
 
 Ref: ItemReviewImage.itemReviewId > ItemReview.id
 
-Ref: Item.partnerId > Partner.id
+Ref: Item.shopId > Shop.id
 
 Ref: ItemImage.itemId > Item.id
+
+Ref: Seller.shopId - Shop.id
+
+Ref: Partner.shopId - Shop.id

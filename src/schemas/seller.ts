@@ -5,15 +5,15 @@ import { GraphQLScalarType } from 'graphql'
 
 import * as types from '../types'
 import * as scalars from '../scalars'
-import * as resolvers from '../resolvers/partner'
+import * as resolvers from '../resolvers/seller'
 
 
 export const schema = makeSchema({
     types: [scalars, types, resolvers],
     shouldGenerateArtifacts: process.env.NODE_ENV === 'development',
     outputs: {
-        schema: __dirname + '/../../schema_partner.graphql',
-        typegen: __dirname + '/../generated/nexus_partner.ts',
+        schema: __dirname + '/../../schema_seller.graphql',
+        typegen: __dirname + '/../generated/nexus_seller.ts',
     },
     contextType: {
         module: require.resolve('../context'),

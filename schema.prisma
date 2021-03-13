@@ -228,15 +228,15 @@ model Item {
   requireInformation Json
   html               String
   category           String
-  partnerId          Int
-  partner            Partner      @relation(fields: [partnerId], references: [id])
+  shopId             Int          @default(1)
+  shop               Shop         @relation(fields: [shopId], references: [id])
   cart               CartItem[]
   images             ItemImage[]
   reviews            ItemReview[]
   orders             Order[]
   userLikes          User[]
 
-  @@index([partnerId], name: "partnerId")
+  @@index([shopId], name: "shopId")
 }
 
 model ItemImage {
@@ -249,15 +249,35 @@ model ItemImage {
   @@index([itemId], name: "itemId")
 }
 
+model Shop {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  shopName  String   @unique
+  shopImage String
+  items     Item[]
+  seller    Seller?
+  partner   Partner?
+}
+
+model Seller {
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  licenseNumber String   @unique
+  email         String   @unique
+  shopId        Int
+  shop          Shop     @relation(fields: [shopId], references: [id])
+}
+
 model Partner {
   id            Int      @id @default(autoincrement())
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  licenseNumber String   @unique
   email         String   @unique
-  shopName      String   @unique
-  licenseNumber String
-  shopImage     String
-  items         Item[]
+  shopId        Int
+  shop          Shop     @relation(fields: [shopId], references: [id])
 }
 
 enum ItemState {

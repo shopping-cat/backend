@@ -9,7 +9,7 @@ import { createContext } from './context'
 
 import { schema as adminSchema } from './schemas/admin'
 import { schema as appSchema } from './schemas/app'
-import { schema as partnerSchema } from './schemas/partner'
+import { schema as sellerSchema } from './schemas/seller'
 
 require('dotenv').config()
 
@@ -46,8 +46,8 @@ const appServer = new ApolloServer({
   playground: process.env.NODE_ENV === 'production' ? false : { settings: { "request.credentials": 'include' } }
 })
 
-const partnerServer = new ApolloServer({
-  schema: partnerSchema,
+const sellerServer = new ApolloServer({
+  schema: sellerSchema,
   context: createContext,
   uploads: { maxFileSize: 10 * 1024 * 1024, maxFiles: 10 },
   playground: process.env.NODE_ENV === 'production' ? false : { settings: { "request.credentials": 'include' } }
@@ -65,9 +65,9 @@ appServer.applyMiddleware({
   cors: false
 })
 
-partnerServer.applyMiddleware({
+sellerServer.applyMiddleware({
   app,
-  path: '/graphql/partner',
+  path: '/graphql/seller',
   cors: false
 })
 
@@ -75,5 +75,5 @@ partnerServer.applyMiddleware({
 const port = process.env.NODE_ENV === 'production' ? 80 : 8080
 
 app.listen({ port }, () => {
-  console.log(`🚀  Server ready at [http://localhost:${port}${adminServer.graphqlPath}, http://localhost:${port}${appServer.graphqlPath}, http://localhost:${port}${partnerServer.graphqlPath}]`)
+  console.log(`🚀  Server ready at [http://localhost:${port}${adminServer.graphqlPath}, http://localhost:${port}${appServer.graphqlPath}, http://localhost:${port}${sellerServer.graphqlPath}]`)
 })

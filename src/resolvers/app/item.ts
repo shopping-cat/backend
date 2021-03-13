@@ -157,9 +157,7 @@ export const shopItems = queryField(t => t.list.field('shopItems', {
         const items = await ctx.prisma.item.findMany({
             take: limit,
             skip: offset,
-            where: {
-                partnerId: shopId
-            },
+            where: { shopId },
             orderBy: {
                 createdAt: orderBy === '최신순' ? 'desc' : undefined,
                 likeNum: orderBy === '인기순' ? 'desc' : undefined

@@ -3,7 +3,7 @@
   "scripts": {
     "dev": "ts-node-dev --tree-kill --no-notify --respawn --transpile-only src/server.ts",
     "dev:migrate": "prisma migrate dev --preview-feature",
-    "generate": "npm -s run generate:prisma && npm -s run generate:nexus:app && npm -s run generate:nexus:admin && npm -s run generate:nexus:partner",
+    "generate": "npm -s run generate:prisma && npm -s run generate:nexus:app && npm -s run generate:nexus:admin && npm -s run generate:nexus:seller",
     "studio": "prisma studio",
     "build": "npm -s run clean && npm -s run generate && tsc",
     "start": "cross-env NODE_ENV=production node dist/server",
@@ -13,7 +13,7 @@
     "generate:prisma": "prisma generate",
     "generate:nexus:app": "cross-env NODE_ENV=development ts-node --transpile-only src/schemas/app",
     "generate:nexus:admin": "cross-env NODE_ENV=development ts-node --transpile-only src/schemas/admin",
-    "generate:nexus:partner": "cross-env NODE_ENV=development ts-node --transpile-only src/schemas/partner"
+    "generate:nexus:seller": "cross-env NODE_ENV=development ts-node --transpile-only src/schemas/seller"
   },
   "dependencies": {
     "@google-cloud/storage": "^5.8.0",

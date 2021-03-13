@@ -1,7 +1,7 @@
 import { intArg, nullable, objectType, stringArg } from "nexus"
 
-export const Partner = objectType({
-    name: 'Partner',
+export const Seller = objectType({
+    name: 'Seller',
     definition(t) {
         t.model.id()
         t.model.createdAt()
