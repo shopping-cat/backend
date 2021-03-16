@@ -1,5 +1,24 @@
 import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable, list } from "nexus"
-import getIUser from "../../utils/getIUser"
+import getISeller from "../../utils/getISeller"
+
+export const item = queryField(t => t.field('item', {
+    type: 'Item',
+    args: {
+        id: nonNull(intArg())
+    },
+    resolve: async (_, { id }, ctx) => {
+        try {
+            const seller = await getISeller(ctx)
+            const item = await ctx.prisma.item.findUnique({
+                where: { id }
+            })
+            return item
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
+}))
 
 // Mutation - 아이템 생성
 export const createItem = mutationField(t => t.field('createItem', {

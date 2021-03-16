@@ -7,3 +7,4 @@ dist
 schema.graphql
 **.graphql
 *AccountKey.json
+serviceAccountKey*.json
