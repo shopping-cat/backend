@@ -15,7 +15,7 @@ export const getISeller = async (ctx: Context) => {
         console.log(email)
 
         const seller = await prisma.seller.findUnique({ where: { email } })
-        if (!seller) errorFormat('다시 로그인해주세요')
+        if (!seller) throw errorFormat('다시 로그인해주세요')
         return seller
     } catch (error) {
         console.log(error)

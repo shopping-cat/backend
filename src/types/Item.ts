@@ -146,6 +146,8 @@ export const Item = objectType({
     }
 })
 
+export type ItemState = 'sale' | 'stop' | 'noStock'
+
 export type ItemOption = {
     data: {
         optionGroupName: string

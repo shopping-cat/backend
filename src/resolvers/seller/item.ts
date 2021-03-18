@@ -20,6 +20,25 @@ export const item = queryField(t => t.field('item', {
     }
 }))
 
+export const items = queryField(t => t.list.field('items', {
+    type: 'Item',
+    resolve: async (_, { }, ctx) => {
+        try {
+            const seller = await getISeller(ctx)
+            const item = await ctx.prisma.item.findMany({
+                where: { shopId: seller.shopId },
+                orderBy: {
+                    createdAt: 'desc'
+                }
+            })
+            return item
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
+}))
+
 // Mutation - 아이템 생성
 export const createItem = mutationField(t => t.field('createItem', {
     type: 'Item',
