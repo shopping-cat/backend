@@ -8,3 +8,5 @@ export const COOKIE_PATH = '/'
 
 
 export const MIN_PAYMENT_PRICE = 300 // 원
+
+export const ERROR_SIMBOL = 'ERRORMESSAGE@'

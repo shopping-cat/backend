@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser'
 import hpp from 'hpp'
 import helmet from 'helmet'
 import cors from 'cors'
+import formatError from './utils/formatError'
 import { createContext } from './context'
 
 import { schema as adminSchema } from './schemas/admin'
@@ -31,32 +32,33 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser(process.env.COOKIE_SECRET))
 app.get('/isRunning', (req, res) => res.send('Server is running')) // 서버 구동 확인용 router
 
+const ApolloServerDefaultConfig = {
+  context: createContext,
+  formatError,
+  uploads: { maxFileSize: 10 * 1024 * 1024, maxFiles: 10 },
+  playground: process.env.NODE_ENV === 'production' ? false : { settings: { "request.credentials": 'include' } }
+}
+
 // apollo 설정
 const adminServer = new ApolloServer({
   schema: adminSchema,
-  context: createContext,
-  uploads: { maxFileSize: 10 * 1024 * 1024, maxFiles: 10 },
-  playground: process.env.NODE_ENV === 'production' ? false : { settings: { "request.credentials": 'include' } }
+  ...ApolloServerDefaultConfig
 })
 
 const appServer = new ApolloServer({
   schema: appSchema,
-  context: createContext,
-  uploads: { maxFileSize: 10 * 1024 * 1024, maxFiles: 10 },
-  playground: process.env.NODE_ENV === 'production' ? false : { settings: { "request.credentials": 'include' } }
+  ...ApolloServerDefaultConfig
 })
 
 const sellerServer = new ApolloServer({
   schema: sellerSchema,
-  context: createContext,
-  uploads: { maxFileSize: 10 * 1024 * 1024, maxFiles: 10 },
-  playground: process.env.NODE_ENV === 'production' ? false : { settings: { "request.credentials": 'include' } }
+  ...ApolloServerDefaultConfig
 })
 
 adminServer.applyMiddleware({
   app,
   path: '/graphql/admin',
-  cors: false
+  cors: false,
 })
 
 appServer.applyMiddleware({

@@ -11,7 +11,6 @@ export const item = queryField(t => t.field('item', {
     },
     resolve: async (_, { id }, ctx) => {
         try {
-            // const seller = await getISeller(ctx)
             const item = await ctx.prisma.item.findUnique({
                 where: { id }
             })
@@ -68,7 +67,6 @@ export const createItem = mutationField(t => t.field('createItem', {
     resolve: async (_, { createItemInput }, ctx) => {
 
         const { category1, category2, html, name, option, price, images, requireInformation, deliveryPrice, extraDeliveryPrice } = createItemInput
-
 
         //option 형식 검사
         if (option) {
