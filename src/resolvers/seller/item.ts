@@ -76,10 +76,19 @@ export const createItem = mutationField(t => t.field('createItem', {
                     for (const optionDetail of data.optionDetails) {
                         if (!('name' in optionDetail)) throw new Error
                         if (!('price' in optionDetail)) throw new Error
+                        price * optionDetail.price
                     }
                 }
             } catch (error) {
                 throw errorFormat('옵션이 형식에 맞지 않습니다.')
+            }
+            // 옵션당 0원짜리 있는지 확인
+            for (const data of option.data) {
+                let price = 1
+                for (const optionDetail of data.optionDetails) {
+                    price *= optionDetail.price
+                }
+                if (price !== 0) throw errorFormat('옵션당 0원짜리 옵션 세부는 필수 입니다.')
             }
         }
 
