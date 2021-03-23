@@ -18,7 +18,8 @@ export const Item = objectType({
         t.model.option()
         t.model.requireInformation()
         t.model.html()
-        t.model.category()
+        t.model.category1()
+        t.model.category2()
         t.model.images()
         t.model.orders()
         t.model.reviews()
@@ -143,10 +144,23 @@ export const Item = objectType({
                 return (Date.now() - createdAt.getTime()) > 1000 // TODO
             }
         })
+        t.field('totalOrderNum', {
+            type: 'Int',
+            resolve: async ({ id }, { }, ctx) => {
+                const count = await ctx.prisma.order.count({
+                    where: {
+                        itemId: id,
+                        state: '구매확정'
+                    }
+                })
+
+                return count
+            }
+        })
     }
 })
 
-export type ItemState = 'sale' | 'stop' | 'noStock'
+export type ItemState = 'sale' | 'stop' | 'noStock' | 'requestCreate' | 'requestUpdate'
 
 export type ItemOption = {
     data: {
@@ -155,5 +169,13 @@ export type ItemOption = {
             name: string
             price: number
         }[]
+    }[]
+} | null
+
+
+export type ItemRequireInformation = {
+    data: {
+        title: string
+        content: string
     }[]
 } | null

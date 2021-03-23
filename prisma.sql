@@ -184,7 +184,7 @@ Table Item {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   likeNum Int [not null, default: 0]
-  state ItemState [not null, default: 'sale']
+  state ItemState [not null, default: 'requestCreate']
   deliveryPrice Int [not null]
   extraDeliveryPrice Int [not null]
   name String [not null]
@@ -193,9 +193,11 @@ Table Item {
   option Json
   requireInformation Json [not null]
   html String [not null]
-  category String [not null]
+  category1 String
+  category2 String
   shopId Int [not null, default: 1]
   shop Shop [not null]
+  updateTargetItemId Int
   cart CartItem
   images ItemImage
   reviews ItemReview
@@ -207,8 +209,8 @@ Table ItemImage {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   uri String [not null]
-  itemId Int [not null]
-  item Item [not null]
+  itemId Int
+  item Item
 }
 
 Table Shop {
@@ -261,6 +263,8 @@ Enum ItemState {
   sale
   stop
   noStock
+  requestCreate
+  requestUpdate
 }
 
 Ref: UserCertificatedInfo.userId - User.id

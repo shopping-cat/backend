@@ -218,7 +218,7 @@ model Item {
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
   likeNum            Int          @default(0)
-  state              ItemState    @default(sale)
+  state              ItemState    @default(requestCreate)
   deliveryPrice      Int
   extraDeliveryPrice Int
   name               String
@@ -227,9 +227,11 @@ model Item {
   option             Json?
   requireInformation Json
   html               String
-  category           String
+  category1          String?
+  category2          String?
   shopId             Int          @default(1)
   shop               Shop         @relation(fields: [shopId], references: [id])
+  updateTargetItemId Int? // 업데이트 요청할때 아이템 아이디 저장해둘 곳
   cart               CartItem[]
   images             ItemImage[]
   reviews            ItemReview[]
@@ -243,8 +245,8 @@ model ItemImage {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   uri       String
-  itemId    Int
-  item      Item     @relation(fields: [itemId], references: [id])
+  itemId    Int?
+  item      Item?    @relation(fields: [itemId], references: [id])
 
   @@index([itemId], name: "itemId")
 }
@@ -284,4 +286,6 @@ enum ItemState {
   sale
   stop
   noStock
+  requestCreate
+  requestUpdate
 }

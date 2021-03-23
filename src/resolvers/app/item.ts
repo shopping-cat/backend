@@ -22,13 +22,14 @@ export const item = queryField(t => t.nullable.field('item', {
 export const filteredItems = queryField(t => t.list.field('filteredItems', {
     type: 'Item',
     args: {
-        category: nullable(stringArg({ default: '전체' })),
+        category1: nullable(stringArg()),
+        category2: nullable(stringArg()),
         keyword: nullable(stringArg()),
         orderBy: nullable(stringArg({ default: '인기순' })),
         offset: nullable(intArg({ default: 0 })),
         limit: nullable(intArg({ default: 15 }))
     },
-    resolve: async (_, { category, keyword, orderBy, offset, limit }, ctx) => {
+    resolve: async (_, { category1, category2, keyword, orderBy, offset, limit }, ctx) => {
         if (keyword) { // 최근 검색어에 추가
             const user = await getIUser(ctx)
             const searchKeyword = await ctx.prisma.searchKeyword.findFirst({
@@ -53,7 +54,8 @@ export const filteredItems = queryField(t => t.list.field('filteredItems', {
             take: limit,
             skip: offset,
             where: {
-                category: category && category !== '전체' ? category : undefined,
+                category1,
+                category2,
                 name: keyword ? { contains: keyword } : undefined,
                 state: 'sale'
             },
@@ -72,13 +74,15 @@ export const filteredItems = queryField(t => t.list.field('filteredItems', {
 export const filteredItemsCount = queryField(t => t.field('filteredItemsCount', {
     type: 'Int',
     args: {
-        category: nullable(stringArg({ default: '전체' })),
+        category1: nullable(stringArg()),
+        category2: nullable(stringArg()),
         keyword: nullable(stringArg()),
     },
-    resolve: async (_, { category, keyword }, ctx) => {
+    resolve: async (_, { category1, category2, keyword }, ctx) => {
         const count = await ctx.prisma.item.count({
             where: {
-                category: category && category !== '전체' ? category : undefined,
+                category1,
+                category2,
                 name: keyword ? { contains: keyword } : undefined,
                 state: 'sale'
             }
@@ -91,11 +95,12 @@ export const filteredItemsCount = queryField(t => t.field('filteredItemsCount', 
 export const zzimItems = queryField(t => t.list.field('zzimItems', {
     type: 'Item',
     args: {
-        category: nullable(stringArg({ default: '전체' })),
+        category1: nullable(stringArg()),
+        category2: nullable(stringArg()),
         offset: nullable(intArg({ default: 0 })),
         limit: nullable(intArg({ default: 15 }))
     },
-    resolve: async (_, { category, offset, limit }, ctx) => {
+    resolve: async (_, { category1, category2, offset, limit }, ctx) => {
         await asyncDelay()
         console.log('zzim')
         const { id } = await getIUser(ctx)
@@ -106,7 +111,8 @@ export const zzimItems = queryField(t => t.list.field('zzimItems', {
                     take: limit,
                     skip: offset,
                     where: {
-                        category: category && category !== '전체' ? category : undefined,
+                        category1,
+                        category2,
                     }
                 }
             }
@@ -157,7 +163,10 @@ export const shopItems = queryField(t => t.list.field('shopItems', {
         const items = await ctx.prisma.item.findMany({
             take: limit,
             skip: offset,
-            where: { shopId },
+            where: {
+                shopId,
+                state: 'sale'
+            },
             orderBy: {
                 createdAt: orderBy === '최신순' ? 'desc' : undefined,
                 likeNum: orderBy === '인기순' ? 'desc' : undefined
