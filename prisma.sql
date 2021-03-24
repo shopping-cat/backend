@@ -184,7 +184,7 @@ Table Item {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   likeNum Int [not null, default: 0]
-  state ItemState [not null, default: 'requestCreate']
+  state String [not null, default: '상품등록요청']
   deliveryPrice Int [not null]
   extraDeliveryPrice Int [not null]
   name String [not null]
@@ -257,14 +257,6 @@ Table UserItemReviewLike {
 Table UserItemReviewUnlike {
   itemreviewunlikesId Int [ref: > ItemReview.id]
   userunlikesId String [ref: > User.id]
-}
-
-Enum ItemState {
-  sale
-  stop
-  noStock
-  requestCreate
-  requestUpdate
 }
 
 Ref: UserCertificatedInfo.userId - User.id

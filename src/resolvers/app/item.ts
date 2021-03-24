@@ -57,7 +57,7 @@ export const filteredItems = queryField(t => t.list.field('filteredItems', {
                 category1,
                 category2,
                 name: keyword ? { contains: keyword } : undefined,
-                state: 'sale'
+                state: '판매중'
             },
             orderBy: {
                 price: orderBy === '저가순' ? 'asc' : orderBy === '고가순' ? 'desc' : undefined,
@@ -84,7 +84,7 @@ export const filteredItemsCount = queryField(t => t.field('filteredItemsCount', 
                 category1,
                 category2,
                 name: keyword ? { contains: keyword } : undefined,
-                state: 'sale'
+                state: '판매중'
             }
         })
         return count
@@ -113,6 +113,7 @@ export const zzimItems = queryField(t => t.list.field('zzimItems', {
                     where: {
                         category1,
                         category2,
+                        state: { in: ['판매중', '재고없음'] }
                     }
                 }
             }
@@ -137,7 +138,7 @@ export const recommendedItems = queryField(t => t.list.field('recommendedItems',
             take: limit,
             skip: offset,
             where: {
-                state: 'sale',
+                state: '판매중',
                 sale: { gte: 10 }
             },
             orderBy: {
@@ -165,7 +166,7 @@ export const shopItems = queryField(t => t.list.field('shopItems', {
             skip: offset,
             where: {
                 shopId,
-                state: 'sale'
+                state: '판매중'
             },
             orderBy: {
                 createdAt: orderBy === '최신순' ? 'desc' : undefined,

@@ -218,7 +218,7 @@ model Item {
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
   likeNum            Int          @default(0)
-  state              ItemState    @default(requestCreate)
+  state              String       @default("상품등록요청")
   deliveryPrice      Int
   extraDeliveryPrice Int
   name               String
@@ -280,12 +280,4 @@ model Partner {
   email         String   @unique
   shopId        Int
   shop          Shop     @relation(fields: [shopId], references: [id])
-}
-
-enum ItemState {
-  sale
-  stop
-  noStock
-  requestCreate
-  requestUpdate
 }

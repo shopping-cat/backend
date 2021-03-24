@@ -108,7 +108,7 @@ export const createItem = mutationField(t => t.field('createItem', {
         const item = await ctx.prisma.item.create({
             data: {
                 shop: { connect: { id: seller.shopId } },
-                state: 'requestCreate',
+                state: '상품등록요청',
                 name,
                 category1,
                 category2,

@@ -160,7 +160,12 @@ export const Item = objectType({
     }
 })
 
-export type ItemState = 'sale' | 'stop' | 'noStock' | 'requestCreate' | 'requestUpdate'
+export type ItemState =
+    '판매중' |
+    '판매중지' |
+    '재고없음' |
+    '상품등록요청' |
+    '상품수정요청'
 
 export type ItemOption = {
     data: {
