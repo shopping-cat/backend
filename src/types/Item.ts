@@ -20,6 +20,9 @@ export const Item = objectType({
         t.model.html()
         t.model.category1()
         t.model.category2()
+        t.model.targetItemId()
+        t.model.targetItem()
+        t.model.updateItem()
         t.model.images()
         t.model.orders()
         t.model.reviews()
@@ -164,8 +167,7 @@ export type ItemState =
     '판매중' |
     '판매중지' |
     '재고없음' |
-    '상품등록요청' |
-    '상품수정요청'
+    '상품등록요청'
 
 export type ItemOption = {
     data: {

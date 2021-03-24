@@ -195,9 +195,11 @@ Table Item {
   html String [not null]
   category1 String
   category2 String
-  shopId Int [not null, default: 1]
-  shop Shop [not null]
-  updateTargetItemId Int
+  shopId Int
+  targetItemId Int
+  targetItem Item
+  updateItem Item
+  shop Shop
   cart CartItem
   images ItemImage
   reviews ItemReview
@@ -292,6 +294,8 @@ Ref: ItemReview.orderId - Order.id
 Ref: ItemReview.userId > User.id
 
 Ref: ItemReviewImage.itemReviewId > ItemReview.id
+
+Ref: Item.targetItemId - Item.id
 
 Ref: Item.shopId > Shop.id
 

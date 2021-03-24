@@ -229,9 +229,11 @@ model Item {
   html               String
   category1          String?
   category2          String?
-  shopId             Int          @default(1)
-  shop               Shop         @relation(fields: [shopId], references: [id])
-  updateTargetItemId Int? // 업데이트 요청할때 아이템 아이디 저장해둘 곳
+  shopId             Int?
+  targetItemId       Int?
+  targetItem         Item?        @relation(fields: [targetItemId], references: [id]) // 업데이트 예정 상품에 서식
+  updateItem         Item?        @relation("ItemToItem") // 본체에 서식
+  shop               Shop?        @relation(fields: [shopId], references: [id])
   cart               CartItem[]
   images             ItemImage[]
   reviews            ItemReview[]
