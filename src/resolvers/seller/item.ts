@@ -309,3 +309,56 @@ export const updateItemState = mutationField(t => t.field('updateItemState', {
         return item
     }
 }))
+
+export const deleteItem = mutationField(t => t.field('deleteItem', {
+    type: 'Item',
+    args: {
+        id: nonNull(intArg())
+    },
+    resolve: async (_, { id }, ctx) => {
+
+        const seller = await getISeller(ctx)
+        const item = await ctx.prisma.item.findUnique({
+            where: { id }
+        })
+        if (!item) throw errorFormat('존재하지 않는 상품입니다')
+        if (item.shopId !== seller.shopId) throw errorFormat('접근 권한이 없습니다')
+        if (item.state !== '상품등록요청') throw errorFormat('상품등록요청 상태일때만 삭제가 가능합니다. 게시를 중단하고 싶으시면 상품관리 탭에서 상태를 판매중지로 바꿔주세요.')
+
+        const deletedItem = await ctx.prisma.item.delete({
+            where: {
+                id
+            }
+        })
+
+        return deletedItem
+    }
+}))
+
+export const deleteItemUpdate = mutationField(t => t.field('deleteItemUpdate', {
+    type: 'Item',
+    args: {
+        id: nonNull(intArg())
+    },
+    resolve: async (_, { id }, ctx) => {
+
+        const seller = await getISeller(ctx)
+        const item = await ctx.prisma.item.findUnique({
+            where: { id },
+            include: {
+                updateItem: true
+            }
+        })
+        if (!item) throw errorFormat('존재하지 않는 상품입니다')
+        if (item.shopId !== seller.shopId) throw errorFormat('접근 권한이 없습니다')
+        if (!item.updateItem) throw errorFormat('삭제할 데이터가 없습니다')
+
+        const deletedItem = await ctx.prisma.item.delete({
+            where: {
+                id: item.updateItem.id
+            }
+        })
+
+        return deletedItem
+    }
+}))
