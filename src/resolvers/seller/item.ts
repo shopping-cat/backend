@@ -285,3 +285,27 @@ export const updateItem = mutationField(t => t.field('updateItem', {
         return updatedItem
     }
 }))
+
+export const updateItemState = mutationField(t => t.field('updateItemState', {
+    type: 'Item',
+    args: {
+        id: nonNull(intArg()),
+        state: nonNull(stringArg())
+    },
+    resolve: async (_, { id, state }, ctx) => {
+
+        const seller = await getISeller(ctx)
+        const prevItem = await ctx.prisma.item.findUnique({
+            where: { id }
+        })
+        if (!prevItem) throw errorFormat('존재하지 않는 상품입니다')
+        if (prevItem.shopId !== seller.shopId) throw errorFormat('접근 권한이 없습니다')
+        if (!(['판매중', '판매중지', '재고없음'].includes(state))) throw errorFormat('형식에 맞지 않습니다')
+
+        const item = await ctx.prisma.item.update({
+            where: { id },
+            data: { state }
+        })
+        return item
+    }
+}))
