@@ -8,6 +8,8 @@ export const Shop = objectType({
         t.model.updatedAt()
         t.model.shopName()
         t.model.shopImage()
+        t.model.items()
+        t.model.seller()
         t.field('rate', {
             type: 'Float',
             resolve: async ({ id }, _, ctx) => {
