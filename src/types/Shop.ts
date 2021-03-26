@@ -32,5 +32,101 @@ export const Shop = objectType({
                 return ctx.prisma.item.count({ where: { shopId: id } })
             }
         })
+        t.field('newOrderNum', {
+            type: 'Int',
+            resolve: ({ id }, _, ctx) => {
+                return ctx.prisma.order.count({
+                    where: {
+                        item: { shopId: id },
+                        state: '구매접수',
+                        payment: { state: '정상처리' }
+                    }
+                })
+            }
+        })
+        t.field('onDeliveryOrderNum', {
+            type: 'Int',
+            resolve: ({ id }, _, ctx) => {
+                return ctx.prisma.order.count({
+                    where: {
+                        item: { shopId: id },
+                        state: '배송중',
+                        payment: { state: '정상처리' }
+                    }
+                })
+            }
+        })
+        t.field('completedDeliveryOrderNum', {
+            type: 'Int',
+            resolve: ({ id }, _, ctx) => {
+                return ctx.prisma.order.count({
+                    where: {
+                        item: { shopId: id },
+                        state: '배송완료',
+                        payment: { state: '정상처리' }
+                    }
+                })
+            }
+        })
+        t.field('confirmedOrderNum', {
+            type: 'Int',
+            resolve: ({ id }, _, ctx) => {
+                return ctx.prisma.order.count({
+                    where: {
+                        item: { shopId: id },
+                        state: '구매확정',
+                        payment: { state: '정상처리' }
+                    }
+                })
+            }
+        })
+        t.field('refundRequestOrderNum', {
+            type: 'Int',
+            resolve: ({ id }, _, ctx) => {
+                return ctx.prisma.order.count({
+                    where: {
+                        item: { shopId: id },
+                        state: '환불중',
+                        payment: { state: '정상처리' }
+                    }
+                })
+            }
+        })
+        t.field('exchangeRequestOrderNum', {
+            type: 'Int',
+            resolve: ({ id }, _, ctx) => {
+                return ctx.prisma.order.count({
+                    where: {
+                        item: { shopId: id },
+                        state: '교환중',
+                        payment: { state: '정상처리' }
+                    }
+                })
+            }
+        })
+        t.field('refundedOrderNum', {
+            type: 'Int',
+            resolve: ({ id }, _, ctx) => {
+                return ctx.prisma.order.count({
+                    where: {
+                        item: { shopId: id },
+                        state: '환불처리',
+                        payment: { state: '정상처리' }
+                    }
+                })
+            }
+        })
+        t.field('exchangedOrderNum', {
+            type: 'Int',
+            resolve: ({ id }, _, ctx) => {
+                return ctx.prisma.order.count({
+                    where: {
+                        item: { shopId: id },
+                        state: '교환처리',
+                        payment: { state: '정상처리' }
+                    }
+                })
+            }
+        })
     }
 })

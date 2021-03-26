@@ -48,6 +48,7 @@ export const uploadShopImage = mutationField(t => t.field('uploadShopImage', {
         image: nonNull('Upload')
     },
     resolve: async (_, { image }, ctx) => {
+        await getISeller(ctx)
         const uri = await uploadImage(image, 'shop-image/')
         return uri
     }
