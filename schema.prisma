@@ -131,6 +131,8 @@ model Order {
   itemOption             Json? // { data:string[] }
   //
   deliveryCompletionDate DateTime? // 배송 도착일
+  deliveryNumber         String?
+  deliveryCompany        String?
   reason                 String? // 환불 | 교환 사유
   cartItemId             Int // 카트에서 삭제할때 사용할 일회성 아이디
   userId                 String

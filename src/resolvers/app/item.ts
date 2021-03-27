@@ -54,8 +54,8 @@ export const filteredItems = queryField(t => t.list.field('filteredItems', {
             take: limit,
             skip: offset,
             where: {
-                category1,
-                category2,
+                category1: category1 || undefined,
+                category2: category2 || undefined,
                 name: keyword ? { contains: keyword } : undefined,
                 state: '판매중'
             },
@@ -81,8 +81,8 @@ export const filteredItemsCount = queryField(t => t.field('filteredItemsCount', 
     resolve: async (_, { category1, category2, keyword }, ctx) => {
         const count = await ctx.prisma.item.count({
             where: {
-                category1,
-                category2,
+                category1: category1 || undefined,
+                category2: category2 || undefined,
                 name: keyword ? { contains: keyword } : undefined,
                 state: '판매중'
             }
@@ -111,8 +111,8 @@ export const zzimItems = queryField(t => t.list.field('zzimItems', {
                     take: limit,
                     skip: offset,
                     where: {
-                        category1,
-                        category2,
+                        category1: category1 || undefined,
+                        category2: category2 || undefined,
                         state: { in: ['판매중', '재고없음'] }
                     }
                 }

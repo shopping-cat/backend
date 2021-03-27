@@ -113,6 +113,8 @@ Table Order {
   num Int [not null]
   itemOption Json
   deliveryCompletionDate DateTime
+  deliveryNumber String
+  deliveryCompany String
   reason String
   cartItemId Int [not null]
   userId String [not null]
