@@ -1,5 +1,4 @@
 import { objectType } from "nexus"
-import salePrice from "../utils/salePrice"
 
 export const Order = objectType({
     name: 'Order',
@@ -11,6 +10,7 @@ export const Order = objectType({
         t.model.itemPrice()
         t.model.itemOptionPrice()
         t.model.itemSale()
+        t.model.totalPrice()
         t.model.num()
         t.model.itemOption()
         t.model.deliveryCompletionDate()
@@ -34,7 +34,7 @@ export const Order = objectType({
                 return [...itemOption.data, `${num}개`].map((v, i) => `${i !== 0 ? ' | ' : ''}${v}`).join('')
             }
         })
-        t.field('totalPrice', {
+        t.field('totalItemPrice', { // 쿠폰 세일 제외하고 기본가격 + 옵션가만
             type: 'Int',
             resolve: ({ num, itemPrice, itemSale, itemOptionPrice }) => {
                 return (itemPrice + itemOptionPrice) * num

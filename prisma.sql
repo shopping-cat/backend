@@ -77,7 +77,7 @@ Table Coupon {
   salePercent Int
   salePrice Int
   userId String
-  orderId Int [unique]
+  orderId Int
   order Order
   user User
 }
@@ -112,6 +112,7 @@ Table Order {
   itemSale Int [not null]
   num Int [not null]
   itemOption Json
+  totalPrice Int [not null]
   deliveryCompletionDate DateTime
   deliveryNumber String
   deliveryCompany String
@@ -134,6 +135,8 @@ Table Payment {
   name String [not null]
   state String [not null]
   cancelReason String
+  cancelPoint Int [not null, default: 0]
+  cancelPrice Int [not null, default: 0]
   paymentMethod String [not null]
   price Int [not null]
   deliveryPrice Int [not null]

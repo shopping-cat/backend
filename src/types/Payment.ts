@@ -9,6 +9,8 @@ export const Payment = objectType({
         t.model.name()
         t.model.state()
         t.model.cancelReason()
+        t.model.cancelPoint()
+        t.model.cancelPrice()
         t.model.paymentMethod()
         t.model.price()
         t.model.deliveryPrice()

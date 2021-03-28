@@ -90,9 +90,10 @@ model Coupon {
   salePercent  Int?
   salePrice    Int?
   userId       String?
-  orderId      Int?     @unique
+  orderId      Int?
   order        Order?   @relation(fields: [orderId], references: [id])
   user         User?    @relation(fields: [userId], references: [id])
+
 }
 
 model PointReceipt {
@@ -129,6 +130,7 @@ model Order {
   itemSale               Int // 세일률
   num                    Int
   itemOption             Json? // { data:string[] }
+  totalPrice             Int // 총 금액 
   //
   deliveryCompletionDate DateTime? // 배송 도착일
   deliveryNumber         String?
@@ -156,6 +158,8 @@ model Payment {
   state              String
   // 결제 취소
   cancelReason       String?
+  cancelPoint        Int      @default(0) // 취소된 포인트
+  cancelPrice        Int      @default(0) // 취소된 금액
   // 결제 정보
   paymentMethod      String
   price              Int
