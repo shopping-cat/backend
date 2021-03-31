@@ -129,6 +129,7 @@ model Order {
   itemOption             Json?
   deliveryCompletionDate DateTime?
   reason                 String?
+  reasonDetail           String?     @db.Text
   cartItemId             Int
   userId                 String
   paymentId              String
@@ -184,7 +185,7 @@ model ItemReview {
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   likeNum     Int               @default(0)
-  content     String?
+  content     String?           @db.Text
   rate        Int
   userId      String
   itemId      Int
@@ -223,7 +224,7 @@ model Item {
   sale               Int          @default(0)
   option             Json?
   requireInformation Json
-  html               String
+  html               String       @db.Text
   shopId             Int?
   category1          String?
   category2          String?
@@ -251,14 +252,16 @@ model ItemImage {
 }
 
 model Shop {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  shopName  String   @unique
-  shopImage String
-  items     Item[]
-  partner   Partner?
-  seller    Seller?
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  shopName     String   @unique
+  shopImage    String
+  refundInfo   String?  @db.Text
+  exchangeInfo String?  @db.Text
+  items        Item[]
+  partner      Partner?
+  seller       Seller?
 }
 
 model Seller {

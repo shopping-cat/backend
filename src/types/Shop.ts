@@ -8,6 +8,8 @@ export const Shop = objectType({
         t.model.updatedAt()
         t.model.shopName()
         t.model.shopImage()
+        t.model.exchangeInfo()
+        t.model.refundInfo()
         t.model.items()
         t.model.seller()
         t.field('rate', {

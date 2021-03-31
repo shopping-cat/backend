@@ -33,40 +33,6 @@ export const Item = objectType({
         t.list.field('bestItemReviews', {
             type: 'ItemReview',
             resolve: async ({ id }, _, ctx) => {
-                // await ctx.prisma.itemReview.create({
-                //     data: {
-                //         item: { connect: { id } },
-                //         rate: 4,
-                //         user: { connect: { id: 'KAKAO:1554573780' } },
-                //         order: {
-                //             create: {
-                //                 address: "address",
-                //                 user: { connect: { id: 'KAKAO:1554573780' } },
-                //                 item: {
-                //                     connect: { id }
-                //                 },
-                //                 payment: {
-                //                     create: {
-                //                         cashReceipt: '',
-                //                         couponSale: 1,
-                //                         itemSale: 1,
-                //                         paymentMethod: '',
-                //                         pointSale: 1,
-                //                         price: 123,
-                //                         state: '',
-                //                         totalPrice: 123,
-                //                         user: { connect: { id: 'KAKAO:1554573780' } }
-                //                     }
-                //                 },
-                //                 phone: '1231',
-                //                 pointSale: 123,
-                //                 state: ''
-                //             }
-                //         },
-                //         content: '빠른 배송! 조립은 30분 정도 걸린 것 같아요 여자 혼자 가능합니다 원목 상태나 마무리 상태도 너무 좋아요 우리집 텐텐 통통이 너무 좋아합니다! 저희집 천장이 낮아서 캣폴 설치되는 상품이 많이없어서 정말 한참을 찾다가 그린웨일을 알게 되었는데 상담도 잘 해주시고 설치 방법도 잘 설명해주셨어요! 너무 감사합니다!',
-                //         images: { create: [{ uri: 'https://gdimg.gmarket.co.kr/674434951/still/600?ver=1575534345' }, { uri: 'https://gdimg.gmarket.co.kr/674434951/still/600?ver=1575534345' }, { uri: 'https://gdimg.gmarket.co.kr/674434951/still/600?ver=1575534345' }, { uri: 'https://gdimg.gmarket.co.kr/674434951/still/600?ver=1575534345' }, { uri: 'https://gdimg.gmarket.co.kr/674434951/still/600?ver=1575534345' }, { uri: 'https://gdimg.gmarket.co.kr/674434951/still/600?ver=1575534345' }, { uri: 'https://gdimg.gmarket.co.kr/674434951/still/600?ver=1575534345' }, { uri: 'https://gdimg.gmarket.co.kr/674434951/still/600?ver=1575534345' }, { uri: 'https://gdimg.gmarket.co.kr/674434951/still/600?ver=1575534345' }, { uri: 'https://gdimg.gmarket.co.kr/674434951/still/600?ver=1575534345' }, { uri: 'https://gdimg.gmarket.co.kr/674434951/still/600?ver=1575534345' }] }
-                //     }
-                // })
                 return ctx.prisma.itemReview.findMany({
                     take: 5,
                     orderBy: { likeNum: 'desc' },
