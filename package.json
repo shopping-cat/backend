@@ -2,7 +2,7 @@
   "name": "back",
   "scripts": {
     "dev": "ts-node-dev --tree-kill --no-notify --respawn --transpile-only src/server.ts",
-    "dev:migrate": "prisma migrate dev --preview-feature",
+    "migrate": "prisma migrate dev",
     "generate": "npm -s run generate:prisma && npm -s run generate:nexus:app && npm -s run generate:nexus:admin && npm -s run generate:nexus:seller",
     "studio": "prisma studio",
     "build": "npm -s run clean && npm -s run generate && tsc",
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@google-cloud/storage": "^5.8.0",
-    "@prisma/client": "2.14.0",
+    "@prisma/client": "^2.20.1",
     "apollo-server-express": "^2.17.0",
     "axios": "^0.21.1",
     "bcrypt": "^5.0.0",
@@ -39,12 +39,11 @@
     "migrate": "^1.7.0",
     "morgan": "^1.10.0",
     "nexus": "^1.0.0",
-    "nexus-plugin-prisma": "^0.28.0",
+    "nexus-plugin-prisma": "^0.33.0",
     "typescript": "^4.0.2",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@prisma/cli": "2.14.0",
     "@types/bcrypt": "^3.0.0",
     "@types/cookie-parser": "^1.4.2",
     "@types/graphql": "^14.5.0",
@@ -58,6 +57,7 @@
     "graphql-import": "^1.0.2",
     "graphql-import-node": "0.0.4",
     "nodemon": "^2.0.4",
+    "prisma": "^2.20.1",
     "prisma-dbml-generator": "^0.4.0",
     "ts-node": "^9.0.0",
     "ts-node-dev": "^1.0.0-pre.62"

@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-generator dbml {
-  provider   = "prisma-dbml-generator"
-  output     = "./"
-  outputName = "prisma.sql"
-}
-
 model User {
   id                String                 @id
   createdAt         DateTime               @default(now())
@@ -22,14 +16,14 @@ model User {
   photo             String?
   cart              CartItem[]
   coupons           Coupon[]
-  pointReceipts     PointReceipt[]
   itemReviews       ItemReview[]
   orders            Order[]
   payments          Payment[]
+  pointReceipts     PointReceipt[]
   searchKeywords    SearchKeyword[]
   certificatedInfo  UserCertificatedInfo?
-  refundBankAccount UserRefundBankAccount?
   deliveryInfo      UserDeliveryInfo?
+  refundBankAccount UserRefundBankAccount?
   itemLikes         Item[]
   itemReviewLikes   ItemReview[]           @relation("UserItemReviewLike")
   itemReviewUnlikes ItemReview[]           @relation("UserItemReviewUnlike")
@@ -40,7 +34,7 @@ model UserCertificatedInfo {
   createdAt DateTime @default(now())
   phone     String
   name      String
-  userId    String
+  userId    String   @unique
   user      User     @relation(fields: [userId], references: [id])
 }
 
@@ -94,6 +88,8 @@ model Coupon {
   order        Order?   @relation(fields: [orderId], references: [id])
   user         User?    @relation(fields: [userId], references: [id])
 
+  @@index([orderId], name: "orderId")
+  @@index([userId], name: "userId")
 }
 
 model PointReceipt {
@@ -103,12 +99,14 @@ model PointReceipt {
   point     Int
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId], name: "userId")
 }
 
 model CartItem {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-  option    Json? // { data:number[] }
+  option    Json?
   itemId    Int
   userId    String
   num       Int
@@ -124,28 +122,27 @@ model Order {
   createdAt              DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
   state                  String
-  // 상품 상세
-  itemPrice              Int // 기본가격
-  itemOptionPrice        Int // 옵션 가격
-  itemSale               Int // 세일률
+  itemPrice              Int
+  itemOptionPrice        Int
+  itemSale               Int
   num                    Int
-  itemOption             Json? // { data:string[] }
-  totalPrice             Int // 총 금액 
-  //
-  deliveryCompletionDate DateTime? // 배송 도착일
-  deliveryNumber         String?
-  deliveryCompany        String?
-  reason                 String? // 환불 | 교환 사유
-  cartItemId             Int // 카트에서 삭제할때 사용할 일회성 아이디
+  itemOption             Json?
+  deliveryCompletionDate DateTime?
+  reason                 String?
+  cartItemId             Int
   userId                 String
   paymentId              String
   itemId                 Int
-  coupons                Coupon[]
-  itemReview             ItemReview?
+  deliveryNumber         String?
+  deliveryCompany        String?
+  totalPrice             Int
+  item                   Item        @relation(fields: [itemId], references: [id])
   payment                Payment     @relation(fields: [paymentId], references: [id])
   user                   User        @relation(fields: [userId], references: [id])
-  item                   Item        @relation(fields: [itemId], references: [id])
+  coupons                Coupon[]
+  itemReview             ItemReview?
 
+  @@index([itemId], name: "itemId")
   @@index([paymentId], name: "paymentId")
   @@index([userId], name: "userId")
 }
@@ -156,11 +153,7 @@ model Payment {
   updatedAt          DateTime @updatedAt
   name               String
   state              String
-  // 결제 취소
   cancelReason       String?
-  cancelPoint        Int      @default(0) // 취소된 포인트
-  cancelPrice        Int      @default(0) // 취소된 금액
-  // 결제 정보
   paymentMethod      String
   price              Int
   deliveryPrice      Int
@@ -169,19 +162,17 @@ model Payment {
   couponSale         Int
   pointSale          Int
   totalPrice         Int
-  // 배송지 정보
   address            String
   addressName        String
   addressPhone       String
   postCode           String
-  // 배송 매모
   deliveryMemo       String
-  // 가상계좌 정보
   vBankNum           String?
   vBankDate          String?
   vBankName          String?
-  //
   userId             String
+  cancelPoint        Int      @default(0)
+  cancelPrice        Int      @default(0)
   user               User     @relation(fields: [userId], references: [id])
   orders             Order[]
 
@@ -233,14 +224,14 @@ model Item {
   option             Json?
   requireInformation Json
   html               String
+  shopId             Int?
   category1          String?
   category2          String?
-  shopId             Int?
-  targetItemId       Int?
-  targetItem         Item?        @relation(fields: [targetItemId], references: [id]) // 업데이트 예정 상품에 서식
-  updateItem         Item?        @relation("ItemToItem") // 본체에 서식
+  targetItemId       Int?         @unique
   shop               Shop?        @relation(fields: [shopId], references: [id])
+  targetItem         Item?        @relation("ItemToItem", fields: [targetItemId], references: [id])
   cart               CartItem[]
+  updateItem         Item?        @relation("ItemToItem")
   images             ItemImage[]
   reviews            ItemReview[]
   orders             Order[]
@@ -266,8 +257,8 @@ model Shop {
   shopName  String   @unique
   shopImage String
   items     Item[]
-  seller    Seller?
   partner   Partner?
+  seller    Seller?
 }
 
 model Seller {
@@ -276,7 +267,7 @@ model Seller {
   updatedAt     DateTime @updatedAt
   licenseNumber String   @unique
   email         String   @unique
-  shopId        Int
+  shopId        Int      @unique
   shop          Shop     @relation(fields: [shopId], references: [id])
 }
 
@@ -286,6 +277,6 @@ model Partner {
   updatedAt     DateTime @updatedAt
   licenseNumber String   @unique
   email         String   @unique
-  shopId        Int
+  shopId        Int      @unique
   shop          Shop     @relation(fields: [shopId], references: [id])
 }
