@@ -332,7 +332,10 @@ export const cancelOrder = mutationField(t => t.field('cancelOrder', {
             where: { id },
             data: {
                 reason,
-                state: '상점취소처리'
+                state: '상점취소처리',
+                refundMethod: '결제취소',
+                refundPoint: cancelPoint,
+                refundPrice: cancelPrice
             }
         })
         return order
@@ -438,7 +441,10 @@ export const refundOrder = mutationField(t => t.field('refundOrder', {
         const order = await ctx.prisma.order.update({
             where: { id },
             data: {
-                state: '환불처리'
+                state: '환불처리',
+                refundMethod: '결제취소',
+                refundPoint: cancelPoint,
+                refundPrice: cancelPrice
             }
         })
         return order

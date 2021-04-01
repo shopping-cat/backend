@@ -128,8 +128,12 @@ model Order {
   num                    Int
   itemOption             Json?
   deliveryCompletionDate DateTime?
+  // 교환 환불 취소
   reason                 String?
   reasonDetail           String?     @db.Text
+  refundPrice            Int         @default(0) // 환불된 가격
+  refundPoint            Int         @default(0) // 환불된 포인트
+  refundMethod           String?
   cartItemId             Int
   userId                 String
   paymentId              String

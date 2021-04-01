@@ -1,11 +1,26 @@
 import { Coupon } from "@prisma/client";
-import { inputObjectType, intArg, list, nonNull, nullable, objectType, queryField, stringArg } from "nexus";
+import { inputObjectType, intArg, list, mutationField, nonNull, nullable, objectType, queryField, stringArg } from "nexus";
 import { type } from "os";
 import { CartItemOption, ItemOption } from "../../types";
 import asyncDelay from "../../utils/asyncDelay";
+import errorFormat from "../../utils/errorFormat";
 import getIUser from "../../utils/getIUser";
 import salePrice from "../../utils/salePrice";
 import { MIN_PAYMENT_PRICE } from "../../values";
+
+export const order = queryField('order', {
+    type: 'Order',
+    args: {
+        id: intArg()
+    },
+    resolve: async (_, { id }, ctx) => {
+        await asyncDelay()
+        return ctx.prisma.order.findUnique({
+            where: { id }
+        })
+    }
+})
+
 
 export const OrderItemsCoupons = objectType({
     name: 'OrderItemsCoupons',
@@ -190,5 +205,33 @@ export const orderCalculate = queryField('orderCalculate', {
 })
 
 
+export const refundOrder = mutationField('refundOrder', {
+    type: 'Order',
+    args: {
+        input: nonNull(inputObjectType({
+            name: 'RefundOrderInput',
+            definition: (t) => {
+                t.nonNull.int('id')
+                t.nonNull.string('reason')
+                t.nonNull.string('reasonDetail')
+            }
+        }))
+    },
+    resolve: async (_, { input }, ctx) => {
+        const { id, reason, reasonDetail } = input
+        await asyncDelay()
+        const prevOrder = await ctx.prisma.order.findUnique({ where: { id } })
+        if (!prevOrder) throw errorFormat('존재하지 않는 주문 입니다')
+        if (prevOrder.state !== '배송완료') throw errorFormat(`${prevOrder.state}상태에서는 환불이 불가능합니다.`)
 
-// const orderRequest
+        const order = await ctx.prisma.order.update({
+            where: { id },
+            data: {
+                reason,
+                reasonDetail,
+                state: '환불중'
+            }
+        })
+        return order
+    }
+})

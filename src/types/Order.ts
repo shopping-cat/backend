@@ -1,4 +1,6 @@
 import { objectType } from "nexus"
+import errorFormat from "../utils/errorFormat"
+import salePrice from "../utils/salePrice"
 
 export const Order = objectType({
     name: 'Order',
@@ -18,6 +20,9 @@ export const Order = objectType({
         t.model.deliveryCompany()
         t.model.reason()
         t.model.reasonDetail()
+        t.model.refundPrice()
+        t.model.refundPoint()
+        t.model.refundMethod()
         t.model.userId()
         t.model.itemId()
         t.model.paymentId()
@@ -39,6 +44,34 @@ export const Order = objectType({
             type: 'Int',
             resolve: ({ num, itemPrice, itemSale, itemOptionPrice }) => {
                 return (itemPrice + itemOptionPrice) * num
+            }
+        })
+        t.field('expectationRefundPrice', {
+            type: 'Int',
+            async resolve({ paymentId, totalPrice }, { }, ctx) {
+                const payment = await ctx.prisma.payment.findUnique({ where: { id: paymentId } })
+                if (!payment) throw new Error
+                const refundAblePrice = payment.totalPrice - payment.cancelPrice
+                const refundPrice = refundAblePrice >= totalPrice ? totalPrice : refundAblePrice
+                return refundPrice
+            }
+        })
+        t.field('expectationRefundPoint', {
+            type: 'Int',
+            async resolve({ paymentId, totalPrice }, { }, ctx) {
+                const payment = await ctx.prisma.payment.findUnique({ where: { id: paymentId } })
+                if (!payment) throw new Error
+                const refundAblePrice = payment.totalPrice - payment.cancelPrice
+                const refundPoint = refundAblePrice >= totalPrice ? 0 : totalPrice - refundAblePrice
+                return refundPoint
+            }
+        })
+        t.field('expectationRefundMethod', {
+            type: 'String',
+            async resolve({ paymentId }, { }, ctx) {
+                const payment = await ctx.prisma.payment.findUnique({ where: { id: paymentId } })
+                if (!payment) return '오류'
+                else return '결제취소' // default value
             }
         })
     }
