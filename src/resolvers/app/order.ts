@@ -235,3 +235,34 @@ export const refundOrder = mutationField('refundOrder', {
         return order
     }
 })
+
+export const exchangeOrder = mutationField('exchangeOrder', {
+    type: 'Order',
+    args: {
+        input: nonNull(inputObjectType({
+            name: 'ExchangeOrderInput',
+            definition: (t) => {
+                t.nonNull.int('id')
+                t.nonNull.string('reason')
+                t.nonNull.string('reasonDetail')
+            }
+        }))
+    },
+    resolve: async (_, { input }, ctx) => {
+        const { id, reason, reasonDetail } = input
+        await asyncDelay()
+        const prevOrder = await ctx.prisma.order.findUnique({ where: { id } })
+        if (!prevOrder) throw errorFormat('존재하지 않는 주문 입니다')
+        if (prevOrder.state !== '배송완료') throw errorFormat(`${prevOrder.state}상태에서는 환불이 불가능합니다.`)
+
+        const order = await ctx.prisma.order.update({
+            where: { id },
+            data: {
+                reason,
+                reasonDetail,
+                state: '교환중'
+            }
+        })
+        return order
+    }
+})
