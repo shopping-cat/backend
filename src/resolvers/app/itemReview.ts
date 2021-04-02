@@ -4,6 +4,19 @@ import getIUser from "../../utils/getIUser"
 import errorFormat from "../../utils/errorFormat";
 
 // Query - 해당 상품의 리뷰들 가져오기
+export const itemReview = queryField(t => t.field('itemReview', {
+    type: 'ItemReview',
+    args: {
+        id: nonNull(intArg()),
+    },
+    resolve: async (_, { id }, ctx) => {
+        await asyncDelay()
+        const itemReview = await ctx.prisma.itemReview.findUnique({ where: { id } })
+        return itemReview
+    }
+}))
+
+// Query - 해당 상품의 리뷰들 가져오기
 export const itemReviews = queryField(t => t.list.field('itemReviews', {
     type: 'ItemReview',
     args: {
