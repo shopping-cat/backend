@@ -1,5 +1,5 @@
 import { Item } from "@prisma/client"
-import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable, extendType, booleanArg, list } from "nexus"
+import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable, extendType, booleanArg, list, objectType } from "nexus"
 import asyncDelay from "../../utils/asyncDelay"
 import errorFormat from "../../utils/errorFormat"
 import getIUser from "../../utils/getIUser"
@@ -15,6 +15,78 @@ export const item = queryField(t => t.nullable.field('item', {
         return ctx.prisma.item.findUnique({
             where: { id }
         })
+    }
+}))
+
+export const homeItemType = objectType({
+    name: 'homeItemsType',
+    definition: (t) => {
+        t.nonNull.string('type')
+        t.nonNull.string('title')
+        t.nullable.list.field('items', {
+            type: 'Item'
+        })
+    }
+})
+
+export const homeItems = queryField(t => t.list.field('homeItems', {
+    type: homeItemType,
+    resolve: async (_, { }, ctx) => {
+        await asyncDelay()
+        const list = []
+        list.push({
+            type: 'itemList',
+            title: '오늘 인기 상품',
+            items: await ctx.prisma.item.findMany({
+                where: { state: '판매중' },
+                orderBy: { likeNum: 'desc' },
+                take: 10,
+            })
+        })
+        list.push({
+            type: 'itemList',
+            title: '광고',
+            items: await ctx.prisma.item.findMany({
+                where: { state: '판매중' },
+                orderBy: { likeNum: 'asc' },
+                take: 10
+            })
+        })
+        list.push({
+            type: 'itemList',
+            title: '최근 본 상품',
+            items: await ctx.prisma.item.findMany({
+                where: { state: '판매중' },
+                orderBy: {
+                    createdAt: 'desc'
+                },
+                take: 10
+            })
+        })
+        list.push({
+            type: 'itemList',
+            title: '신규 세일',
+            items: await ctx.prisma.item.findMany({
+                where: { state: '판매중' },
+                orderBy: {
+                    createdAt: 'asc'
+                },
+                take: 10
+            })
+        })
+        list.push({
+            type: 'itemList',
+            title: '오늘까지 세일',
+            items: await ctx.prisma.item.findMany({
+                where: { state: '판매중' },
+                orderBy: { createdAt: 'asc' },
+                take: 10
+            })
+        })
+
+
+
+        return list.filter(v => v.items.length !== 0)
     }
 }))
 
