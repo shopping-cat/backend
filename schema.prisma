@@ -287,3 +287,12 @@ model Partner {
   shopId        Int      @unique
   shop          Shop     @relation(fields: [shopId], references: [id])
 }
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  period      DateTime
+  bannerImage String
+  html        String   @db.Text
+}

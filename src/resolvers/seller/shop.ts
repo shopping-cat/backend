@@ -1,4 +1,5 @@
 import { inputObjectType, intArg, mutationField, nonNull, queryField } from "nexus"
+import xss from "xss"
 import { uploadImage } from "../../lib/googleCloudStorage"
 import errorFormat from "../../utils/errorFormat"
 import getISeller from "../../utils/getISeller"
@@ -38,8 +39,8 @@ export const updateShop = mutationField(t => t.field('updateShop', {
             data: {
                 shopImage,
                 shopName,
-                refundInfo,
-                exchangeInfo
+                refundInfo: xss(refundInfo),
+                exchangeInfo: xss(exchangeInfo)
             }
         })
         return shop
