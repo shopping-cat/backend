@@ -1,0 +1,23 @@
+FROM node:12.18.3
+
+WORKDIR /app
+
+COPY package.json .
+COPY schema.prisma .
+COPY dist dist/
+COPY gcpServiceAccountKey.json .
+COPY serviceAccountKeySeller.json .
+COPY serviceAccountKeyUser.json .
+# COPY .env .
+
+RUN npm install --production --force
+RUN npm run generate:prisma
+
+EXPOSE 80
+
+CMD ["npm", "run", "pm2"]
+
+# run npm build first
+# docker build -t asia.gcr.io/shoppingcat/dev-back:0.0.1 .
+# docker run --name react-graphql-back-con -p 80:80 gcr.io/react-graphql-295404/back:1.5
+# docker push asia.gcr.io/shoppingcat/dev-back:0.0.1

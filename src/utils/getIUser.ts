@@ -13,7 +13,7 @@ export const getIUser = async (ctx: Context) => {
         const { uid: id } = await userAuth.verifyIdToken(token)
 
         // uid에 해당하는 user filed 가 없다면 유저를 생성
-        let user = await prisma.user.findFirst({ where: { id } })
+        let user = await prisma.user.findUnique({ where: { id } })
         if (!user) {
             user = await prisma.user.create({ data: { id } })
         }
