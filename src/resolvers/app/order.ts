@@ -67,7 +67,6 @@ export const orderCalculate = queryField('orderCalculate', {
     },
     resolve: async (_, { cartItemIds, point, coupons }, ctx) => {
         try {
-            console.log(coupons)
             await asyncDelay()
             const user = await getIUser(ctx)
             const orderItems = await ctx.prisma.cartItem.findMany({

@@ -192,7 +192,6 @@ export const updateItem = mutationField(t => t.field('updateItem', {
 
         const seller = await getISeller(ctx)
 
-        console.log(updateItemInput)
 
         const item = await ctx.prisma.item.findUnique({
             where: { id },

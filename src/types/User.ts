@@ -68,7 +68,6 @@ export const User = objectType({
                         photoURL: photoURL || null
                     }
                 } catch (error) {
-                    console.log(error)
                     // 오류시 속성마다 null 로 리턴
                     return {
                         email: null,

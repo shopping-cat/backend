@@ -1,13 +1,26 @@
 import { GraphQLError } from "graphql"
 import { ERROR_SIMBOL } from "../values"
+import winston from 'winston'
+import { LoggingWinston } from '@google-cloud/logging-winston'
+
+const loggingWinston = new LoggingWinston()
+
+const logger = winston.createLogger({
+    level: 'info',
+    transports: [
+        new winston.transports.Console(),
+        loggingWinston,
+    ]
+})
 
 const formatError = (error: GraphQLError): GraphQLError => {
     let errorMessage = ''
+    logger.error(error.message)
+    console.log(error.message)
     try {
         if (error.message.substr(0, ERROR_SIMBOL.length) === ERROR_SIMBOL) errorMessage = error.message.substr(ERROR_SIMBOL.length)
         else {
             errorMessage = '알 수 없는 오류'
-            console.log(error.message)
         }
     } catch (error) {
         errorMessage = '알 수 없는 오류'

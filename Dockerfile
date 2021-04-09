@@ -18,6 +18,6 @@ EXPOSE 80
 CMD ["npm", "run", "pm2"]
 
 # run npm build first
-# docker build -t asia.gcr.io/shoppingcat/dev-back:0.0.1 .
-# docker run --name react-graphql-back-con -p 80:80 gcr.io/react-graphql-295404/back:1.5
-# docker push asia.gcr.io/shoppingcat/dev-back:0.0.1
+# docker build -t asia.gcr.io/shoppingcat/dev-back:0.0.2 .
+# docker run --name shopping-cat-back-con -p 80:80 asia.gcr.io/shoppingcat/dev-back:0.0.2
+# docker push asia.gcr.io/shoppingcat/dev-back:0.0.2

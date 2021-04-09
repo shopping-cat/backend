@@ -7,7 +7,7 @@
     "studio": "prisma studio",
     "build": "cross-env NODE_ENV=production npm -s run clean && npm -s run generate && tsc",
     "start": " cross-env NODE_ENV=production node dist/server",
-    "pm2": "cross-env NODE_ENV=production pm2 start dist/server.js",
+    "pm2": "cross-env NODE_ENV=production pm2-runtime start dist/server.js",
     "clean": "rm -rf dist",
     "dev:migrate:save": "prisma migrate save --experimental",
     "dev:migrate:up": "prisma migrate up --experimental",
@@ -17,6 +17,7 @@
     "generate:nexus:seller": "cross-env NODE_ENV=development ts-node --transpile-only src/schemas/seller"
   },
   "dependencies": {
+    "@google-cloud/logging-winston": "^4.0.4",
     "@google-cloud/storage": "^5.8.0",
     "@prisma/client": "^2.20.1",
     "apollo-server-express": "^2.17.0",
@@ -34,7 +35,6 @@
     "graphql": "^15.4.0",
     "graphql-scalars": "^1.7.0",
     "graphql-upload": "^11.0.0",
-    "prisma": "^2.20.1",
     "helmet": "^4.2.0",
     "hpp": "^0.2.3",
     "jsonwebtoken": "^8.5.1",
@@ -42,8 +42,10 @@
     "nexus": "^1.0.0",
     "nexus-plugin-prisma": "^0.33.0",
     "pm2": "^4.5.6",
+    "prisma": "^2.20.1",
     "typescript": "^4.0.2",
     "uuid": "^8.3.2",
+    "winston": "^3.3.3",
     "xss": "^1.0.8"
   },
   "devDependencies": {

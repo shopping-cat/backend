@@ -4,7 +4,6 @@ export const BANKS = ['KB국민은행', 'SC제일은행', '경남은행', '광�
 export const BANK_CODES = ['004', '023', '039', '034', '003', '011', '031', '002', '045', '007', '088', '048', '005', '020', '071', '037', '090', '089', '081', '027']
 
 const bankNameToBankCode = (name: string) => {
-    console.log(BANKS.length, BANK_CODES.length)
     const index = BANKS.indexOf(name)
     if (index === -1) throw errorFormat('존재하지 않는 환불계좌입니다')
     return BANK_CODES[index]

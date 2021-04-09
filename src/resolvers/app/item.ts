@@ -174,7 +174,6 @@ export const zzimItems = queryField(t => t.list.field('zzimItems', {
     },
     resolve: async (_, { category1, category2, offset, limit }, ctx) => {
         await asyncDelay()
-        console.log('zzim')
         const { id } = await getIUser(ctx)
         const user = await ctx.prisma.user.findUnique({
             where: { id },
