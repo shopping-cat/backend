@@ -1,14 +1,12 @@
 import { arg, booleanArg, intArg, list, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
 import { prisma } from "../../context"
 import { ItemOption } from "../../types"
-import asyncDelay from "../../utils/asyncDelay"
 import errorFormat from "../../utils/errorFormat"
 import getIUser from "../../utils/getIUser"
 
 export const cartItems = queryField(t => t.list.field('cartItems', {
     type: 'CartItem',
     resolve: async (_, { }, ctx) => {
-        await asyncDelay()
         const user = await getIUser(ctx)
         return ctx.prisma.cartItem.findMany({
             where: { userId: user.id },
@@ -30,7 +28,6 @@ export const addToCart = mutationField(t => t.field('addToCart', {
     },
     resolve: async (_, { itemId, number, option, isDirectBuy }, ctx) => {
         try {
-            await asyncDelay()
             // 유저 식별
             const user = await getIUser(ctx)
 

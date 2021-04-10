@@ -5,7 +5,7 @@ import errorFormat from '../utils/errorFormat';
 
 
 const storage = new Storage()
-const bucket = storage.bucket(process.env.GCLOUD_STORAGE_BUCKET as string)
+const bucket = storage.bucket('shoppingcat')
 
 export const uploadImage = async (file: Promise<FileUpload>, path?: string): Promise<string> => {
     try {

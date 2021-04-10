@@ -1,5 +1,5 @@
 import { intArg, nonNull, nullable, queryField, stringArg } from "nexus"
-import asyncDelay from "../../utils/asyncDelay"
+
 import getISeller from "../../utils/getISeller"
 
 // Query - 해당 상품의 리뷰들 가져오기
@@ -9,7 +9,7 @@ export const itemReviews = queryField(t => t.list.field('itemReviews', {
         itemId: nonNull(intArg())
     },
     resolve: async (_, { itemId }, ctx) => {
-        await asyncDelay()
+
         await getISeller(ctx)
         const itemReviews = await ctx.prisma.itemReview.findMany({
             where: { itemId },

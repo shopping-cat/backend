@@ -2,7 +2,7 @@ import axios from "axios"
 import { intArg, list, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
 import { CartItemOption, ItemOption } from "../../types"
 import addPoint from "../../utils/addPoint"
-import asyncDelay from "../../utils/asyncDelay"
+
 import bankNameToBankCode from "../../utils/bankNameToBankCode"
 import getIUser from "../../utils/getIUser"
 import salePrice from "../../utils/salePrice"
@@ -19,7 +19,7 @@ export const payment = queryField(t => t.field('payment', {
         id: nonNull(stringArg())
     },
     resolve: async (_, { id }, ctx) => {
-        await asyncDelay()
+
 
         const user = await getIUser(ctx)
 
@@ -41,7 +41,7 @@ export const payments = queryField(t => t.list.field('payments', {
         limit: nullable(intArg({ default: 10 }))
     },
     resolve: async (_, { offset, limit }, ctx) => {
-        await asyncDelay()
+
         const user = await getIUser(ctx)
         const payments = await ctx.prisma.payment.findMany({
             skip: offset,
@@ -71,7 +71,7 @@ export const createPayment = mutationField(t => t.field('createPayment', {
     },
     resolve: async (_, { amount, cartItemIds, point, coupons, method, deliveryMemo }, ctx) => {
         try {
-            await asyncDelay()
+
             const { id } = await getIUser(ctx)
             const user = await ctx.prisma.user.findUnique({
                 where: { id },
@@ -233,7 +233,7 @@ export const completePayment = mutationField(t => t.field('completePayment', {
     },
     resolve: async (_, { imp_uid, merchant_uid }, ctx) => {
         try {
-            await asyncDelay()
+
             const user = await getIUser(ctx)
 
             // 결제 정보 조회
@@ -330,7 +330,7 @@ export const cancelPayment = mutationField(t => t.field('cancelPayment', {
         id: nonNull(stringArg())
     },
     resolve: async (_, { id }, ctx) => {
-        await asyncDelay()
+
         const user = await getIUser(ctx)
         const refundBankAccount = await ctx.prisma.userRefundBankAccount.findUnique({
             where: { userId: user.id },

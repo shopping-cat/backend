@@ -1,6 +1,6 @@
 import { Item } from "@prisma/client"
 import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable, extendType, booleanArg, list, objectType } from "nexus"
-import asyncDelay from "../../utils/asyncDelay"
+
 import errorFormat from "../../utils/errorFormat"
 import getIUser from "../../utils/getIUser"
 
@@ -11,7 +11,7 @@ export const item = queryField(t => t.nullable.field('item', {
         id: nonNull(intArg())
     },
     resolve: async (_, { id }, ctx) => {
-        await asyncDelay(1000)
+
         return ctx.prisma.item.findUnique({
             where: { id }
         })
@@ -32,7 +32,7 @@ export const homeItemType = objectType({
 export const homeItems = queryField(t => t.list.field('homeItems', {
     type: homeItemType,
     resolve: async (_, { }, ctx) => {
-        await asyncDelay()
+
         const list = []
         list.push({
             type: 'itemList',
@@ -137,7 +137,7 @@ export const filteredItems = queryField(t => t.list.field('filteredItems', {
                 likeNum: orderBy === '인기순' ? 'desc' : undefined
             }
         })
-        await asyncDelay(1000)
+
         return items
     }
 }))
@@ -173,7 +173,7 @@ export const zzimItems = queryField(t => t.list.field('zzimItems', {
         limit: nullable(intArg({ default: 15 }))
     },
     resolve: async (_, { category1, category2, offset, limit }, ctx) => {
-        await asyncDelay()
+
         const { id } = await getIUser(ctx)
         const user = await ctx.prisma.user.findUnique({
             where: { id },
@@ -216,7 +216,7 @@ export const recommendedItems = queryField(t => t.list.field('recommendedItems',
                 likeNum: 'desc'
             }
         })
-        await asyncDelay(1000)
+
         return items
     }
 }))
@@ -231,7 +231,7 @@ export const shopItems = queryField(t => t.list.field('shopItems', {
         limit: nullable(intArg({ default: 15 }))
     },
     resolve: async (_, { shopId, orderBy, offset, limit }, ctx) => {
-        await asyncDelay()
+
         const items = await ctx.prisma.item.findMany({
             take: limit,
             skip: offset,
@@ -256,7 +256,7 @@ export const likeItem = mutationField(t => t.field('likeItem', {
         like: nonNull(booleanArg()) // 좋아요 누른거면 true 아니면 false
     },
     resolve: async (_, { itemId, like }, ctx) => {
-        await asyncDelay()
+
         const user = await getIUser(ctx)
         if (like) {
             await ctx.prisma.user.update({
@@ -309,7 +309,7 @@ export const unlikeItems = mutationField(t => t.list.field('unlikeItems', {
     },
     resolve: async (_, { itemIds }, ctx) => {
         try {
-            await asyncDelay()
+
             const user = await getIUser(ctx)
             const items: Item[] = []
             for (const itemId of itemIds) {

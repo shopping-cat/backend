@@ -1,5 +1,5 @@
 import { intArg, nullable, queryField, stringArg, nonNull, mutationField, list } from "nexus"
-import asyncDelay from "../../utils/asyncDelay"
+
 import getIUser from "../../utils/getIUser"
 import errorFormat from "../../utils/errorFormat";
 
@@ -10,7 +10,7 @@ export const itemReview = queryField(t => t.field('itemReview', {
         id: nonNull(intArg()),
     },
     resolve: async (_, { id }, ctx) => {
-        await asyncDelay()
+
         const itemReview = await ctx.prisma.itemReview.findUnique({ where: { id } })
         return itemReview
     }
@@ -26,7 +26,7 @@ export const itemReviews = queryField(t => t.list.field('itemReviews', {
         limit: nullable(intArg({ default: 10 }))
     },
     resolve: async (_, { itemId, orderBy, offset, limit }, ctx) => {
-        await asyncDelay()
+
         const itemReviews = await ctx.prisma.itemReview.findMany({
             take: limit,
             skip: offset,
@@ -73,7 +73,7 @@ export const createableItemReviews = queryField(t => t.list.field('createableIte
     },
     resolve: async (_, { offset, limit }, ctx) => {
 
-        await asyncDelay()
+
         const user = await getIUser(ctx)
         const orders = await ctx.prisma.order.findMany({
             take: limit,
@@ -153,7 +153,7 @@ export const updateItemReview = mutationField(t => t.field('updateItemReview', {
         imageIds: nonNull(list(nonNull(intArg())))
     },
     resolve: async (_, { id, rate, content, imageIds }, ctx) => {
-        await asyncDelay()
+
         const user = await getIUser(ctx)
         const prevItemReview = await ctx.prisma.itemReview.findUnique({
             where: { id },
@@ -192,7 +192,7 @@ export const itemReviewRecommend = mutationField(t => t.field('itemReviewRecomme
     },
     resolve: async (_, { itemReviewId, recommendState }, ctx) => {
         try {
-            await asyncDelay()
+
             const user = await getIUser(ctx)
 
             let prevRecommendState = 'none'

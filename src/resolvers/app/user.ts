@@ -5,7 +5,7 @@ import { idArg, intArg, mutationField, nonNull, nullable, queryField, stringArg 
 import Axios from "axios"
 import { userAuth } from "../../lib/firebase"
 import getIUser from "../../utils/getIUser"
-import asyncDelay from "../../utils/asyncDelay"
+
 import errorFormat from "../../utils/errorFormat";
 import { uploadImage } from "../../lib/googleCloudStorage"
 
@@ -56,7 +56,7 @@ export const kakaoTokenToFirebaseToken = queryField(t => t.nonNull.field('kakaoT
 export const withdrawalUser = mutationField(t => t.field('withdrawalUser', {
     type: 'User',
     resolve: async (_, { }, ctx) => {
-        await asyncDelay()
+
         const user = await getIUser(ctx)
         return user
     }
@@ -71,7 +71,7 @@ export const updateRefundBankAccount = mutationField(t => t.field('updateRefundB
         accountNumber: stringArg()
     },
     resolve: async (_, { ownerName, bankName, accountNumber }, ctx) => {
-        await asyncDelay()
+
         const user = await getIUser(ctx)
         const refundBankAccount = await ctx.prisma.userRefundBankAccount.findUnique({ where: { userId: user.id } })
         if (refundBankAccount) { // update
@@ -132,7 +132,7 @@ export const updateDeliveryInfo = mutationField(t => t.field('updateDeliveryInfo
         phone: stringArg()
     },
     resolve: async (_, { postCode, address, addressDetail, name, phone }, ctx) => {
-        await asyncDelay()
+
         const user = await getIUser(ctx)
         const deliveryInfo = await ctx.prisma.userDeliveryInfo.findUnique({ where: { userId: user.id } })
         if (deliveryInfo) { // update

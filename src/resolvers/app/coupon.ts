@@ -1,5 +1,5 @@
 import { intArg, mutationField, nonNull, nullable, queryField, stringArg } from "nexus";
-import asyncDelay from "../../utils/asyncDelay";
+
 import errorFormat from "../../utils/errorFormat";
 import getIUser from "../../utils/getIUser";
 
@@ -12,7 +12,7 @@ export const coupons = queryField(t => t.list.field('coupons', {
         limit: nullable(intArg({ default: 10 }))
     },
     resolve: async (_, { offset, limit }, ctx) => {
-        await asyncDelay()
+
 
         const user = await getIUser(ctx)
 
@@ -43,7 +43,7 @@ export const registCoupon = mutationField(t => t.field('registCoupon', {
         couponId: nonNull(stringArg())
     },
     resolve: async (_, { couponId }, ctx) => {
-        await asyncDelay()
+
         const user = await getIUser(ctx)
 
         const prevCoupon = await ctx.prisma.coupon.findUnique({

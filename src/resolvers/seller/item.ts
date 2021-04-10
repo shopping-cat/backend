@@ -1,5 +1,5 @@
 import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable, list, arg, inputObjectType } from "nexus"
-import asyncDelay from "../../utils/asyncDelay"
+
 import getISeller from "../../utils/getISeller"
 import { ItemOption, ItemRequireInformation } from "../../types"
 import errorFormat from "../../utils/errorFormat"
@@ -26,7 +26,7 @@ export const items = queryField(t => t.list.field('items', {
     type: 'Item',
     resolve: async (_, { }, ctx) => {
         try {
-            await asyncDelay()
+
             const seller = await getISeller(ctx)
             const item = await ctx.prisma.item.findMany({
                 where: { shopId: seller.shopId },

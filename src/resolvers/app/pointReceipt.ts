@@ -1,5 +1,5 @@
 import { intArg, nullable, queryField } from "nexus"
-import asyncDelay from "../../utils/asyncDelay"
+
 import getIUser from "../../utils/getIUser"
 
 // Query - 유저의 유효한 쿠폰 리스트
@@ -10,7 +10,7 @@ export const pointReceipts = queryField(t => t.list.field('pointReceipts', {
         limit: nullable(intArg({ default: 10 }))
     },
     resolve: async (_, { offset, limit }, ctx) => {
-        await asyncDelay()
+
 
         const user = await getIUser(ctx)
 
