@@ -1,14 +1,11 @@
 import * as admin from 'firebase-admin';
 
-const serviceAccountUser = require('../../serviceAccountKeyUser.json')
-const serviceAccountSeller = require('../../serviceAccountKeySeller')
-
 const userFirebase = admin.initializeApp({
-    credential: admin.credential.cert(serviceAccountUser),
+    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_KEY_USER as string)),
 }, 'user')
 
 const sellerFirebase = admin.initializeApp({
-    credential: admin.credential.cert(serviceAccountSeller),
+    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_KEY_SELLER as string)),
 }, 'seller')
 
 export const userAuth = userFirebase.auth()

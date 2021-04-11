@@ -76,6 +76,14 @@ sellerServer.applyMiddleware({
 
 const port = process.env.NODE_ENV === 'production' ? 80 : 8080
 
-app.listen({ port }, () => {
+const server = app.listen({ port }, () => {
+  process.send && process.send('ready')
   console.log(`🚀  Server ready at [http://localhost:${port}${adminServer.graphqlPath}, http://localhost:${port}${appServer.graphqlPath}, http://localhost:${port}${sellerServer.graphqlPath}]`)
+})
+
+process.on('SIGINT', () => {
+  server.close((err) => {
+    console.log('server closed')
+    process.exit(err ? 1 : 0)
+  })
 })
