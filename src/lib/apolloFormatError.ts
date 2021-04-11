@@ -15,11 +15,11 @@ const logger = winston.createLogger({
 
 const formatError = (error: GraphQLError): GraphQLError => {
     let errorMessage = ''
-    logger.error(error.message)
     console.log(error.message)
     try {
         if (error.message.substr(0, ERROR_SIMBOL.length) === ERROR_SIMBOL) errorMessage = error.message.substr(ERROR_SIMBOL.length)
         else {
+            logger.error(error.message + ' stack : ' + error.stack)
             errorMessage = '알 수 없는 오류'
         }
     } catch (error) {

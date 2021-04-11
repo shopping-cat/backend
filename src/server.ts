@@ -5,12 +5,17 @@ import cookieParser from 'cookie-parser'
 import hpp from 'hpp'
 import helmet from 'helmet'
 import cors from 'cors'
-import formatError from './utils/formatError'
+import apolloFormatError from './lib/apolloFormatError'
 import { createContext } from './context'
+
+import schedulerRoute from './routes/scheduler'
+
 
 import { schema as adminSchema } from './schemas/admin'
 import { schema as appSchema } from './schemas/app'
 import { schema as sellerSchema } from './schemas/seller'
+import expressErrorLogger from './lib/expressErrorLogger'
+
 
 require('dotenv').config()
 
@@ -30,11 +35,17 @@ app.use(cors({ origin: process.env.FRONT_URL, credentials: true }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser(process.env.COOKIE_SECRET))
+app.use(expressErrorLogger)
+
+// routing
+app.use('/scheduler', schedulerRoute)
+
 app.get('/isRunning', (req, res) => res.send('Server is running')) // 서버 구동 확인용 router
 
+// graphql
 const ApolloServerDefaultConfig = {
   context: createContext,
-  formatError,
+  formatError: apolloFormatError,
   uploads: { maxFileSize: 10 * 1024 * 1024, maxFiles: 10 },
   playground: process.env.NODE_ENV === 'production' ? false : { settings: { "request.credentials": 'include' } }
 }
