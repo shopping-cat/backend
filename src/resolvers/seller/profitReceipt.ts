@@ -4,6 +4,23 @@ import errorFormat from "../../utils/errorFormat"
 import getISeller from "../../utils/getISeller"
 import { COMMISSION } from "../../values"
 
+export const profitReceipts = queryField(t => t.list.field('profitReceipts', {
+    type: 'ProfitReceipt',
+    resolve: async (_, { }, ctx) => {
+        const seller = await getISeller(ctx)
+        const profitReceipts = await ctx.prisma.profitReceipt.findMany({
+            where: {
+                shopId: seller.shopId
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        })
+        // TODO offset limit
+        return profitReceipts
+    }
+}))
+
 export const monthlyProfit = queryField(t => t.list.field('monthlyProfit', {
     type: 'Int',
     resolve: async (_, { }, ctx) => {
@@ -68,8 +85,8 @@ export const createProfitReceipt = mutationField(t => t.field('createProfitRecei
         const price = Math.floor(totalPrice * (100 - COMMISSION) / 100)
         const commission = totalPrice - price
 
-        if (orders.length === 0) throw errorFormat('정산 가능한 주문이 없습니다')
         if (profitReceipt) throw errorFormat('정산은 한번에 하나씩만 가능합니다')
+        if (orders.length === 0) throw errorFormat('정산 가능한 주문이 없습니다')
 
         const createdProfitReceipt = await ctx.prisma.profitReceipt.create({
             data: {

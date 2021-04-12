@@ -267,25 +267,35 @@ model ItemImage {
 }
 
 model Shop {
-  id             Int             @id @default(autoincrement())
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  shopName       String          @unique
-  shopImage      String
-  refundInfo     String?         @db.Text
-  exchangeInfo   String?         @db.Text
-  items          Item[]
-  partner        Partner?
-  seller         Seller?
-  profitReceipts ProfitReceipt[]
+  id                Int             @id @default(autoincrement())
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  // 기본정보
+  shopName          String          @unique
+  shopImage         String
+  kakaoId           String? // 주문 정보를 받을 수 있음
+  // 수익
+  bankAccountNumber String?
+  bankName          String?
+  bankOwnerName     String?
+  // CS
+  kakaoLink         String? // 카카오 채널
+  csPhone           String?
+  refundInfo        String?         @db.Text
+  exchangeInfo      String?         @db.Text
+  //
+  items             Item[]
+  partner           Partner?
+  seller            Seller?
+  profitReceipts    ProfitReceipt[]
 }
 
 model Seller {
   id            Int      @id @default(autoincrement())
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  licenseNumber String   @unique
   email         String   @unique
+  licenseNumber String   @unique
   shopId        Int      @unique
   shop          Shop     @relation(fields: [shopId], references: [id])
 

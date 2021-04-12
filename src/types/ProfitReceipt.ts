@@ -10,6 +10,7 @@ export const ProfitReceipt = objectType({
         t.model.price()
         t.model.shopId()
         t.model.shop()
+        t.model.state()
         t.model.orders()
     }
 })

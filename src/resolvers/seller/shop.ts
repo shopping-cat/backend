@@ -23,6 +23,13 @@ export const updateShopInput = inputObjectType({
         t.nonNull.string('shopImage')
         t.nonNull.string('refundInfo')
         t.nonNull.string('exchangeInfo')
+        t.nullable.string('kakaoId')
+        t.nullable.string('kakaoLink')
+        t.nullable.string('csPhone')
+        t.nullable.string('bankAccountNumber')
+        t.nullable.string('bankName')
+        t.nullable.string('bankOwnerName')
+
     }
 })
 
@@ -32,13 +39,12 @@ export const updateShop = mutationField(t => t.field('updateShop', {
         updateShopInput: nonNull(updateShopInput)
     },
     resolve: async (_, { updateShopInput }, ctx) => {
-        const { shopName, shopImage, refundInfo, exchangeInfo } = updateShopInput
+        const { refundInfo, exchangeInfo } = updateShopInput
         const seller = await getISeller(ctx)
         const shop = await ctx.prisma.shop.update({
             where: { id: seller.shopId },
             data: {
-                shopImage,
-                shopName,
+                ...updateShopInput,
                 refundInfo: xss(refundInfo),
                 exchangeInfo: xss(exchangeInfo)
             }
