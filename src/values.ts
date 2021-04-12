@@ -6,7 +6,8 @@ export const USER_ACCESS_TOKEN_NAME = 'userAccessToken' // 사용 안함
 export const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.react-graphql.shop' : undefined
 export const COOKIE_PATH = '/'
 
-
+// Paymnet
 export const MIN_PAYMENT_PRICE = 300 // 원
+export const COMMISSION = 10 // %
 
 export const ERROR_SIMBOL = 'ERRORMESSAGE@'

@@ -1,4 +1,5 @@
 import { intArg, nullable, objectType, stringArg } from "nexus"
+import { COMMISSION } from "../values"
 
 export const Shop = objectType({
     name: 'Shop',
@@ -12,6 +13,21 @@ export const Shop = objectType({
         t.model.refundInfo()
         t.model.items()
         t.model.seller()
+        t.model.profitReceipts()
+        t.field('balance', {
+            type: 'Int',
+            resolve: async ({ id }, { }, ctx) => {
+                const { sum } = await ctx.prisma.order.aggregate({
+                    sum: { totalPrice: true },
+                    where: {
+                        item: { shopId: id },
+                        state: '구매확정',
+                        profitReceipt: null
+                    }
+                })
+                return Number((sum.totalPrice * (100 - COMMISSION) / 100).toFixed(0))
+            }
+        })
         t.field('rate', {
             type: 'Float',
             resolve: async ({ id }, _, ctx) => {

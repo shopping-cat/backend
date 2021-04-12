@@ -36,6 +36,8 @@ model UserCertificatedInfo {
   name      String
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId], name: "userId")
 }
 
 model UserRefundBankAccount {
@@ -47,6 +49,8 @@ model UserRefundBankAccount {
   ownerName     String
   userId        String   @unique
   user          User     @relation(fields: [userId], references: [id])
+
+  @@index([userId], name: "userId")
 }
 
 model UserDeliveryInfo {
@@ -60,6 +64,8 @@ model UserDeliveryInfo {
   phone         String
   userId        String   @unique
   user          User     @relation(fields: [userId], references: [id])
+
+  @@index([userId], name: "userId")
 }
 
 model SearchKeyword {
@@ -118,9 +124,9 @@ model CartItem {
 }
 
 model Order {
-  id                     Int         @id @default(autoincrement())
-  createdAt              DateTime    @default(now())
-  updatedAt              DateTime    @updatedAt
+  id                     Int            @id @default(autoincrement())
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
   state                  String
   itemPrice              Int
   itemOptionPrice        Int
@@ -130,26 +136,29 @@ model Order {
   deliveryCompletionDate DateTime?
   // 교환 환불 취소
   reason                 String?
-  reasonDetail           String?     @db.Text
-  refundPrice            Int         @default(0) // 환불된 가격
-  refundPoint            Int         @default(0) // 환불된 포인트
+  reasonDetail           String?        @db.Text
+  refundPrice            Int            @default(0) // 환불된 가격
+  refundPoint            Int            @default(0) // 환불된 포인트
   refundMethod           String?
+  deliveryNumber         String?
+  deliveryCompany        String?
+  totalPrice             Int
   cartItemId             Int
   userId                 String
   paymentId              String
   itemId                 Int
-  deliveryNumber         String?
-  deliveryCompany        String?
-  totalPrice             Int
-  item                   Item        @relation(fields: [itemId], references: [id])
-  payment                Payment     @relation(fields: [paymentId], references: [id])
-  user                   User        @relation(fields: [userId], references: [id])
+  profitReceiptId        Int?
+  item                   Item           @relation(fields: [itemId], references: [id])
+  payment                Payment        @relation(fields: [paymentId], references: [id])
+  user                   User           @relation(fields: [userId], references: [id])
+  profitReceipt          ProfitReceipt? @relation(fields: [profitReceiptId], references: [id])
   coupons                Coupon[]
   itemReview             ItemReview?
 
   @@index([itemId], name: "itemId")
   @@index([paymentId], name: "paymentId")
   @@index([userId], name: "userId")
+  @@index([itemId], name: "itemId")
 }
 
 model Payment {
@@ -203,6 +212,7 @@ model ItemReview {
 
   @@index([itemId], name: "itemId")
   @@index([userId], name: "userId")
+  @@index([orderId], name: "orderId")
 }
 
 model ItemReviewImage {
@@ -243,6 +253,7 @@ model Item {
   userLikes          User[]
 
   @@index([shopId], name: "shopId")
+  @@index([targetItemId], name: "targetItemId")
 }
 
 model ItemImage {
@@ -256,16 +267,17 @@ model ItemImage {
 }
 
 model Shop {
-  id           Int      @id @default(autoincrement())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  shopName     String   @unique
-  shopImage    String
-  refundInfo   String?  @db.Text
-  exchangeInfo String?  @db.Text
-  items        Item[]
-  partner      Partner?
-  seller       Seller?
+  id             Int             @id @default(autoincrement())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  shopName       String          @unique
+  shopImage      String
+  refundInfo     String?         @db.Text
+  exchangeInfo   String?         @db.Text
+  items          Item[]
+  partner        Partner?
+  seller         Seller?
+  profitReceipts ProfitReceipt[]
 }
 
 model Seller {
@@ -276,6 +288,8 @@ model Seller {
   email         String   @unique
   shopId        Int      @unique
   shop          Shop     @relation(fields: [shopId], references: [id])
+
+  @@index([shopId], name: "shopId")
 }
 
 model Partner {
@@ -286,6 +300,8 @@ model Partner {
   email         String   @unique
   shopId        Int      @unique
   shop          Shop     @relation(fields: [shopId], references: [id])
+
+  @@index([shopId], name: "shopId")
 }
 
 model Event {
@@ -295,4 +311,18 @@ model Event {
   period      DateTime
   bannerImage String
   html        String   @db.Text
+}
+
+model ProfitReceipt {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  state      String   @default("정산요청")
+  price      Int
+  commission Int
+  shopId     Int
+  shop       Shop     @relation(fields: [shopId], references: [id])
+  orders     Order[]
+
+  @@index([shopId], name: "shopId")
 }

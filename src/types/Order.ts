@@ -32,6 +32,8 @@ export const Order = objectType({
         t.model.item()
         t.model.user()
         t.model.payment()
+        t.model.profitReceiptId()
+        t.model.profitReceipt()
         t.nullable.field('stringOptionNum', {
             type: 'String',
             async resolve({ itemOption: itemOptionJson, num }) {

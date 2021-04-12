@@ -33,7 +33,7 @@ router.post('/paymentStateUpdateToSuccess', async (req, res, next) => {
         })
         await prisma.payment.updateMany({
             where: { id: { in: payments.map(v => v.id) } },
-            data: { state: '구매접수' }
+            data: { state: '정상처리' }
         })
 
         // shop에다가 메시지 보내주기

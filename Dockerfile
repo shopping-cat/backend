@@ -20,7 +20,7 @@ CMD ["npm", "run", "pm2"]
 
 # run npm build first
 
-# docker build -t asia.gcr.io/shoppingcat/dev-back:0.0.10 .
-# docker push asia.gcr.io/shoppingcat/dev-back:0.0.10
+# docker build -t asia.gcr.io/shoppingcat/dev-back:0.0.11 .
+# docker push asia.gcr.io/shoppingcat/dev-back:0.0.11
 
 # docker run --name shopping-cat-back-con -p 80:80 asia.gcr.io/shoppingcat/dev-back:0.0.5
