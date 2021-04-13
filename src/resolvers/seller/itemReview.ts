@@ -20,3 +20,23 @@ export const itemReviews = queryField(t => t.list.field('itemReviews', {
         return itemReviews
     }
 }))
+
+// Query - 해당 상점의 최신 리뷰들
+export const recentReviews = queryField(t => t.list.field('recentReviews', {
+    type: 'ItemReview',
+    args: {
+        limit: nullable(intArg())
+    },
+    resolve: async (_, { limit }, ctx) => {
+
+        const seller = await getISeller(ctx)
+        const itemReviews = await ctx.prisma.itemReview.findMany({
+            where: { item: { shopId: seller.shopId } },
+            orderBy: {
+                createdAt: 'desc'
+            },
+            take: limit || undefined
+        })
+        return itemReviews
+    }
+}))
