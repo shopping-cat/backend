@@ -265,3 +265,47 @@ export const exchangeOrder = mutationField('exchangeOrder', {
         return order
     }
 })
+
+export const refundCancelOrder = mutationField('refundCancelOrder', {
+    type: 'Order',
+    args: {
+        id: nonNull(intArg())
+    },
+    resolve: async (_, { id }, ctx) => {
+        const user = await getIUser(ctx)
+        const prevOrder = await ctx.prisma.order.findUnique({ where: { id } })
+        if (!prevOrder) throw errorFormat('존재하지 않는 주문 입니다')
+        if (prevOrder.userId !== user.id) throw errorFormat('권한이 없습니다')
+        if (prevOrder.state !== '환불중') throw errorFormat(`${prevOrder.state}상태에서는 취소가 불가능합니다.`)
+
+        const order = await ctx.prisma.order.update({
+            where: { id },
+            data: {
+                state: '배송완료'
+            }
+        })
+        return order
+    }
+})
+
+export const exchangeCancelOrder = mutationField('exchangeCancelOrder', {
+    type: 'Order',
+    args: {
+        id: nonNull(intArg())
+    },
+    resolve: async (_, { id }, ctx) => {
+        const user = await getIUser(ctx)
+        const prevOrder = await ctx.prisma.order.findUnique({ where: { id } })
+        if (!prevOrder) throw errorFormat('존재하지 않는 주문 입니다')
+        if (prevOrder.userId !== user.id) throw errorFormat('권한이 없습니다')
+        if (prevOrder.state !== '교환중') throw errorFormat(`${prevOrder.state}상태에서는 취소가 불가능합니다.`)
+
+        const order = await ctx.prisma.order.update({
+            where: { id },
+            data: {
+                state: '배송완료'
+            }
+        })
+        return order
+    }
+})
