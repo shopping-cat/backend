@@ -240,8 +240,8 @@ model Item {
   requireInformation Json
   html               String       @db.Text
   shopId             Int?
-  category1          String?
-  category2          String?
+  category1          String
+  category2          String
   targetItemId       Int?         @unique
   shop               Shop?        @relation(fields: [shopId], references: [id])
   targetItem         Item?        @relation("ItemToItem", fields: [targetItemId], references: [id])

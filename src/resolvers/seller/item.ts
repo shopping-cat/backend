@@ -46,8 +46,8 @@ export const createItemInput = inputObjectType({
     name: 'CreateItemInput',
     definition: (t) => {
         t.nonNull.string('name')
-        t.nullable.string('category1')
-        t.nullable.string('category2')
+        t.nonNull.string('category1')
+        t.nonNull.string('category2')
         t.nonNull.int('price')
         t.nonNull.int('deliveryPrice')
         t.nonNull.int('extraDeliveryPrice')
@@ -131,8 +131,8 @@ export const updateItemInput = inputObjectType({
     definition: (t) => {
         t.nonNull.int('id')
         t.nonNull.string('name')
-        t.nullable.string('category1')
-        t.nullable.string('category2')
+        t.nonNull.string('category1')
+        t.nonNull.string('category2')
         t.nonNull.int('sale')
         t.nonNull.int('price')
         t.nonNull.int('deliveryPrice')
