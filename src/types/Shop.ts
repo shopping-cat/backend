@@ -1,4 +1,5 @@
 import { intArg, nullable, objectType, stringArg } from "nexus"
+import errorFormat from "../utils/errorFormat"
 import { COMMISSION } from "../values"
 
 export const Shop = objectType({
@@ -31,6 +32,7 @@ export const Shop = objectType({
                         profitReceipt: null
                     }
                 })
+                if (sum.totalPrice === null) throw errorFormat('정산 가능금액 계산 오류')
                 return Number((sum.totalPrice * (100 - COMMISSION) / 100).toFixed(0))
             }
         })
@@ -41,7 +43,7 @@ export const Shop = objectType({
                     avg: { rate: true },
                     where: { item: { shopId: id } }
                 })
-                return Number(avg.rate.toFixed(1))
+                return Number((avg.rate || 0).toFixed(1))
             }
         })
         t.field('rateNum', {

@@ -131,14 +131,6 @@ export const createItemReview = mutationField(t => t.field('createItemReview', {
             }
         })
 
-        // 구매확정
-        await ctx.prisma.order.update({
-            where: { id: order.id },
-            data: {
-                state: '구매확정'
-            }
-        })
-
         return itemReview
     }
 }))

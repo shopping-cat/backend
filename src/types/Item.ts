@@ -104,6 +104,7 @@ export const Item = objectType({
                     avg: { rate: true },
                     where: { itemId: id }
                 })
+                if (!avg.rate) return 0
                 return Number(avg.rate.toFixed(1))
             }
         })

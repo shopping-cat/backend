@@ -302,7 +302,7 @@ export const cancelOrder = mutationField(t => t.field('cancelOrder', {
 
         // 포인트 환불
         if (cancelPoint > 0) {
-            await addPoint(cancelPoint, '부분 환불', prevOrder.user.id, ctx)
+            await addPoint(cancelPoint, '부분 환불', prevOrder.user.id)
         }
 
         // DB에 저장
@@ -412,7 +412,7 @@ export const refundOrder = mutationField(t => t.field('refundOrder', {
 
         // 포인트 환불
         if (cancelPoint > 0) {
-            await addPoint(cancelPoint, '부분 환불', prevOrder.user.id, ctx)
+            await addPoint(cancelPoint, '부분 환불', prevOrder.user.id)
         }
 
         // DB에 저장

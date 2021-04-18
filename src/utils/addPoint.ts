@@ -1,8 +1,8 @@
-import { Context } from "../context"
+import { Context, prisma } from "../context"
 
-const addPoint = async (point: number, name: string, userId: string, ctx: Context) => {
+const addPoint = async (point: number, name: string, userId: string) => {
     // 영수증 생성
-    await ctx.prisma.pointReceipt.create({
+    await prisma.pointReceipt.create({
         data: {
             user: { connect: { id: userId } },
             name,
@@ -10,7 +10,7 @@ const addPoint = async (point: number, name: string, userId: string, ctx: Contex
         }
     })
     // 포인트 적용
-    await ctx.prisma.user.update({
+    await prisma.user.update({
         where: { id: userId },
         data: {
             point: { increment: point }

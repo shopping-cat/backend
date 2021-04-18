@@ -12,7 +12,7 @@ export const addUserPoint = mutationField('addUserPoint', {
         userId: nonNull(stringArg())
     },
     resolve: async (_, { point, name, userId }, ctx) => {
-        await addPoint(point, name, userId, ctx)
+        await addPoint(point, name, userId)
         const user = await ctx.prisma.user.findUnique({
             where: { id: userId }
         })

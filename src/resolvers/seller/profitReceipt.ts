@@ -53,7 +53,7 @@ export const monthlyProfit = queryField(t => t.list.field('monthlyProfit', {
                     price: true
                 }
             })
-            result.push(sum.price)
+            result.push(sum.price || 0)
         }
 
         return result.reverse()

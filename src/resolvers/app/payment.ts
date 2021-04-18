@@ -309,7 +309,7 @@ export const completePayment = mutationField(t => t.field('completePayment', {
                 })
                 // 포인트 삭제
                 if (prevPayment.pointSale > 0) {
-                    await addPoint(-prevPayment.pointSale, '상품구매', user.id, ctx)
+                    await addPoint(-prevPayment.pointSale, '상품구매', user.id)
                 }
             }
 
@@ -388,7 +388,7 @@ export const cancelPayment = mutationField(t => t.field('cancelPayment', {
         }
 
         // 포인트 환불
-        await addPoint(payment.pointSale, '주문 취소', user.id, ctx)
+        await addPoint(payment.pointSale, '주문 취소', user.id)
 
         // 상태 변경
         const newPayment = await ctx.prisma.payment.update({
