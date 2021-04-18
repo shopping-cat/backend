@@ -1,4 +1,5 @@
 import { objectType } from "nexus"
+import isExtraDeliveryPriceAddress from "../lib/isExtraDeliveryPriceAddress"
 
 export const UserDeliveryInfo = objectType({
     name: 'UserDeliveryInfo',
@@ -13,6 +14,11 @@ export const UserDeliveryInfo = objectType({
         t.model.phone()
         t.model.user()
         t.model.userId()
-        // 산간지역 계산 TODO
+        t.field('isExtraDeliveryPriceAddress', {
+            type: 'Boolean',
+            resolve: ({ postCode }, { }, _) => {
+                return isExtraDeliveryPriceAddress(postCode)
+            }
+        })
     }
 })

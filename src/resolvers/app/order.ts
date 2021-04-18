@@ -1,6 +1,7 @@
 import { Coupon } from "@prisma/client";
 import { inputObjectType, intArg, list, mutationField, nonNull, nullable, objectType, queryField, stringArg } from "nexus";
 import { type } from "os";
+import isExtraDeliveryPriceAddress from "../../lib/isExtraDeliveryPriceAddress";
 import { CartItemOption, ItemOption } from "../../types";
 
 import errorFormat from "../../utils/errorFormat";
@@ -68,7 +69,14 @@ export const orderCalculate = queryField('orderCalculate', {
     resolve: async (_, { cartItemIds, point, coupons }, ctx) => {
         try {
 
-            const user = await getIUser(ctx)
+            const { id } = await getIUser(ctx)
+            const user = await ctx.prisma.user.findUnique({
+                where: { id },
+                include: {
+                    deliveryInfo: true
+                }
+            })
+            if (!user) throw errorFormat('권한 없음')
             const orderItems = await ctx.prisma.cartItem.findMany({
                 where: { id: { in: cartItemIds } },
                 include: { item: true }
@@ -129,7 +137,7 @@ export const orderCalculate = queryField('orderCalculate', {
                 totalSaledPrice += optionedSaledPrice * orderItem.num
                 // 배송비 적용
                 totalDeliveryPrice += orderItem.item.deliveryPrice
-                if (false /* 산간지역이라면 */) {
+                if (isExtraDeliveryPriceAddress(user.deliveryInfo?.postCode || '0') /* 산간지역이라면 */) {
                     totalExtraDeliveryPrice += orderItem.item.extraDeliveryPrice
                 }
                 // 쿠폰 적용 가격

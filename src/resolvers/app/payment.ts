@@ -10,6 +10,7 @@ import { MIN_PAYMENT_PRICE } from "../../values"
 import { OrderCouponArg } from "./order"
 import errorFormat from "../../utils/errorFormat";
 import arraySum from "../../utils/arraySum"
+import isExtraDeliveryPriceAddress from "../../lib/isExtraDeliveryPriceAddress"
 
 
 // Query - 주문 조회
@@ -149,7 +150,7 @@ export const createPayment = mutationField(t => t.field('createPayment', {
                 }
                 // 영수증 계산
                 const currentDeliveryPrice = cartItem.item.deliveryPrice
-                const currentExtraDeliveryPrice = false ? cartItem.item.extraDeliveryPrice : 0 // TODO
+                const currentExtraDeliveryPrice = isExtraDeliveryPriceAddress(user.deliveryInfo.postCode) ? cartItem.item.extraDeliveryPrice : 0
                 // 적용
                 price += (cartItem.item.price + optionPrice) * cartItem.num
                 deliveryPrice += currentDeliveryPrice
