@@ -12,6 +12,8 @@ model User {
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
   point             Int                    @default(0)
+  fcmToken          String?
+  eventMessageAllow Boolean                @default(false)
   name              String?
   photo             String?
   cart              CartItem[]
@@ -27,6 +29,7 @@ model User {
   itemLikes         Item[]
   itemReviewLikes   ItemReview[]           @relation("UserItemReviewLike")
   itemReviewUnlikes ItemReview[]           @relation("UserItemReviewUnlike")
+  notifications     Notification[]
 }
 
 model UserCertificatedInfo {
@@ -335,4 +338,17 @@ model ProfitReceipt {
   orders     Order[]
 
   @@index([shopId], name: "shopId")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  image     String?
+  title     String
+  content   String
+  type      String
+  params    Json?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
 }

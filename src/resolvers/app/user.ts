@@ -176,3 +176,19 @@ export const removeAllSearchKeywords = mutationField(t => t.field('removeAllSear
         }
     }
 ))
+
+export const updateFcmToken = mutationField(t => t.field('updateFcmToken', {
+    type: 'User',
+    args: {
+        token: nonNull(stringArg())
+    },
+    resolve: async (_, { token }, ctx) => {
+        const { id } = await getIUser(ctx)
+        console.log(token)
+        const user = await ctx.prisma.user.update({
+            where: { id },
+            data: { fcmToken: token }
+        })
+        return user
+    }
+}))

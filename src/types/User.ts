@@ -8,6 +8,8 @@ export const User = objectType({
         t.model.createdAt()
         t.model.updatedAt()
         t.model.point()
+        t.model.fcmToken()
+        t.model.eventMessageAllow()
         t.model.coupons()
         t.model.name()
         t.model.photo()
@@ -23,6 +25,7 @@ export const User = objectType({
         t.model.itemLikes()
         t.model.cart()
         t.model.searchKeywords()
+        t.model.notifications()
         t.field('notificationNum', {
             type: 'Int',
             resolve: async ({ id }, _, ctx) => {
