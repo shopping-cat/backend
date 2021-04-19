@@ -1,7 +1,7 @@
 /* 
  *
  */
-import { idArg, intArg, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
+import { booleanArg, idArg, intArg, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
 import Axios from "axios"
 import { userAuth } from "../../lib/firebase"
 import getIUser from "../../utils/getIUser"
@@ -188,6 +188,21 @@ export const updateFcmToken = mutationField(t => t.field('updateFcmToken', {
         const user = await ctx.prisma.user.update({
             where: { id },
             data: { fcmToken: token }
+        })
+        return user
+    }
+}))
+
+export const updateEventMessageAllow = mutationField(t => t.field('updateEventMessageAllow', {
+    type: 'User',
+    args: {
+        allow: nonNull(booleanArg())
+    },
+    resolve: async (_, { allow }, ctx) => {
+        const { id } = await getIUser(ctx)
+        const user = await ctx.prisma.user.update({
+            where: { id },
+            data: { eventMessageAllow: allow }
         })
         return user
     }

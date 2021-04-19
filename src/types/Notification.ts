@@ -10,7 +10,7 @@ export const Notification = objectType({
         t.model.title()
         t.model.content()
         t.model.type()
-        t.model.type()
+        t.model.params()
         t.model.userId()
         t.model.user()
     }
