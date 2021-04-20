@@ -29,7 +29,13 @@ export const User = objectType({
         t.field('notificationNum', {
             type: 'Int',
             resolve: async ({ id }, _, ctx) => {
-                return 5
+                const count = await ctx.prisma.notification.count({
+                    where: {
+                        userId: id,
+                        checked: false
+                    }
+                })
+                return count
             }
         })
         t.list.field('recentSearchKeywords', {

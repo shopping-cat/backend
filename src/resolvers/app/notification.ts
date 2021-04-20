@@ -16,7 +16,17 @@ export const notifications = queryField(t => t.list.field('notifications', {
             take: limit,
             skip: offset,
         })
-        console.log(notifications.length)
+
+        // checked 전부다 true로 변환
+        await ctx.prisma.notification.updateMany({
+            where: {
+                userId: user.id,
+                checked: false
+            },
+            data: {
+                checked: true
+            }
+        })
 
         return notifications
     }

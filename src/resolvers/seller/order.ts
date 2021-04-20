@@ -2,6 +2,7 @@ import axios from "axios";
 import { intArg, mutationField, nonNull, nullable, queryField, stringArg } from "nexus";
 import addPoint from "../../utils/addPoint";
 import bankNameToBankCode from "../../utils/bankNameToBankCode";
+import createNotification from "../../utils/createNotification";
 import errorFormat from "../../utils/errorFormat";
 import getISeller from "../../utils/getISeller";
 
@@ -73,6 +74,7 @@ export const completedDeliveryOrders = queryField(t => t.list.field('completedDe
             skip: offset,
             take: limit
         })
+
         return orders
     }
 }))
@@ -224,8 +226,22 @@ export const registDelivery = mutationField(t => t.field('registDelivery', {
                 deliveryCompany,
                 deliveryNumber,
                 state: '배송중'
+            },
+            include: {
+                item: true
             }
         })
+
+        await createNotification(
+            {
+                user: { connect: { id: order.userId } },
+                title: '배송시작',
+                content: `${order.item.name} 상품의 배송이 시작되었습니다.`,
+                type: 'none',
+            },
+            order.userId
+        )
+
         return order
     }
 }))
@@ -336,8 +352,22 @@ export const cancelOrder = mutationField(t => t.field('cancelOrder', {
                 refundMethod: '결제취소',
                 refundPoint: cancelPoint,
                 refundPrice: cancelPrice
+            },
+            include: {
+                item: true
             }
         })
+
+        await createNotification(
+            {
+                user: { connect: { id: order.userId } },
+                title: '상점취소처리',
+                content: `${order.item.name} 상품이 상점취소처리 되었습니다. \n사유 : ${order.reason}`,
+                type: 'none',
+            },
+            order.userId
+        )
+
         return order
     }
 }))
@@ -445,8 +475,20 @@ export const refundOrder = mutationField(t => t.field('refundOrder', {
                 refundMethod: '결제취소',
                 refundPoint: cancelPoint,
                 refundPrice: cancelPrice
+            },
+            include: {
+                item: true
             }
         })
+        await createNotification(
+            {
+                user: { connect: { id: order.userId } },
+                title: '환불처리',
+                content: `${order.item.name} 상품이 정상적으로 환불처리 되었습니다. 환불금액은 지급은 최대 영업일로 3일 까지 소요 될 수 있으며 미지급시 문의 바랍니다.`,
+                type: 'none',
+            },
+            order.userId
+        )
         return order
     }
 }))
@@ -457,13 +499,25 @@ export const exchangeOrder = mutationField('exchangeOrder', {
         id: nonNull(intArg())
     },
     resolve: async (_, { id }, ctx) => {
-        // TODO push message
-        const order = ctx.prisma.order.update({
+
+        const order = await ctx.prisma.order.update({
             where: { id },
             data: {
                 state: '교환처리'
+            },
+            include: {
+                item: true
             }
         })
+        await createNotification(
+            {
+                user: { connect: { id: order.userId } },
+                title: '교환처리',
+                content: `${order.item.name} 상품이 정상적으로 교환처리 되었습니다`,
+                type: 'none',
+            },
+            order.userId
+        )
         return order
     }
 })

@@ -347,6 +347,7 @@ model Notification {
   image     String?
   title     String
   content   String
+  checked   Boolean  @default(false)
   type      String
   params    Json?
   userId    String

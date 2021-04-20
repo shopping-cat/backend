@@ -9,6 +9,7 @@ export const Notification = objectType({
         t.model.image()
         t.model.title()
         t.model.content()
+        t.model.checked()
         t.model.type()
         t.model.params()
         t.model.userId()

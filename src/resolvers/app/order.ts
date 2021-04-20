@@ -49,7 +49,7 @@ export const OrderCalculateType = objectType({
         t.nonNull.int('totalSaledPrice') // 상품 세일 적용 총 금액
         t.nonNull.int('totalCouponedPrice') // 쿠폰 적용 총 금액
         t.nonNull.int('totalDeliveryPrice') // 배송비
-        t.nonNull.int('totalExtraDeliveryPrice') // 산간지역 추가 배송비 TODO
+        t.nonNull.int('totalExtraDeliveryPrice') // 산간지역 추가 배송비
         t.nonNull.int('totalSale') // 상품 할인
         t.nonNull.int('totalCouponSale') // 쿠폰 할인
         t.nonNull.int('totalPointSale') // 포인트 할인

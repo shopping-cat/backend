@@ -6,14 +6,17 @@ export const USER_ACCESS_TOKEN_NAME = 'userAccessToken' // 사용 안함
 export const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.react-graphql.shop' : undefined
 export const COOKIE_PATH = '/'
 
+// ETC
+export const ERROR_SIMBOL = 'ERRORMESSAGE@'
+
 // Paymnet
 export const MIN_PAYMENT_PRICE = 300 // 원
 export const COMMISSION = 10 // %
 export const POINT_BACK_PERCENT = 1 // % , payment.totalPrice의 n %
 export const REFUND_EXCHANGE_PERIOD = 7 // day , order의 배송완료일 기준
 
-export const ERROR_SIMBOL = 'ERRORMESSAGE@'
-
+// ITEM
+export const ITEM_NEW_DAYS = 14 // isNew 프로퍼티가 true인 기간 생성일 기준 n일
 export const CATEGORY = [
     {
         category: '사료',

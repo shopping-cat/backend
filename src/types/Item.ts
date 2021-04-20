@@ -1,6 +1,8 @@
+import dayjs from "dayjs"
 import { objectType } from "nexus"
 import getIUser from "../utils/getIUser"
 import salePrice from "../utils/salePrice"
+import { ITEM_NEW_DAYS } from "../values"
 
 export const Item = objectType({
     name: 'Item',
@@ -111,7 +113,7 @@ export const Item = objectType({
         t.field('isNew', {
             type: 'Boolean',
             resolve: ({ createdAt }) => {
-                return (Date.now() - createdAt.getTime()) > 1000 // TODO
+                return dayjs().add(-ITEM_NEW_DAYS, 'day').toDate().getTime() < createdAt.getTime()
             }
         })
         t.field('totalOrderNum', {

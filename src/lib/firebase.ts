@@ -9,4 +9,5 @@ const sellerFirebase = admin.initializeApp({
 }, 'seller')
 
 export const userAuth = userFirebase.auth()
+export const userMessaging = userFirebase.messaging()
 export const sellerAuth = sellerFirebase.auth()
