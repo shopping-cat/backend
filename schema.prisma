@@ -8,28 +8,30 @@ datasource db {
 }
 
 model User {
-  id                String                 @id
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
-  point             Int                    @default(0)
-  fcmToken          String?
-  eventMessageAllow Boolean                @default(false)
-  name              String?
-  photo             String?
-  cart              CartItem[]
-  coupons           Coupon[]
-  itemReviews       ItemReview[]
-  orders            Order[]
-  payments          Payment[]
-  pointReceipts     PointReceipt[]
-  searchKeywords    SearchKeyword[]
-  certificatedInfo  UserCertificatedInfo?
-  deliveryInfo      UserDeliveryInfo?
-  refundBankAccount UserRefundBankAccount?
-  itemLikes         Item[]
-  itemReviewLikes   ItemReview[]           @relation("UserItemReviewLike")
-  itemReviewUnlikes ItemReview[]           @relation("UserItemReviewUnlike")
-  notifications     Notification[]
+  id                      String                 @id
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  point                   Int                    @default(0)
+  fcmToken                String?
+  eventMessageAllowDate   DateTime?
+  termsOfServiceAllowDate DateTime?
+  privacyPolicyAllowDate  DateTime?
+  name                    String?
+  photo                   String?
+  cart                    CartItem[]
+  coupons                 Coupon[]
+  itemReviews             ItemReview[]
+  orders                  Order[]
+  payments                Payment[]
+  pointReceipts           PointReceipt[]
+  searchKeywords          SearchKeyword[]
+  certificatedInfo        UserCertificatedInfo?
+  deliveryInfo            UserDeliveryInfo?
+  refundBankAccount       UserRefundBankAccount?
+  itemLikes               Item[]
+  itemReviewLikes         ItemReview[]           @relation("UserItemReviewLike")
+  itemReviewUnlikes       ItemReview[]           @relation("UserItemReviewUnlike")
+  notifications           Notification[]
 }
 
 model UserCertificatedInfo {

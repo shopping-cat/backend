@@ -1,7 +1,7 @@
 /* 
  *
  */
-import { booleanArg, idArg, intArg, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
+import { booleanArg, idArg, inputObjectType, intArg, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
 import Axios from "axios"
 import { userAuth } from "../../lib/firebase"
 import getIUser from "../../utils/getIUser"
@@ -121,6 +121,44 @@ export const updateUserProfile = mutationField(t => t.field('updateUserProfile',
     }
 }))
 
+export const registUserProfileInput = inputObjectType({
+    name: 'RegistUserProfileInput',
+    definition: (t) => {
+        t.nonNull.string('name')
+        t.nullable.upload('photo')
+        t.nonNull.boolean('eventMessageAllow')
+    }
+})
+
+export const registUserProfile = mutationField(t => t.field('registUserProfile', {
+    type: 'User',
+    args: {
+        input: nonNull(registUserProfileInput)
+    },
+    resolve: async (_, { input }, ctx) => {
+
+        const { name, photo, eventMessageAllow } = input
+        const { id } = await getIUser(ctx)
+
+        const uri = photo ? await uploadImage(photo, 'user-profile-image/') : undefined
+
+        const nowDate = new Date
+
+        const user = await ctx.prisma.user.update({
+            where: { id },
+            data: {
+                name,
+                photo: uri,
+                eventMessageAllowDate: eventMessageAllow ? nowDate : null,
+                privacyPolicyAllowDate: nowDate,
+                termsOfServiceAllowDate: nowDate,
+            }
+        })
+
+        return user
+    }
+}))
+
 // MUTATION - 배송지 업데이트
 export const updateDeliveryInfo = mutationField(t => t.field('updateDeliveryInfo', {
     type: 'User',
@@ -202,7 +240,7 @@ export const updateEventMessageAllow = mutationField(t => t.field('updateEventMe
         const { id } = await getIUser(ctx)
         const user = await ctx.prisma.user.update({
             where: { id },
-            data: { eventMessageAllow: allow }
+            data: { eventMessageAllowDate: allow ? new Date : null }
         })
         return user
     }
