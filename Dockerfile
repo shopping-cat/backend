@@ -1,4 +1,4 @@
-FROM node:12.18.3
+FROM node:14.16.1
 
 WORKDIR /app
 
@@ -21,7 +21,7 @@ CMD ["npm", "run", "pm2"]
 
 # run npm build first
 
-# docker build -t asia.gcr.io/shoppingcat/dev-back:0.0.16 .
-# docker push asia.gcr.io/shoppingcat/dev-back:0.0.16
+# docker build -t asia.gcr.io/shoppingcat/dev-back:0.0.17 .
+# docker push asia.gcr.io/shoppingcat/dev-back:0.0.17
 
 # docker run --name shopping-cat-back-con -p 80:80 asia.gcr.io/shoppingcat/dev-back:0.0.14

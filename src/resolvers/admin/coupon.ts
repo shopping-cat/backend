@@ -26,12 +26,14 @@ export const createCoupon = mutationField(t => t.field('createCoupon', {
 
         const couponId = cc.generate()
 
-        await createNotification({
-            title: '테스트',
-            content: '쿠폰 발급',
-            type: 'none',
-            user: { connect: { id: userId } }
-        }, userId)
+        if (userId) {
+            await createNotification({
+                title: '테스트',
+                content: '쿠폰 발급',
+                type: 'none',
+                user: { connect: { id: userId } }
+            }, userId)
+        }
 
         return ctx.prisma.coupon.create({
             data: {
