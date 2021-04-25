@@ -8,11 +8,13 @@ import getIUser from "../../utils/getIUser"
 
 import errorFormat from "../../utils/errorFormat";
 import { uploadImage } from "../../lib/googleCloudStorage"
+import asyncDelay from "../../utils/asyncDelay";
 
 // Query - 내 정보를 가져옴
 export const iUser = queryField(t => t.field('iUser', {
     type: 'User',
     resolve: async (_, { }, ctx) => {
+        await asyncDelay()
         const user = await getIUser(ctx)
         return user
     }

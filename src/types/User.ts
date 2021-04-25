@@ -28,6 +28,18 @@ export const User = objectType({
         t.model.cart()
         t.model.searchKeywords()
         t.model.notifications()
+        t.field('paymentNum', {
+            type: 'Int',
+            resolve: async ({ id }, _, ctx) => {
+                const count = await ctx.prisma.payment.count({
+                    where: {
+                        userId: id,
+                        state: '정상처리'
+                    }
+                })
+                return count
+            }
+        })
         t.field('notificationNum', {
             type: 'Int',
             resolve: async ({ id }, _, ctx) => {

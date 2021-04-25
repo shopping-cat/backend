@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { intArg, mutationField, nonNull, nullable, stringArg } from "nexus";
+import createNotification from "../../utils/createNotification";
 import errorFormat from "../../utils/errorFormat";
 
 const cc = require('coupon-code');
@@ -24,6 +25,13 @@ export const createCoupon = mutationField(t => t.field('createCoupon', {
         if (salePrice && maxSalePrice) throw errorFormat('salePrice는 maxSalePrice와 같이 사용할 수 없습니다')
 
         const couponId = cc.generate()
+
+        await createNotification({
+            title: '테스트',
+            content: '쿠폰 발급',
+            type: 'none',
+            user: { connect: { id: userId } }
+        }, userId)
 
         return ctx.prisma.coupon.create({
             data: {

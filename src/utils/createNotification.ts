@@ -15,18 +15,22 @@ const createNotification = async (notiData: Prisma.NotificationCreateInput, user
         data: notiData
     })
     if (user.fcmToken && !disablePush && (!isEventMessage || !!user.eventMessageAllowDate)) {
-        const res = await userMessaging.send({
-            token: user.fcmToken,
-            data: {
-                title: notification.title,
-                body: notification.content
-            },
-            notification: {
-                title: notification.title,
-                body: notification.content
-            }
-        })
-        console.log(res)
+        try {
+            await userMessaging.send({
+                token: user.fcmToken,
+                data: {
+                    title: notification.title,
+                    body: notification.content,
+                    type: 'notification'
+                },
+                notification: {
+                    title: notification.title,
+                    body: notification.content
+                }
+            })
+        } catch (error) {
+
+        }
     }
     return notification
 }
