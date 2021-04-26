@@ -237,7 +237,8 @@ export const registDelivery = mutationField(t => t.field('registDelivery', {
                 user: { connect: { id: order.userId } },
                 title: '배송시작',
                 content: `${order.item.name} 상품의 배송이 시작되었습니다.`,
-                type: 'none',
+                type: 'payment',
+                params: { data: { id: order.paymentId } }
             },
             order.userId
         )
@@ -363,7 +364,8 @@ export const cancelOrder = mutationField(t => t.field('cancelOrder', {
                 user: { connect: { id: order.userId } },
                 title: '상점취소처리',
                 content: `${order.item.name} 상품이 상점취소처리 되었습니다. \n사유 : ${order.reason}`,
-                type: 'none',
+                type: 'payment',
+                params: { data: { id: order.paymentId } }
             },
             order.userId
         )
@@ -485,7 +487,8 @@ export const refundOrder = mutationField(t => t.field('refundOrder', {
                 user: { connect: { id: order.userId } },
                 title: '환불처리',
                 content: `${order.item.name} 상품이 정상적으로 환불처리 되었습니다. 환불금액은 지급은 최대 영업일로 3일 까지 소요 될 수 있으며 미지급시 문의 바랍니다.`,
-                type: 'none',
+                type: 'payment',
+                params: { data: { id: order.paymentId } }
             },
             order.userId
         )
@@ -514,7 +517,8 @@ export const exchangeOrder = mutationField('exchangeOrder', {
                 user: { connect: { id: order.userId } },
                 title: '교환처리',
                 content: `${order.item.name} 상품이 정상적으로 교환처리 되었습니다`,
-                type: 'none',
+                type: 'payment',
+                params: { data: { id: order.paymentId } }
             },
             order.userId
         )
