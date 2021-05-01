@@ -32,7 +32,7 @@ export const Shop = objectType({
                         profitReceipt: null
                     }
                 })
-                if (sum.totalPrice === null) throw errorFormat('정산 가능금액 계산 오류')
+                if (sum.totalPrice === null) return 0
                 return Number((sum.totalPrice * (100 - COMMISSION) / 100).toFixed(0))
             }
         })
