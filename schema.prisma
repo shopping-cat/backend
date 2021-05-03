@@ -355,3 +355,14 @@ model Notification {
   userId    String
   user      User     @relation(fields: [userId], references: [id])
 }
+
+model AppVersion {
+  id                   Int      @id @default(autoincrement())
+  createdAt            DateTime @default(now())
+  majorVersion         Int
+  minorVersion         Int
+  patchVersion         Int
+  updateRequire        Boolean
+  playstoreDistributed Boolean
+  appstoreDistributed  Boolean
+}
