@@ -1,5 +1,5 @@
 # BUILDER
-FROM node:12 AS builder
+FROM node:12.22.1 AS builder
 WORKDIR /app
 COPY . .
 RUN ls -a
@@ -7,7 +7,7 @@ RUN npm install
 RUN npm run build:silent
 
 # RUNNER
-FROM node:12
+FROM node:12.22.1
 WORKDIR /app
 COPY --from=builder app/dist ./dist
 COPY assets ./assets
