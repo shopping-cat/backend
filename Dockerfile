@@ -1,27 +1,19 @@
-FROM node:12.22.1
-
+# BUILDER
+FROM node:12 AS builder
 WORKDIR /app
+COPY . .
+RUN ls -a
+RUN npm install
+RUN npm run build:silent
 
+# RUNNER
+FROM node:12
+WORKDIR /app
+COPY --from=builder app/dist ./dist
+COPY assets ./assets
 COPY package.json .
-COPY schema.prisma .
-COPY extraDeliveryPriceAddressList.json .
+COPY package-lock.json .
 COPY pm2.json .
-COPY dist dist/
-# COPY gcpServiceAccountKey.json .
-# COPY serviceAccountKeySeller.json .
-# COPY serviceAccountKeyUser.json .
-# COPY .env .
-
-RUN npm install --production --force
-RUN npm run generate:prisma
-
+RUN npm install --production
 EXPOSE 80
-
 CMD ["npm", "run", "pm2"]
-
-# run npm build first
-
-# docker build -t asia.gcr.io/shoppingcat/dev-back:0.0.18 .
-# docker push asia.gcr.io/shoppingcat/dev-back:0.0.18
-
-# docker run --name shopping-cat-back-con -p 80:80 asia.gcr.io/shoppingcat/dev-back:0.0.18

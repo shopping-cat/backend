@@ -1,8 +1,9 @@
 dist
-node_modules
 migrations
+node_modules
 src/generated
 .env
+.dockerignore
 **/.DS_Store
 **.graphql
 *AccountKey.json

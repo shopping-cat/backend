@@ -5,7 +5,8 @@
     "migrate": "prisma migrate dev",
     "generate": "npm -s run generate:prisma && npm -s run generate:nexus:app && npm -s run generate:nexus:admin && npm -s run generate:nexus:seller",
     "studio": "prisma studio",
-    "build": "cross-env NODE_ENV=production npm -s run clean && npm -s run generate && tsc",
+    "build": "cross-env NODE_ENV=production npm -s run clean && tsc -b --force",
+    "build:silent": "cross-env NODE_ENV=production npm -s run clean && tsc-silent -p tsconfig.json --suppress @/src",
     "start": " cross-env NODE_ENV=production node dist/server",
     "pm2": "cross-env NODE_ENV=production pm2-runtime start pm2.json",
     "clean": "rm -rf dist",
@@ -44,8 +45,6 @@
     "nexus": "^1.0.0",
     "nexus-plugin-prisma": "^0.34.1",
     "pm2": "^4.5.6",
-    "prisma": "^2.21.2",
-    "typescript": "^4.0.2",
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
     "xss": "^1.0.8"
@@ -64,8 +63,12 @@
     "graphql-import": "^1.0.2",
     "graphql-import-node": "0.0.4",
     "nodemon": "^2.0.4",
+    "prisma": "^2.21.2",
     "prisma-dbml-generator": "^0.4.0",
     "ts-node": "^9.0.0",
-    "ts-node-dev": "^1.0.0-pre.62"
+    "ts-node-dev": "^1.0.0-pre.62",
+    "tsc-silent": "^1.2.1",
+    "typescript": "^4.0.2",
+    "yargs": "^15.4.1"
   }
 }
