@@ -12,7 +12,6 @@ WORKDIR /app
 COPY --from=builder app/dist ./dist
 COPY assets ./assets
 COPY package.json .
-COPY package-lock.json .
 COPY pm2.json .
 RUN npm install --production
 EXPOSE 80
