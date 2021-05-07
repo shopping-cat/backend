@@ -71,12 +71,20 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
             items: Item[]
         }[] = []
 
-
         const [todayPopular, userRecentViewItem, newSale, saleUntilToday] = await Promise.all([
-            ctx.prisma.item.findMany({
-                where: { state: '판매중' },
-                orderBy: { likeNum: 'desc' },
-                take: 10,
+            ctx.prisma.order.groupBy({
+                by: ['itemId'],
+                where: {
+                    createdAt: { gte: dayjs().add(-1, 'day').toDate() },
+                    state: { in: ['구매접수', '배송중'] }
+                },
+                count: true,
+                orderBy: {
+                    _count: {
+                        itemId: 'desc'
+                    }
+                },
+                take: 10
             }),
             ctx.prisma.userRecentViewItem.findMany({
                 where: { userId: user.id },
@@ -115,7 +123,12 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
         list.push({
             type: 'itemList',
             title: '오늘 인기 상품',
-            items: todayPopular
+            items: (await ctx.prisma.item.findMany({
+                where: {
+                    id: { in: todayPopular.map(v => v.itemId) }
+                }
+                //@ts-ignore
+            })).sort((a, b) => (todayPopular.find(v => v.itemId === b.id)?.count || 0) - (todayPopular.find(v => v.itemId === a.id)?.count || 0))
         })
         // list.push({
         //     type: 'itemList',
