@@ -1,9 +1,11 @@
 import { Item } from "@prisma/client"
+import dayjs from "dayjs"
 import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable, extendType, booleanArg, list, objectType } from "nexus"
+import endOfTheDate from "../../utils/endOfTheDate"
 
 import errorFormat from "../../utils/errorFormat"
-import firstOfTheDate from "../../utils/firstOfTheDate"
 import getIUser from "../../utils/getIUser"
+import startOfTheDate from "../../utils/startOfTheDate"
 
 // Query - 아이템 세부 정보
 export const item = queryField(t => t.nullable.field('item', {
@@ -85,14 +87,26 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
             ctx.prisma.item.findMany({
                 where: {
                     state: '판매중',
-                    saleStartDate: { equals: firstOfTheDate(new Date) }
+                    AND: [
+                        { saleStartDate: { gte: startOfTheDate(new Date()) } },
+                        { saleStartDate: { lte: endOfTheDate(new Date()) } }
+                    ]
+                },
+                orderBy: {
+                    sale: 'desc'
                 },
                 take: 10
             }),
             ctx.prisma.item.findMany({
                 where: {
                     state: '판매중',
-                    saleEndDate: { equals: firstOfTheDate(new Date) }
+                    AND: [
+                        { saleEndDate: { gte: startOfTheDate(new Date()) } },
+                        { saleEndDate: { lte: endOfTheDate(new Date()) } }
+                    ]
+                },
+                orderBy: {
+                    sale: 'desc'
                 },
                 take: 10
             })
