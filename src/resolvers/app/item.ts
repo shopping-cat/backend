@@ -2,6 +2,7 @@ import { Item } from "@prisma/client"
 import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable, extendType, booleanArg, list, objectType } from "nexus"
 
 import errorFormat from "../../utils/errorFormat"
+import firstOfTheDate from "../../utils/firstOfTheDate"
 import getIUser from "../../utils/getIUser"
 
 // Query - 아이템 세부 정보
@@ -12,9 +13,36 @@ export const item = queryField(t => t.nullable.field('item', {
     },
     resolve: async (_, { id }, ctx) => {
 
-        return ctx.prisma.item.findUnique({
-            where: { id }
+        const user = await getIUser(ctx)
+        console.log(id)
+        const userRecentViewItems = await ctx.prisma.userRecentViewItem.findMany({
+            where: { userId: user.id },
+            orderBy: { createdAt: 'desc' }
         })
+        const item = await ctx.prisma.item.findUnique({ where: { id } })
+
+        if (!item) throw errorFormat('존재하지 않는 상품 입니다')
+
+        // 중복 제거
+        const filteredUserRecentViewItems = userRecentViewItems.filter(v => v.itemId === id)
+        if (filteredUserRecentViewItems.length > 0) {
+            await ctx.prisma.userRecentViewItem.delete({ where: { id: filteredUserRecentViewItems[0].id } })
+        }
+        // 중복제거 후에 상품이 20개 이상이면 이상인 만큼 삭제
+        const deletedUserRecentViewItmes = userRecentViewItems.filter(v => v.itemId !== id)
+        if (deletedUserRecentViewItmes.length >= 20) {
+            await ctx.prisma.userRecentViewItem.deleteMany({ where: { id: { in: deletedUserRecentViewItmes.slice(20 - 1).map(v => v.id) } } })
+        }
+
+        // 최근 검색에 추가
+        await ctx.prisma.userRecentViewItem.create({
+            data: {
+                user: { connect: { id: user.id } },
+                item: { connect: { id: item.id } }
+            }
+        })
+
+        return item
     }
 }))
 
@@ -28,63 +56,73 @@ export const homeItemType = objectType({
         })
     }
 })
-
+// 홈화면에 보여줄 아이템 세트들
 export const homeItems = queryField(t => t.list.field('homeItems', {
     type: homeItemType,
     resolve: async (_, { }, ctx) => {
 
-        const list = []
-        list.push({
-            type: 'itemList',
-            title: '오늘 인기 상품',
-            items: await ctx.prisma.item.findMany({
+        const user = await getIUser(ctx)
+
+        const list: {
+            type: string
+            title: string
+            items: Item[]
+        }[] = []
+
+
+        const [todayPopular, userRecentViewItem, newSale, saleUntilToday] = await Promise.all([
+            ctx.prisma.item.findMany({
                 where: { state: '판매중' },
                 orderBy: { likeNum: 'desc' },
                 take: 10,
-            })
-        })
-        list.push({
-            type: 'itemList',
-            title: '광고',
-            items: await ctx.prisma.item.findMany({
-                where: { state: '판매중' },
-                orderBy: { likeNum: 'asc' },
+            }),
+            ctx.prisma.userRecentViewItem.findMany({
+                where: { userId: user.id },
+                include: { item: true },
+                orderBy: { createdAt: 'desc' },
                 take: 10
-            })
-        })
-        list.push({
-            type: 'itemList',
-            title: '최근 본 상품',
-            items: await ctx.prisma.item.findMany({
-                where: { state: '판매중' },
-                orderBy: {
-                    createdAt: 'desc'
+            }),
+            ctx.prisma.item.findMany({
+                where: {
+                    state: '판매중',
+                    saleStartDate: { equals: firstOfTheDate(new Date) }
+                },
+                take: 10
+            }),
+            ctx.prisma.item.findMany({
+                where: {
+                    state: '판매중',
+                    saleEndDate: { equals: firstOfTheDate(new Date) }
                 },
                 take: 10
             })
+        ])
+
+        list.push({
+            type: 'itemList',
+            title: '오늘 인기 상품',
+            items: todayPopular
+        })
+        // list.push({
+        //     type: 'itemList',
+        //     title: '광고',
+        //     items: [] // TODO
+        // })
+        list.push({
+            type: 'itemList',
+            title: '최근 본 상품',
+            items: userRecentViewItem.map(v => v.item)
         })
         list.push({
             type: 'itemList',
             title: '신규 세일',
-            items: await ctx.prisma.item.findMany({
-                where: { state: '판매중' },
-                orderBy: {
-                    createdAt: 'asc'
-                },
-                take: 10
-            })
+            items: newSale
         })
         list.push({
             type: 'itemList',
             title: '오늘까지 세일',
-            items: await ctx.prisma.item.findMany({
-                where: { state: '판매중' },
-                orderBy: { createdAt: 'asc' },
-                take: 10
-            })
+            items: saleUntilToday
         })
-
-
 
         return list.filter(v => v.items.length !== 0)
     }

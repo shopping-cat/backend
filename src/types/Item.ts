@@ -29,6 +29,7 @@ export const Item = objectType({
         t.model.orders()
         t.model.reviews()
         t.model.cart()
+        t.model.userRecentViewItem()
         t.model.userLikes()
         t.model.shop()
         t.model.shopId()

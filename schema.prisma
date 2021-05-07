@@ -32,6 +32,18 @@ model User {
   itemReviewLikes         ItemReview[]           @relation("UserItemReviewLike")
   itemReviewUnlikes       ItemReview[]           @relation("UserItemReviewUnlike")
   notifications           Notification[]
+  userRecentViewItem      UserRecentViewItem[]
+}
+
+model UserRecentViewItem {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  userId    String
+  itemId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  item      Item     @relation(fields: [itemId], references: [id])
+
+  @@index([createdAt])
 }
 
 model UserCertificatedInfo {
@@ -231,34 +243,39 @@ model ItemReviewImage {
 }
 
 model Item {
-  id                 Int          @id @default(autoincrement())
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
-  likeNum            Int          @default(0)
-  state              String       @default("상품등록요청")
+  id                 Int                  @id @default(autoincrement())
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  likeNum            Int                  @default(0)
+  state              String               @default("상품등록요청")
   deliveryPrice      Int
   extraDeliveryPrice Int
   name               String
   price              Int
-  sale               Int          @default(0)
+  sale               Int                  @default(0)
+  reservedSale       Int?
+  saleStartDate      DateTime?
+  saleEndDate        DateTime?
   option             Json?
   requireInformation Json
-  html               String       @db.Text
+  html               String               @db.Text
   shopId             Int?
   category1          String
   category2          String
-  targetItemId       Int?         @unique
-  shop               Shop?        @relation(fields: [shopId], references: [id])
-  targetItem         Item?        @relation("ItemToItem", fields: [targetItemId], references: [id])
+  targetItemId       Int?                 @unique
+  shop               Shop?                @relation(fields: [shopId], references: [id])
+  targetItem         Item?                @relation("ItemToItem", fields: [targetItemId], references: [id])
   cart               CartItem[]
-  updateItem         Item?        @relation("ItemToItem")
+  updateItem         Item?                @relation("ItemToItem")
   images             ItemImage[]
   reviews            ItemReview[]
   orders             Order[]
   userLikes          User[]
+  userRecentViewItem UserRecentViewItem[]
 
   @@index([shopId], name: "shopId")
   @@index([targetItemId], name: "targetItemId")
+  @@index([likeNum], name: "likeNum")
 }
 
 model ItemImage {

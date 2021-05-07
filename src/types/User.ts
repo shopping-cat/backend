@@ -25,6 +25,7 @@ export const User = objectType({
         t.model.itemReviewLikes()
         t.model.itemReviewUnlikes()
         t.model.itemLikes()
+        t.model.userRecentViewItem()
         t.model.cart()
         t.model.searchKeywords()
         t.model.notifications()

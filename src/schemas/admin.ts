@@ -13,7 +13,7 @@ export const schema = makeSchema({
     shouldGenerateArtifacts: process.env.NODE_ENV === 'development',
     outputs: {
         schema: __dirname + '/../../schema_admin.graphql',
-        typegen: __dirname + '/../generated/nexus_admin.ts',
+        typegen: __dirname + '/../generated/nexus_admin.d.ts',
     },
     contextType: {
         module: require.resolve('../context'),
