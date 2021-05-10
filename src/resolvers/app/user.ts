@@ -37,10 +37,9 @@ export const kakaoTokenToFirebaseToken = queryField(t => t.nonNull.field('kakaoT
         const kakaoUserId = `KAKAO:${result.data.id}`
         const properties = {
             email: result?.data?.kakao_account?.email,
-            displayName: result?.data?.properties?.nickname || null,
-            photoURL: result?.data?.properties?.profile_image || null,
+            displayName: result?.data?.properties?.nickname || undefined,
+            photoURL: result?.data?.properties?.profile_image || undefined,
         }
-
         // 파이어베이스에 유저 생성 or 업데이트
         try {
             await userAuth.updateUser(kakaoUserId, properties)

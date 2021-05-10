@@ -13,7 +13,7 @@ const logger = winston.createLogger({
 
 //@ts-ignore
 const expressErrorLogger = (err, req, res, next) => {
-    console.log(err.message)
+    console.error(err)
     logger.error(err.message)
     next(err)
 }
