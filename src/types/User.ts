@@ -1,5 +1,6 @@
 import { objectType } from "nexus"
 import { userAuth } from "../lib/firebase"
+import getUserPoint from "../utils/getUserPoint"
 
 export const User = objectType({
     name: 'User',
@@ -7,7 +8,6 @@ export const User = objectType({
         t.model.id()
         t.model.createdAt()
         t.model.updatedAt()
-        t.model.point()
         t.model.fcmToken()
         t.model.eventMessageAllowDate()
         t.model.termsOfServiceAllowDate()
@@ -29,6 +29,13 @@ export const User = objectType({
         t.model.cart()
         t.model.searchKeywords()
         t.model.notifications()
+        t.field('point', {
+            type: 'Int',
+            resolve: async ({ id }) => {
+                const point = await getUserPoint(id)
+                return point
+            }
+        })
         t.field('paymentNum', {
             type: 'Int',
             resolve: async ({ id }, _, ctx) => {

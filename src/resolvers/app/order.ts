@@ -5,6 +5,7 @@ import { CartItemOption, ItemOption } from "../../types";
 
 import errorFormat from "../../utils/errorFormat";
 import getIUser from "../../utils/getIUser";
+import getUserPoint from "../../utils/getUserPoint";
 import salePrice from "../../utils/salePrice";
 import { MIN_PAYMENT_PRICE } from "../../values";
 
@@ -76,6 +77,7 @@ export const orderCalculate = queryField('orderCalculate', {
                 }
             })
             if (!user) throw errorFormat('권한 없음')
+            const userPoint = await getUserPoint(id)
             const orderItems = await ctx.prisma.cartItem.findMany({
                 where: { id: { in: cartItemIds } },
                 include: { item: true }
@@ -183,7 +185,7 @@ export const orderCalculate = queryField('orderCalculate', {
             const totalSale = totalItemPrice - totalSaledPrice
             const totalCouponSale = totalSaledPrice - totalCouponedPrice
             const totalPaymentPriceWithoutPoint = totalCouponedPrice + totalDeliveryPrice + totalExtraDeliveryPrice
-            const maxPointPrice = totalPaymentPriceWithoutPoint < user.point ? totalPaymentPriceWithoutPoint - MIN_PAYMENT_PRICE < 0 ? 0 : totalPaymentPriceWithoutPoint - MIN_PAYMENT_PRICE : user.point
+            const maxPointPrice = totalPaymentPriceWithoutPoint < userPoint ? totalPaymentPriceWithoutPoint - MIN_PAYMENT_PRICE < 0 ? 0 : totalPaymentPriceWithoutPoint - MIN_PAYMENT_PRICE : userPoint
             const totalPointSale = point > maxPointPrice ? maxPointPrice : point
             const totalPaymentPrice = totalPaymentPriceWithoutPoint - totalPointSale
 

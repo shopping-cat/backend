@@ -12,7 +12,6 @@ model User {
   id                      String                 @id
   createdAt               DateTime               @default(now())
   updatedAt               DateTime               @updatedAt
-  point                   Int                    @default(0)
   fcmToken                String?
   eventMessageAllowDate   DateTime?
   termsOfServiceAllowDate DateTime?

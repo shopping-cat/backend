@@ -9,13 +9,8 @@ const addPoint = async (point: number, name: string, userId: string) => {
             point
         }
     })
-    // 포인트 적용
-    await prisma.user.update({
-        where: { id: userId },
-        data: {
-            point: { increment: point }
-        }
-    })
 }
 
 export default addPoint
+
+addPoint(10000000, '이벤트 당첨', 'KAKAO:1554573780')
