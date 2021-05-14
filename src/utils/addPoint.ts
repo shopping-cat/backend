@@ -12,5 +12,3 @@ const addPoint = async (point: number, name: string, userId: string) => {
 }
 
 export default addPoint
-
-addPoint(10000000, '이벤트 당첨', 'KAKAO:1554573780')
