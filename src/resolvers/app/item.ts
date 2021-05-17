@@ -15,34 +15,37 @@ export const item = queryField(t => t.nullable.field('item', {
     },
     resolve: async (_, { id }, ctx) => {
 
-        const user = await getIUser(ctx)
-        console.log(id)
-        const userRecentViewItems = await ctx.prisma.userRecentViewItem.findMany({
-            where: { userId: user.id },
-            orderBy: { createdAt: 'desc' }
-        })
+
         const item = await ctx.prisma.item.findUnique({ where: { id } })
 
-        if (!item) throw errorFormat('존재하지 않는 상품 입니다')
+        const user = await getIUser(ctx, true)
 
-        // 중복 제거
-        const filteredUserRecentViewItems = userRecentViewItems.filter(v => v.itemId === id)
-        if (filteredUserRecentViewItems.length > 0) {
-            await ctx.prisma.userRecentViewItem.delete({ where: { id: filteredUserRecentViewItems[0].id } })
-        }
-        // 중복제거 후에 상품이 20개 이상이면 이상인 만큼 삭제
-        const deletedUserRecentViewItmes = userRecentViewItems.filter(v => v.itemId !== id)
-        if (deletedUserRecentViewItmes.length >= 20) {
-            await ctx.prisma.userRecentViewItem.deleteMany({ where: { id: { in: deletedUserRecentViewItmes.slice(20 - 1).map(v => v.id) } } })
-        }
+        if (user) { // 최근 검색어 추가
+            const userRecentViewItems = await ctx.prisma.userRecentViewItem.findMany({
+                where: { userId: user.id },
+                orderBy: { createdAt: 'desc' }
+            })
 
-        // 최근 검색에 추가
-        await ctx.prisma.userRecentViewItem.create({
-            data: {
-                user: { connect: { id: user.id } },
-                item: { connect: { id: item.id } }
+            if (!item) throw errorFormat('존재하지 않는 상품 입니다')
+
+            // 중복 제거
+            const filteredUserRecentViewItems = userRecentViewItems.filter(v => v.itemId === id)
+            if (filteredUserRecentViewItems.length > 0) {
+                await ctx.prisma.userRecentViewItem.delete({ where: { id: filteredUserRecentViewItems[0].id } })
             }
-        })
+            // 중복제거 후에 상품이 20개 이상이면 이상인 만큼 삭제
+            const deletedUserRecentViewItmes = userRecentViewItems.filter(v => v.itemId !== id)
+            if (deletedUserRecentViewItmes.length >= 20) {
+                await ctx.prisma.userRecentViewItem.deleteMany({ where: { id: { in: deletedUserRecentViewItmes.slice(20 - 1).map(v => v.id) } } })
+            }
+            // 최근 검색에 추가
+            await ctx.prisma.userRecentViewItem.create({
+                data: {
+                    user: { connect: { id: user.id } },
+                    item: { connect: { id: item.id } }
+                }
+            })
+        }
 
         return item
     }
@@ -63,7 +66,7 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
     type: homeItemType,
     resolve: async (_, { }, ctx) => {
 
-        const user = await getIUser(ctx)
+
 
         const list: {
             type: string
@@ -86,12 +89,20 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
                 },
                 take: 10
             }),
-            ctx.prisma.userRecentViewItem.findMany({
-                where: { userId: user.id },
-                include: { item: true },
-                orderBy: { createdAt: 'desc' },
-                take: 10
-            }),
+            (async () => {
+                try {
+                    const user = await getIUser(ctx)
+                    const items = await ctx.prisma.userRecentViewItem.findMany({
+                        where: { userId: user.id },
+                        include: { item: true },
+                        orderBy: { createdAt: 'desc' },
+                        take: 10
+                    })
+                    return items
+                } catch (error) {
+                    return []
+                }
+            })(),
             ctx.prisma.item.findMany({
                 where: {
                     state: '판매중',
@@ -167,8 +178,9 @@ export const filteredItems = queryField(t => t.list.field('filteredItems', {
         limit: nullable(intArg({ default: 15 }))
     },
     resolve: async (_, { category1, category2, keyword, orderBy, offset, limit }, ctx) => {
-        if (keyword) { // 최근 검색어에 추가
-            const user = await getIUser(ctx)
+        const user = await getIUser(ctx, true)
+
+        if (keyword && user) { // 최근 검색어에 추가
             const searchKeyword = await ctx.prisma.searchKeyword.findFirst({
                 where: {
                     keyword,
@@ -302,7 +314,7 @@ export const shopItems = queryField(t => t.list.field('shopItems', {
             skip: offset,
             where: {
                 shopId,
-                state: '판매중'
+                state: { in: ['판매중', '재고없음'] }
             },
             orderBy: {
                 createdAt: orderBy === '최신순' ? 'desc' : undefined,

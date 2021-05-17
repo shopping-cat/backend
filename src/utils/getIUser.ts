@@ -1,11 +1,16 @@
+import { User } from '.prisma/client'
 import { Context, prisma } from '../context'
 import { userAuth } from '../lib/firebase'
 import errorFormat from './errorFormat'
 
-
-export const getIUser = async (ctx: Context) => {
+// TODO @ts-ignore
+export const getIUser = async <B = false>(ctx: Context, ignoreError?: B): Promise<B extends true ? User | null : User> => {
     let token = ctx.expressContext.req.headers.authorization
-    if (!token) throw errorFormat('로그인이 필요한 작업입니다')
+    if (!token) {
+        //@ts-ignore
+        if (ignoreError) return null
+        else throw errorFormat('로그인이 필요한 작업입니다')
+    }
 
     token = token.replace('Bearer ', '')
 
@@ -16,9 +21,8 @@ export const getIUser = async (ctx: Context) => {
     if (!user) {
         user = await prisma.user.create({ data: { id } })
     }
-
+    //@ts-ignore
     return user
 }
-
 
 export default getIUser

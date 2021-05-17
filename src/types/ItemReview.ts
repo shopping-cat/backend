@@ -33,7 +33,8 @@ export const ItemReview = objectType({
         t.field('recommendState', { // 해당 유저가 좋아요 누른 상품인지
             type: 'String',
             resolve: async ({ id }, _, ctx) => {
-                const user = await getIUser(ctx)
+                const user = await getIUser(ctx, true)
+                if (!user) return 'none'
                 const userLikes = await ctx.prisma.user.findUnique({
                     where: { id: user.id },
                     include: {

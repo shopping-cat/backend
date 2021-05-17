@@ -76,18 +76,22 @@ export const Item = objectType({
         t.field('isILiked', { // 해당 유저가 좋아요 누른 상품인지
             type: 'Boolean',
             resolve: async ({ id }, _, ctx) => {
-                const user = await getIUser(ctx)
-                const userLikes = await ctx.prisma.user.findUnique({
-                    where: { id: user.id },
-                    include: {
-                        itemLikes: {
-                            where: { id }
+                try {
+                    const user = await getIUser(ctx)
+                    const userLikes = await ctx.prisma.user.findUnique({
+                        where: { id: user.id },
+                        include: {
+                            itemLikes: {
+                                where: { id }
+                            }
                         }
-                    }
-                })
-                if (!userLikes) return false
-                if (userLikes.itemLikes.length === 0) return false
-                return true
+                    })
+                    if (!userLikes) return false
+                    if (userLikes.itemLikes.length === 0) return false
+                    return true
+                } catch (error) {
+                    return false
+                }
             }
         })
         t.field('mainImage', {
