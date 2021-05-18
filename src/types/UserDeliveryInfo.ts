@@ -1,5 +1,5 @@
 import { objectType } from "nexus"
-import isExtraDeliveryPriceAddress from "../lib/isExtraDeliveryPriceAddress"
+import isExtraDeliveryPriceAddress from "../utils/isExtraDeliveryPriceAddress"
 
 export const UserDeliveryInfo = objectType({
     name: 'UserDeliveryInfo',

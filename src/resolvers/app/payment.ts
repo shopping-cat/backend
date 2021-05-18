@@ -10,7 +10,7 @@ import { MIN_PAYMENT_PRICE } from "../../values"
 import { OrderCouponArg } from "./order"
 import errorFormat from "../../utils/errorFormat";
 import arraySum from "../../utils/arraySum"
-import isExtraDeliveryPriceAddress from "../../lib/isExtraDeliveryPriceAddress"
+import isExtraDeliveryPriceAddress from "../../utils/isExtraDeliveryPriceAddress"
 
 
 // Query - 주문 조회

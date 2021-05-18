@@ -1,6 +1,6 @@
 import { Coupon } from "@prisma/client";
 import { inputObjectType, intArg, list, mutationField, nonNull, nullable, objectType, queryField, stringArg } from "nexus";
-import isExtraDeliveryPriceAddress from "../../lib/isExtraDeliveryPriceAddress";
+import isExtraDeliveryPriceAddress from "../../utils/isExtraDeliveryPriceAddress";
 import { CartItemOption, ItemOption } from "../../types";
 
 import errorFormat from "../../utils/errorFormat";

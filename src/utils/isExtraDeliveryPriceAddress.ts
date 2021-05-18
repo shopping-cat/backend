@@ -1,5 +1,5 @@
 import bs from "binary-search";
-const list = require('../../../assets/extraDeliveryPriceAddressList.json')
+const list = require('../../assets/extraDeliveryPriceAddressList.json')
 
 const isExtraDeliveryPriceAddress = (postCode: string) => {
     //@ts-ignore

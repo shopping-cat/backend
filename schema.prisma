@@ -157,8 +157,9 @@ model Order {
   refundPrice            Int            @default(0) // 환불된 가격
   refundPoint            Int            @default(0) // 환불된 포인트
   refundMethod           String?
-  deliveryNumber         String?
-  deliveryCompany        String?
+  deliveryNumber         String? // 운송장 번호
+  deliveryCompany        String? // 배송회사 이름
+  deliveryCompanyCode    String? // 배송회사 코드
   totalPrice             Int
   cartItemId             Int
   userId                 String

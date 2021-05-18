@@ -3,6 +3,7 @@ import { intArg, mutationField, nonNull, nullable, queryField, stringArg } from 
 import addPoint from "../../utils/addPoint";
 import bankNameToBankCode from "../../utils/bankNameToBankCode";
 import createNotification from "../../utils/createNotification";
+import deliveryCompanyCodeToDeliveryCompany from "../../utils/deliveryCompanyCodeToDeliveryCompany";
 import errorFormat from "../../utils/errorFormat";
 import getISeller from "../../utils/getISeller";
 
@@ -207,9 +208,9 @@ export const registDelivery = mutationField(t => t.field('registDelivery', {
     args: {
         id: nonNull(intArg()),
         deliveryNumber: nonNull(stringArg()),
-        deliveryCompany: nonNull(stringArg())
+        deliveryCompanyCode: nonNull(stringArg()),
     },
-    resolve: async (_, { id, deliveryNumber, deliveryCompany }, ctx) => {
+    resolve: async (_, { id, deliveryNumber, deliveryCompanyCode }, ctx) => {
         const seller = await getISeller(ctx)
         const prevOrder = await ctx.prisma.order.findUnique({
             where: { id },
@@ -223,7 +224,8 @@ export const registDelivery = mutationField(t => t.field('registDelivery', {
         const order = await ctx.prisma.order.update({
             where: { id },
             data: {
-                deliveryCompany,
+                deliveryCompany: deliveryCompanyCodeToDeliveryCompany(deliveryCompanyCode),
+                deliveryCompanyCode,
                 deliveryNumber,
                 state: '배송중'
             },

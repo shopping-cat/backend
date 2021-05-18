@@ -18,6 +18,7 @@ export const Order = objectType({
         t.model.deliveryCompletionDate()
         t.model.deliveryNumber()
         t.model.deliveryCompany()
+        t.model.deliveryCompanyCode()
         t.model.reason()
         t.model.reasonDetail()
         t.model.refundPrice()
