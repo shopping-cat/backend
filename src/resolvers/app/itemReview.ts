@@ -81,7 +81,7 @@ export const createableItemReviews = queryField(t => t.list.field('createableIte
             where: {
                 userId: user.id,
                 itemReview: null,
-                state: '배송완료'
+                state: { in: ['배송완료', '구매확정'] }
             },
             orderBy: {
                 createdAt: 'desc'
@@ -114,7 +114,7 @@ export const createItemReview = mutationField(t => t.field('createItemReview', {
         // 유효성 검사
         if (!order) throw errorFormat('존재하지 않는 주문 입니다.')
         if (user.id !== order.userId) throw errorFormat('해당 주문에 대해 수정 권한이 없는 계정입니다')
-        if (order.state !== '배송완료') throw errorFormat('해당 주문은 리뷰를 작성할 수 있는 상태가 아닙니다')
+        if (!(order.state === '배송완료' || order.state === '구매확정')) throw errorFormat('해당 주문은 리뷰를 작성할 수 있는 상태가 아닙니다')
         if (order.itemReview) throw errorFormat('이미 리뷰가 작성 되어 있습니다')
 
         // 리뷰 생성

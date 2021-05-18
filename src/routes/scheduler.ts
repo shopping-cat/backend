@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import express from 'express'
 import { prisma } from '../context'
 import addPoint from '../utils/addPoint'
+import createNotification from '../utils/createNotification'
 import { POINT_BACK_PERCENT } from '../values'
 
 const router = express.Router()
@@ -61,14 +62,28 @@ router.post('/orderStateUpdateToConfirmed', async (req, res, next) => {
                 deliveryCompletionDate: { lt: dayjs().add(-7, 'day').toDate() },
             },
             include: {
-                payment: true
+                payment: true,
+                item: true
             },
             take: 100 // 100개 단위로 처리
         })
 
         for (const order of orders) {
             const point = Math.floor(order.payment.totalPrice * order.totalPrice / (order.payment.totalPrice + order.payment.pointSale) * POINT_BACK_PERCENT / 100)
-            if (point > 0) await addPoint(point, '구매확정 포인트 적립', order.userId)
+            if (point > 0) {
+                await addPoint(point, '구매확정 포인트 적립', order.userId)
+                await createNotification(
+                    {
+                        user: { connect: { id: order.userId } },
+                        title: '배송완료',
+                        content: `${order.item.name} 상품의 구매 포인트가 적립되었습니다.`,
+                        type: 'Point'
+                    },
+                    order.userId,
+                    false,
+                    true
+                )
+            }
             await prisma.order.update({
                 where: { id: order.id },
                 data: { state: '구매확정' }

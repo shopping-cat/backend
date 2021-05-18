@@ -9,7 +9,7 @@ import apolloFormatError from './lib/apolloFormatError'
 import { createContext } from './context'
 
 import schedulerRoute from './routes/scheduler'
-
+import deliveryRoute from './routes/delivery'
 
 import { schema as adminSchema } from './schemas/admin'
 import { schema as appSchema } from './schemas/app'
@@ -39,6 +39,7 @@ app.use(expressErrorLogger)
 
 // routing
 app.use('/scheduler', schedulerRoute)
+app.use('/delivery', deliveryRoute)
 
 app.get('/isRunning', (req, res) => res.send('Server is running')) // 서버 구동 확인용 router
 
