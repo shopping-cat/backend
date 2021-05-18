@@ -39,7 +39,7 @@ export const Order = objectType({
             type: 'String',
             async resolve({ itemOption: itemOptionJson, num }) {
                 const itemOption = itemOptionJson as OrderItemOption
-                if (!itemOption) return null
+                if (!itemOption) return `${num}개`
                 return [...itemOption.data, `${num}개`].map((v, i) => `${i !== 0 ? ' | ' : ''}${v}`).join('')
             }
         })
