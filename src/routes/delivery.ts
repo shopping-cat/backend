@@ -9,10 +9,22 @@ const router = express.Router()
 // 주문 상태를 배송중 -> 배송완료 함
 router.post('/trace', async (req, res, next) => {
     try {
+        const { fid, invoice_no, level, time_trans } = req.body
+
+        const prevOrder = await prisma.order.findUnique({ where: { id: Number(fid) } })
+
+        if (!prevOrder) throw new Error('유효하지 않은 fid입니다')
+        if (prevOrder?.deliveryNumber !== invoice_no) throw new Error('운송장번호가 다릅니다')
+        // 배송완료일대만 처리
+        if (Number(level) !== 6) return res.status(200).json({
+            code: true,
+            message: 'success'
+        })
+
         const order = await prisma.order.update({
-            where: { id: 123 },
+            where: { id: Number(fid) },
             data: {
-                deliveryCompletionDate: dayjs().toDate(),
+                deliveryCompletionDate: dayjs(time_trans).toDate(),
                 state: '배송완료'
             },
             include: {
@@ -28,10 +40,20 @@ router.post('/trace', async (req, res, next) => {
                 type: 'Payment',
                 params: { data: { id: order.paymentId } }
             },
-            order.userId
+            order.userId,
+            false,
+            true
         )
+
+        return res.status(200).json({
+            code: true,
+            message: 'success'
+        })
     } catch (error) {
-        next(error)
+        res.status(400).json({
+            code: false,
+            message: 'fail - ' + error
+        })
     }
 })
 

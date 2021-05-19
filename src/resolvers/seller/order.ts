@@ -1,5 +1,7 @@
 import axios from "axios";
+import FormData from "form-data";
 import { intArg, mutationField, nonNull, nullable, queryField, stringArg } from "nexus";
+import { URLSearchParams } from "url";
 import addPoint from "../../utils/addPoint";
 import bankNameToBankCode from "../../utils/bankNameToBankCode";
 import createNotification from "../../utils/createNotification";
@@ -221,6 +223,36 @@ export const registDelivery = mutationField(t => t.field('registDelivery', {
         if (!prevOrder) throw errorFormat('존재하지 않는 주문입니다')
         if (prevOrder.item.shopId !== seller.shopId) throw errorFormat('권한이 없습니다')
         if (prevOrder.state !== '구매접수') throw errorFormat(`${prevOrder.state} 상태에서는 송장 등록이 불가능합니다`)
+
+        // 배송추적 API 등록
+        const params = new URLSearchParams()
+        params.append('num', deliveryNumber)
+        params.append('code', deliveryCompanyCode)
+        params.append('fid', id)
+        params.append('callback_url', 'https://api.shoppingcat.kr/delivery/trace')
+        params.append('callback_type', 'json')
+        params.append('key', process.env.SWEETTRACKER_API_KEY || '')
+        params.append('tier', process.env.SWEETTRACKER_API_KEY || '')
+        params.append('type', 'json')
+
+        try {
+            const { data } = await axios.post(
+                'http://trace-api-dev.sweettracker.net:8102/add_invoice',
+                params,
+                {
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                }
+            )
+            if (!data.success) throw new Error(data.e_message || '운송장 정보가 잘못되었습니다')
+        } catch (error) {
+            console.log(error)
+            throw errorFormat(error)
+        }
+
+
+        // 구매접수 -> 배송중 && 배송정보 등록
         const order = await ctx.prisma.order.update({
             where: { id },
             data: {
