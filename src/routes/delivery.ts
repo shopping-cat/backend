@@ -37,7 +37,7 @@ router.post('/trace', async (req, res, next) => {
                 user: { connect: { id: order.userId } },
                 title: '배송완료',
                 content: `${order.item.name} 상품이 배송완료 되었습니다.\n교환/환불은 7일 이내에 가능합니다.`,
-                type: 'Payment',
+                type: 'OrderDetail',
                 params: { data: { id: order.paymentId } }
             },
             order.userId,
