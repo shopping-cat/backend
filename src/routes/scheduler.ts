@@ -3,6 +3,7 @@ import express from 'express'
 import { prisma } from '../context'
 import addPoint from '../utils/addPoint'
 import createNotification from '../utils/createNotification'
+import getDeliveryInfo from '../utils/getDeliveryInfo'
 import { POINT_BACK_PERCENT } from '../values'
 
 const router = express.Router()
@@ -46,7 +47,7 @@ router.post('/paymentStateUpdateToSuccess', async (req, res, next) => {
                 order.item.shop?.seller?.email
             }
         }
-        res.send()
+        return res.send()
     } catch (error) {
         next(error)
     }
@@ -89,7 +90,77 @@ router.post('/orderStateUpdateToConfirmed', async (req, res, next) => {
                 data: { state: '구매확정' }
             })
         }
-        res.send()
+        return res.send()
+    } catch (error) {
+        next(error)
+    }
+})
+
+// 5분마다 호출
+// 배송중 -> 배송완료
+router.post('/orderStateUpdateToCompletedDelivery', async (req, res, next) => {
+    try {
+        const count = await prisma.order.count({ where: { state: '배송중' } })
+        const ramdomSkip = Math.floor(Math.random() * count)
+        const orders = await prisma.order.findMany({
+            where: {
+                state: '배송중'
+            },
+            include: {
+                payment: true,
+                item: true
+            },
+            take: 100,// 100개 단위로 처리
+            skip: ramdomSkip - 100 > 0 ? ramdomSkip - 100 : 0
+        })
+
+        const list = await Promise.all(orders.map(v => {
+            return (async () => {
+                try {
+                    if (!v.deliveryCompanyCode) throw new Error('택배사 코드 없음')
+                    if (!v.deliveryNumber) throw new Error('운송장 번호 없음')
+
+                    const data = await getDeliveryInfo(v.deliveryCompanyCode, v.deliveryNumber)
+                    if (data.state.id !== 'delivered') return null
+
+                    return v.id
+                } catch (error) {
+                    console.error('배송조회 오류 주문번호 : ' + v.id)
+                    return null
+                }
+            })()
+        }))
+
+        await prisma.order.updateMany({
+            where: {
+                id: { in: list.filter(v => v !== null) as number[] }
+            },
+            data: {
+                deliveryCompletionDate: new Date(),
+                state: '배송완료'
+            }
+        })
+
+        for (const orderIds of list.filter(v => v !== null) as number[]) {
+            try {
+                const order = orders.find(v => v.id === orderIds)
+                if (!order) continue
+                await createNotification(
+                    {
+                        user: { connect: { id: order.userId } },
+                        title: '배송완료',
+                        content: `${order.item.name} 상품이 배송완료 되었습니다.\n교환/환불은 7일 이내에 가능합니다.`,
+                        type: 'OrderDetail',
+                        params: { data: { id: order.paymentId } }
+                    },
+                    order.userId,
+                    false,
+                    true
+                )
+            } catch (error) { }
+        }
+
+        return res.status(200).send()
     } catch (error) {
         next(error)
     }
