@@ -68,9 +68,10 @@ export const createPayment = mutationField(t => t.field('createPayment', {
         point: nonNull(intArg()),
         coupons: nonNull(list(OrderCouponArg)),
         method: nonNull(stringArg()),
-        deliveryMemo: nonNull(stringArg())
+        deliveryMemo: nonNull(stringArg()),
+        easyPaymentMethod: nullable(stringArg())
     },
-    resolve: async (_, { amount, cartItemIds, point, coupons, method, deliveryMemo }, ctx) => {
+    resolve: async (_, { amount, cartItemIds, point, coupons, method, deliveryMemo, easyPaymentMethod }, ctx) => {
         try {
 
             const { id } = await getIUser(ctx)
@@ -86,6 +87,8 @@ export const createPayment = mutationField(t => t.field('createPayment', {
             if (!user.certificatedInfo) throw errorFormat('본인인증이 필요합니다')
             if (!user.deliveryInfo) throw errorFormat('배송지 정보를 입력해주세요')
             if (!user.refundBankAccount) throw errorFormat('환불계좌 정보를 입력해주세요')
+
+            if (method === '간편결제' && !easyPaymentMethod) throw errorFormat('사용하실 간편결제를 골라주세요')
 
             const uid = `${new Date().getTime()}` // payment id & 주문번호
             const cartItems = await ctx.prisma.cartItem.findMany({
@@ -185,6 +188,7 @@ export const createPayment = mutationField(t => t.field('createPayment', {
                     state: '결제요청',
                     name,
                     paymentMethod: method,
+                    easyPaymentMethod,
                     price,
                     deliveryPrice,
                     extraDeliveryPrice,
@@ -266,40 +270,16 @@ export const completePayment = mutationField(t => t.field('completePayment', {
             if (prevPayment.state !== '결제요청') throw errorFormat('잘못된 주문 절차입니다')
             if (prevPayment.totalPrice !== paymentData.amount) throw errorFormat('위조된 결제시도')
 
-            // 오류 처리
-            switch (paymentData.status) {
-                case 'failed': // 오류
-                    await ctx.prisma.payment.update({
-                        where: { id: merchant_uid },
-                        data: {
-                            cancelReason: paymentData.fail_reason || '알 수 없는 이유',
-                            state: '결제취소'
-                        }
-                    })
-                    break
-                case 'ready': // 가상계좌 발급
-                    const { vbank_num, vbank_date, vbank_name } = paymentData
-                    await ctx.prisma.payment.update({
-                        where: { id: merchant_uid },
-                        data: {
-                            vBankDate: vbank_date,
-                            vBankNum: vbank_num,
-                            vBankName: vbank_name,
-                            state: '입금대기'
-                        }
-                    })
-                    break
-                case 'paid': // 결제 성공
-                    await ctx.prisma.payment.update({
-                        where: { id: merchant_uid },
-                        data: {
-                            state: '구매접수'
-                        }
-                    })
-                    break
-            }
+            console.log(paymentData)
 
-            if (paymentData.status !== 'failed') {
+
+            if (paymentData.status === 'paid') {
+                const payment = await ctx.prisma.payment.update({
+                    where: { id: merchant_uid },
+                    data: {
+                        state: '구매접수'
+                    }
+                })
                 //카트에서 삭제
                 await ctx.prisma.cartItem.deleteMany({
                     where: {
@@ -311,13 +291,17 @@ export const completePayment = mutationField(t => t.field('completePayment', {
                 if (prevPayment.pointSale > 0) {
                     await addPoint(-prevPayment.pointSale, '상품구매', user.id)
                 }
+                return payment
+            } else {
+                const payment = await ctx.prisma.payment.update({
+                    where: { id: merchant_uid },
+                    data: {
+                        cancelReason: paymentData.fail_reason || '알 수 없는 이유',
+                        state: '결제취소'
+                    }
+                })
+                return payment
             }
-
-            const payment = await ctx.prisma.payment.findUnique({
-                where: { id: merchant_uid }
-            })
-
-            return payment
         } catch (error) {
             console.error(error)
             throw error

@@ -187,6 +187,7 @@ model Payment {
   state              String
   cancelReason       String?
   paymentMethod      String
+  easyPaymentMethod  String?
   price              Int
   deliveryPrice      Int
   extraDeliveryPrice Int
