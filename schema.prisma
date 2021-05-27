@@ -50,7 +50,6 @@ model UserCertificatedInfo {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   phone     String
-  name      String
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id])
 
@@ -187,7 +186,6 @@ model Payment {
   state              String
   cancelReason       String?
   paymentMethod      String
-  easyPaymentMethod  String?
   price              Int
   deliveryPrice      Int
   extraDeliveryPrice Int

@@ -68,10 +68,9 @@ export const createPayment = mutationField(t => t.field('createPayment', {
         point: nonNull(intArg()),
         coupons: nonNull(list(OrderCouponArg)),
         method: nonNull(stringArg()),
-        deliveryMemo: nonNull(stringArg()),
-        easyPaymentMethod: nullable(stringArg())
+        deliveryMemo: nonNull(stringArg())
     },
-    resolve: async (_, { amount, cartItemIds, point, coupons, method, deliveryMemo, easyPaymentMethod }, ctx) => {
+    resolve: async (_, { amount, cartItemIds, point, coupons, method, deliveryMemo }, ctx) => {
         try {
 
             const { id } = await getIUser(ctx)
@@ -86,9 +85,7 @@ export const createPayment = mutationField(t => t.field('createPayment', {
             if (!user) throw errorFormat('권한이 없습니다')
             if (!user.certificatedInfo) throw errorFormat('본인인증이 필요합니다')
             if (!user.deliveryInfo) throw errorFormat('배송지 정보를 입력해주세요')
-            if (!user.refundBankAccount) throw errorFormat('환불계좌 정보를 입력해주세요')
-
-            if (method === '간편결제' && !easyPaymentMethod) throw errorFormat('사용하실 간편결제를 골라주세요')
+            // if (!user.refundBankAccount) throw errorFormat('환불계좌 정보를 입력해주세요')
 
             const uid = `${new Date().getTime()}` // payment id & 주문번호
             const cartItems = await ctx.prisma.cartItem.findMany({
@@ -188,7 +185,6 @@ export const createPayment = mutationField(t => t.field('createPayment', {
                     state: '결제요청',
                     name,
                     paymentMethod: method,
-                    easyPaymentMethod,
                     price,
                     deliveryPrice,
                     extraDeliveryPrice,

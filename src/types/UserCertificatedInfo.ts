@@ -5,7 +5,6 @@ export const UserCertificatedInfo = objectType({
     definition(t) {
         t.model.id()
         t.model.createdAt()
-        t.model.name()
         t.model.phone()
         t.model.userId()
         t.model.user()
