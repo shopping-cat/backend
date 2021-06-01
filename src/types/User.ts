@@ -1,6 +1,7 @@
 import { objectType } from "nexus"
-import { userAuth } from "../lib/firebase"
+import { catUserAuth, dogUserAuth } from "../lib/firebase"
 import getUserPoint from "../utils/getUserPoint"
+import isCat from "../utils/isCat"
 
 export const User = objectType({
     name: 'User',
@@ -90,9 +91,10 @@ export const User = objectType({
         // oauth에 있는 유저 정보들 가져오기
         t.field('userDetail', {
             type: 'UserDetail',
-            resolve: async ({ id }) => {
+            resolve: async ({ id }, _, ctx) => {
                 try {
-                    const { email, displayName, photoURL } = await userAuth.getUser(id)
+                    const auth = isCat(ctx) ? catUserAuth : dogUserAuth
+                    const { email, displayName, photoURL } = await auth.getUser(id)
                     return {
                         email: email || null,
                         displayName: displayName || null,

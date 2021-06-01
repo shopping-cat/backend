@@ -3,12 +3,13 @@
  */
 import { booleanArg, idArg, inputObjectType, intArg, mutationField, nonNull, nullable, queryField, stringArg } from "nexus"
 import Axios from "axios"
-import { userAuth } from "../../lib/firebase"
+import { catUserAuth, dogUserAuth } from "../../lib/firebase"
 import getIUser from "../../utils/getIUser"
 
 import errorFormat from "../../utils/errorFormat";
 import { uploadImage } from "../../lib/googleCloudStorage"
 import asyncDelay from "../../utils/asyncDelay";
+import isCat from "../../utils/isCat";
 
 // Query - 내 정보를 가져옴
 export const iUser = queryField(t => t.field('iUser', {
@@ -42,14 +43,19 @@ export const kakaoTokenToFirebaseToken = queryField(t => t.nonNull.field('kakaoT
         }
         // 파이어베이스에 유저 생성 or 업데이트
         try {
-            await userAuth.updateUser(kakaoUserId, properties)
+            if (isCat(ctx)) await catUserAuth.updateUser(kakaoUserId, properties)
+            else await dogUserAuth.updateUser(kakaoUserId, properties)
         } catch (error) {
             if (error.code !== 'auth/user-not-found') throw error
-            await userAuth.createUser({ ...properties, uid: kakaoUserId })
+            if (isCat(ctx)) await catUserAuth.createUser({ ...properties, uid: kakaoUserId })
+            else dogUserAuth.updateUser(kakaoUserId, properties)
         }
 
         // 파이어베이스 토큰 생성
-        const firebaseToken = await userAuth.createCustomToken(kakaoUserId, { provider: 'KAKAO' })
+        const firebaseToken = isCat(ctx)
+            ? await catUserAuth.createCustomToken(kakaoUserId, { provider: 'KAKAO' })
+            : await dogUserAuth.createCustomToken(kakaoUserId, { provider: 'KAKAO' })
+
         return firebaseToken
     }
 }))
