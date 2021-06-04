@@ -11,6 +11,7 @@ export const Item = objectType({
         t.model.createdAt()
         t.model.updatedAt()
         t.model.likeNum()
+        t.model.type()
         t.model.state()
         t.model.deliveryPrice()
         t.model.extraDeliveryPrice()

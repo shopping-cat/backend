@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client"
 import { prisma } from "../context"
-import { userMessaging } from '../lib/firebase'
+import { catMessaging, dogMessaging } from '../lib/firebase'
 import errorFormat from "./errorFormat"
 
 
@@ -14,9 +14,12 @@ const createNotification = async (notiData: Prisma.NotificationCreateInput, user
     const notification = await prisma.notification.create({
         data: notiData
     })
+
+    const messaging = user.type === 'cat' ? catMessaging : dogMessaging
+
     if (user.fcmToken && !disablePush && (!isEventMessage || !!user.eventMessageAllowDate)) {
         try {
-            await userMessaging.send({
+            await messaging.send({
                 token: user.fcmToken,
                 data: {
                     title: notification.title,

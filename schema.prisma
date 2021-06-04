@@ -18,6 +18,7 @@ model User {
   privacyPolicyAllowDate  DateTime?
   name                    String?
   photo                   String?
+  type                    UserType
   cart                    CartItem[]
   coupons                 Coupon[]
   itemReviews             ItemReview[]
@@ -33,6 +34,11 @@ model User {
   itemReviewUnlikes       ItemReview[]           @relation("UserItemReviewUnlike")
   notifications           Notification[]
   userRecentViewItem      UserRecentViewItem[]
+}
+
+enum UserType {
+  cat
+  dog
 }
 
 model UserRecentViewItem {
@@ -248,6 +254,7 @@ model Item {
   updatedAt          DateTime             @updatedAt
   likeNum            Int                  @default(0)
   state              String               @default("상품등록요청")
+  type               ItemType
   deliveryPrice      Int
   extraDeliveryPrice Int
   name               String
@@ -276,6 +283,12 @@ model Item {
   @@index([shopId], name: "shopId")
   @@index([targetItemId], name: "targetItemId")
   @@index([likeNum], name: "likeNum")
+}
+
+enum ItemType {
+  cat
+  dog
+  both
 }
 
 model ItemImage {

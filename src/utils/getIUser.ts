@@ -29,7 +29,7 @@ export const getIUser = async <B = false>(ctx: Context, ignoreError?: B): Promis
     // uid에 해당하는 user filed 가 없다면 유저를 생성
     let user = await prisma.user.findFirst({ where: { id } })
     if (!user) {
-        user = await prisma.user.create({ data: { id } })
+        user = await prisma.user.create({ data: { id, type: isCat ? 'cat' : 'dog' } })
     }
     //@ts-ignore
     return user

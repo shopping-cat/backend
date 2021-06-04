@@ -13,6 +13,7 @@ export const User = objectType({
         t.model.eventMessageAllowDate()
         t.model.termsOfServiceAllowDate()
         t.model.privacyPolicyAllowDate()
+        t.model.type()
         t.model.coupons()
         t.model.name()
         t.model.photo()
