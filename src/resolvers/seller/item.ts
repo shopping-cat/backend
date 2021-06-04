@@ -55,6 +55,7 @@ export const createItemInput = inputObjectType({
         t.nonNull.field('requireInformation', { type: 'Json' })
         t.nonNull.list.nonNull.int('images')
         t.nonNull.string('html')
+        t.nonNull.field('type', { type: 'ItemType' })
     }
 })
 
@@ -66,7 +67,7 @@ export const createItem = mutationField(t => t.field('createItem', {
     },
     resolve: async (_, { createItemInput }, ctx) => {
 
-        const { category1, category2, html, name, option, price, images, requireInformation, deliveryPrice, extraDeliveryPrice } = createItemInput
+        const { category1, category2, html, name, option, price, images, requireInformation, deliveryPrice, extraDeliveryPrice, type } = createItemInput
 
         //option 형식 검사
         if (option) {
@@ -120,6 +121,7 @@ export const createItem = mutationField(t => t.field('createItem', {
                 option: option as ItemOption,
                 requireInformation: requireInformation as ItemRequireInformation,
                 images: { connect: images.map((v: number) => ({ id: v })) },
+                type
             }
         })
         return item
@@ -141,6 +143,7 @@ export const updateItemInput = inputObjectType({
         t.nonNull.field('requireInformation', { type: 'Json' })
         t.nonNull.list.nonNull.int('images')
         t.nonNull.string('html')
+        t.nonNull.field('type', { type: 'ItemType' })
     }
 })
 
@@ -152,7 +155,7 @@ export const updateItem = mutationField(t => t.field('updateItem', {
     },
     resolve: async (_, { updateItemInput }, ctx) => {
 
-        const { id, category1, category2, html, name, option, price, images, requireInformation, deliveryPrice, extraDeliveryPrice, sale } = updateItemInput
+        const { id, category1, category2, html, name, option, price, images, requireInformation, deliveryPrice, extraDeliveryPrice, sale, type } = updateItemInput
 
         //option 형식 검사
         if (option) {
@@ -226,6 +229,7 @@ export const updateItem = mutationField(t => t.field('updateItem', {
                         disconnect: item.images.map((v) => ({ id: v.id })),
                         connect: images.map((v: number) => ({ id: v }))
                     },
+                    type
                 }
             })
         }
@@ -248,6 +252,7 @@ export const updateItem = mutationField(t => t.field('updateItem', {
                         disconnect: item.updateItem.images.map((v) => ({ id: v.id })),
                         connect: images.map((v: number) => ({ id: v }))
                     },
+                    type
                 }
             })
         }
@@ -269,6 +274,7 @@ export const updateItem = mutationField(t => t.field('updateItem', {
                             option: option as ItemOption,
                             requireInformation: requireInformation as ItemRequireInformation,
                             images: { connect: images.map((v: number) => ({ id: v })) },
+                            type
                         }
                     }
                 }
