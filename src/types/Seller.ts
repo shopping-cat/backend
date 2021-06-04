@@ -8,6 +8,8 @@ export const Seller = objectType({
         t.model.updatedAt()
         t.model.email()
         t.model.licenseNumber()
+        t.model.bizRegistration()
+        t.model.bizType()
         t.model.shopId()
         t.model.shop()
     }

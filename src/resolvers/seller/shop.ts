@@ -16,6 +16,66 @@ export const shop = queryField(t => t.field('shop', {
     }
 }))
 
+export const createShopInput = inputObjectType({
+    name: 'CreateShopInput',
+    definition: t => {
+        t.nonNull.string('email')
+        t.nonNull.string('licenseNumber')
+        t.nonNull.string('bizType')
+        t.nonNull.string('bizRegistration')
+
+        t.nonNull.string('shopName')
+        t.nonNull.string('kakaoId')
+
+        t.nonNull.string('bankAccountNumber')
+        t.nonNull.string('bankName')
+        t.nonNull.string('bankOwnerName')
+
+        t.nullable.string('kakaoLink')
+        t.nullable.string('csPhone')
+
+        t.nonNull.string('managerName')
+        t.nonNull.string('managerPhone')
+        t.nonNull.string('managerEmail')
+
+        t.nullable.string('storeLink')
+    }
+})
+
+export const createShop = mutationField(t => t.field('createShop', {
+    type: 'Shop',
+    args: {
+        createShopInput: nonNull(createShopInput)
+    },
+    resolve: async (_, { createShopInput }, ctx) => {
+        console.log(createShopInput)
+        const shop = await ctx.prisma.shop.create({
+            data: {
+                shopName: createShopInput.shopName,
+                kakaoId: createShopInput.kakaoId,
+                bankAccountNumber: createShopInput.bankAccountNumber,
+                bankName: createShopInput.bankName,
+                bankOwnerName: createShopInput.bankOwnerName,
+                kakaoLink: createShopInput.kakaoLink,
+                csPhone: createShopInput.csPhone,
+                managerName: createShopInput.managerName,
+                managerPhone: createShopInput.managerPhone,
+                managerEmail: createShopInput.managerEmail,
+                storeLink: createShopInput.storeLink,
+                seller: {
+                    create: {
+                        email: createShopInput.email,
+                        licenseNumber: createShopInput.licenseNumber,
+                        bizRegistration: createShopInput.bizRegistration,
+                        bizType: createShopInput.bizType
+                    }
+                }
+            }
+        })
+        return shop
+    }
+}))
+
 export const updateShopInput = inputObjectType({
     name: 'UpdateShopInput',
     definition: t => {
@@ -61,6 +121,17 @@ export const uploadShopImage = mutationField(t => t.field('uploadShopImage', {
     resolve: async (_, { image }, ctx) => {
         await getISeller(ctx)
         const uri = await uploadImage(image, 'shop-image/')
+        return uri
+    }
+}))
+
+export const uploadEtcImage = mutationField(t => t.field('uploadEtcImage', {
+    type: 'String',
+    args: {
+        image: nonNull('Upload')
+    },
+    resolve: async (_, { image }, ctx) => {
+        const uri = await uploadImage(image, 'etc-image/')
         return uri
     }
 }))

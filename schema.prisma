@@ -294,7 +294,7 @@ model Shop {
   updatedAt         DateTime        @updatedAt
   // 기본정보
   shopName          String          @unique
-  shopImage         String
+  shopImage         String?
   kakaoId           String? // 주문 정보를 받을 수 있음
   // 수익
   bankAccountNumber String?
@@ -305,7 +305,13 @@ model Shop {
   csPhone           String?
   refundInfo        String?         @db.Text
   exchangeInfo      String?         @db.Text
-  //
+  // 담당자
+  managerName       String?
+  managerPhone      String?
+  managerEmail      String?
+  // 기타
+  storeLink         String?
+  state             String          @default("가입요청")
   items             Item[]
   partner           Partner?
   seller            Seller?
@@ -313,13 +319,15 @@ model Shop {
 }
 
 model Seller {
-  id            Int      @id @default(autoincrement())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  email         String   @unique
-  licenseNumber String   @unique
-  shopId        Int      @unique
-  shop          Shop     @relation(fields: [shopId], references: [id])
+  id              Int      @id @default(autoincrement())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  email           String   @unique
+  licenseNumber   String   @unique
+  bizRegistration String?
+  bizType         String?
+  shopId          Int      @unique
+  shop            Shop     @relation(fields: [shopId], references: [id])
 
   @@index([shopId], name: "shopId")
 }

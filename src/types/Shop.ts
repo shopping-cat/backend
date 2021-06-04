@@ -21,6 +21,11 @@ export const Shop = objectType({
         t.model.bankOwnerName()
         t.model.kakaoLink()
         t.model.csPhone()
+        t.model.managerName()
+        t.model.managerPhone()
+        t.model.managerEmail()
+        t.model.storeLink()
+        t.model.state()
         t.field('balance', {
             type: 'Int',
             resolve: async ({ id }, { }, ctx) => {
