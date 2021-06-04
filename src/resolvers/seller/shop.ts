@@ -89,7 +89,9 @@ export const updateShopInput = inputObjectType({
         t.nullable.string('bankAccountNumber')
         t.nullable.string('bankName')
         t.nullable.string('bankOwnerName')
-
+        t.nullable.string('managerName')
+        t.nullable.string('managerPhone')
+        t.nullable.string('managerEmail')
     }
 })
 
