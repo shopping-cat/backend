@@ -257,6 +257,7 @@ export const updateItem = mutationField(t => t.field('updateItem', {
             })
         }
         else {
+            // 기존 아이템 이미지 이미지 복사본 생성
             await ctx.prisma.item.update({
                 where: { id },
                 data: {
@@ -273,7 +274,11 @@ export const updateItem = mutationField(t => t.field('updateItem', {
                             extraDeliveryPrice,
                             option: option as ItemOption,
                             requireInformation: requireInformation as ItemRequireInformation,
-                            images: { connect: images.map((v: number) => ({ id: v })) },
+                            images: {
+                                createMany: {
+                                    data: item.images.map(v => ({ uri: v.uri }))
+                                }
+                            },
                             type
                         }
                     }
