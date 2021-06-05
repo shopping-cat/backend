@@ -18,5 +18,6 @@ const sellerFirebase = admin.initializeApp({
 export const catUserAuth = catUserFirebase.auth()
 export const dogUserAuth = dogUserFirebase.auth()
 export const sellerAuth = sellerFirebase.auth()
+
 export const catMessaging = catUserFirebase.messaging()
 export const dogMessaging = dogUserFirebase.messaging()

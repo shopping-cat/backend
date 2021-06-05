@@ -32,7 +32,7 @@ const createNotification = async (notiData: Prisma.NotificationCreateInput, user
                 }
             })
         } catch (error) {
-
+            console.error(error)
         }
     }
     return notification
