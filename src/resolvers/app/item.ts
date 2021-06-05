@@ -5,6 +5,8 @@ import endOfTheDate from "../../utils/endOfTheDate"
 
 import errorFormat from "../../utils/errorFormat"
 import getIUser from "../../utils/getIUser"
+import getType from "../../utils/getType"
+import isCat from "../../utils/isCat"
 import startOfTheDate from "../../utils/startOfTheDate"
 
 // Query - 아이템 세부 정보
@@ -66,7 +68,7 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
     type: homeItemType,
     resolve: async (_, { }, ctx) => {
 
-
+        const type = getType(ctx)
 
         const list: {
             type: string
@@ -79,13 +81,14 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
                 by: ['itemId'],
                 where: {
                     createdAt: { gte: dayjs().add(-1, 'day').toDate() },
-                    state: { in: ['구매접수', '배송중'] }
+                    state: { in: ['구매접수', '배송중'] },
+                    item: { type }
                 },
                 count: true,
                 orderBy: {
                     _count: {
                         itemId: 'desc'
-                    }
+                    },
                 },
                 take: 10
             }),
@@ -93,7 +96,7 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
                 try {
                     const user = await getIUser(ctx)
                     const items = await ctx.prisma.userRecentViewItem.findMany({
-                        where: { userId: user.id },
+                        where: { userId: user.id, item: { type } },
                         include: { item: true },
                         orderBy: { createdAt: 'desc' },
                         take: 10
@@ -109,7 +112,8 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
                     AND: [
                         { saleStartDate: { gte: startOfTheDate(new Date()) } },
                         { saleStartDate: { lte: endOfTheDate(new Date()) } }
-                    ]
+                    ],
+                    type
                 },
                 orderBy: {
                     sale: 'desc'
@@ -122,7 +126,8 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
                     AND: [
                         { saleEndDate: { gte: startOfTheDate(new Date()) } },
                         { saleEndDate: { lte: endOfTheDate(new Date()) } }
-                    ]
+                    ],
+                    type
                 },
                 orderBy: {
                     sale: 'desc'
@@ -200,13 +205,14 @@ export const filteredItems = queryField(t => t.list.field('filteredItems', {
             })
         }
         const items = await ctx.prisma.item.findMany({
-            take: limit,
-            skip: offset,
+            take: limit || 15,
+            skip: offset || 0,
             where: {
                 category1: category1 || undefined,
                 category2: category2 || undefined,
                 name: keyword ? { contains: keyword } : undefined,
-                state: '판매중'
+                state: '판매중',
+                type: getType(ctx)
             },
             orderBy: {
                 price: orderBy === '저가순' ? 'asc' : orderBy === '고가순' ? 'desc' : undefined,
@@ -233,7 +239,8 @@ export const filteredItemsCount = queryField(t => t.field('filteredItemsCount', 
                 category1: category1 || undefined,
                 category2: category2 || undefined,
                 name: keyword ? { contains: keyword } : undefined,
-                state: '판매중'
+                state: '판매중',
+                type: getType(ctx)
             }
         })
         return count
@@ -256,12 +263,13 @@ export const zzimItems = queryField(t => t.list.field('zzimItems', {
             where: { id },
             include: {
                 itemLikes: {
-                    take: limit,
-                    skip: offset,
+                    take: limit || 15,
+                    skip: offset || 0,
                     where: {
                         category1: category1 || undefined,
                         category2: category2 || undefined,
-                        state: { in: ['판매중', '재고없음'] }
+                        state: { in: ['판매중', '재고없음'] },
+                        type: getType(ctx)
                     }
                 }
             }
@@ -273,7 +281,7 @@ export const zzimItems = queryField(t => t.list.field('zzimItems', {
 }))
 
 
-// Query - 추천 아이템
+// Query - 추천 아이템 no use
 export const recommendedItems = queryField(t => t.list.field('recommendedItems', {
     type: 'Item',
     args: {
@@ -283,11 +291,12 @@ export const recommendedItems = queryField(t => t.list.field('recommendedItems',
     resolve: async (_, { offset, limit }, ctx) => {
         // 일단 인기 순 && 10% 이상 세일 순으로
         const items = await ctx.prisma.item.findMany({
-            take: limit,
-            skip: offset,
+            take: limit || 15,
+            skip: offset || 0,
             where: {
                 state: '판매중',
-                sale: { gte: 10 }
+                sale: { gte: 10 },
+                type: getType(ctx)
             },
             orderBy: {
                 likeNum: 'desc'
@@ -310,11 +319,12 @@ export const shopItems = queryField(t => t.list.field('shopItems', {
     resolve: async (_, { shopId, orderBy, offset, limit }, ctx) => {
 
         const items = await ctx.prisma.item.findMany({
-            take: limit,
-            skip: offset,
+            take: limit || 15,
+            skip: offset || 0,
             where: {
                 shopId,
-                state: { in: ['판매중', '재고없음'] }
+                state: { in: ['판매중', '재고없음'] },
+                type: getType(ctx)
             },
             orderBy: {
                 createdAt: orderBy === '최신순' ? 'desc' : undefined,
@@ -382,7 +392,7 @@ export const likeItem = mutationField(t => t.field('likeItem', {
 export const unlikeItems = mutationField(t => t.list.field('unlikeItems', {
     type: 'Item',
     args: {
-        itemIds: list(intArg())
+        itemIds: nonNull(list(nonNull(intArg())))
     },
     resolve: async (_, { itemIds }, ctx) => {
         try {
