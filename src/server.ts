@@ -31,7 +31,17 @@ if (process.env.NODE_ENV === 'production') {
   app.use(morgan('dev')) //log 용
 }
 // 기타 미들웨어
-app.use(cors({ origin: process.env.FRONT_URL, credentials: true }))
+const CORS_WHITE_LIST = ['https://shoppingcat.kr', 'https://seller.shoppingcat.kr', 'https://admin.shoppingcat.kr', 'http://localhost:3000']
+app.use(cors({
+  credentials: true,
+  origin: (origin, callback) => {
+    if (CORS_WHITE_LIST.includes(origin || '')) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+}))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser(process.env.COOKIE_SECRET))

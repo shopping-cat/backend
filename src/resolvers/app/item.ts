@@ -82,7 +82,7 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
                 where: {
                     createdAt: { gte: dayjs().add(-1, 'day').toDate() },
                     state: { in: ['구매접수', '배송중'] },
-                    item: { type }
+                    item: { type, shop: { state: '정상' }, }
                 },
                 count: true,
                 orderBy: {
@@ -96,7 +96,7 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
                 try {
                     const user = await getIUser(ctx)
                     const items = await ctx.prisma.userRecentViewItem.findMany({
-                        where: { userId: user.id, item: { type } },
+                        where: { userId: user.id, item: { type, shop: { state: '정상' }, } },
                         include: { item: true },
                         orderBy: { createdAt: 'desc' },
                         take: 10
@@ -109,6 +109,7 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
             ctx.prisma.item.findMany({
                 where: {
                     state: '판매중',
+                    shop: { state: '정상' },
                     AND: [
                         { saleStartDate: { gte: startOfTheDate(new Date()) } },
                         { saleStartDate: { lte: endOfTheDate(new Date()) } }
@@ -123,6 +124,7 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
             ctx.prisma.item.findMany({
                 where: {
                     state: '판매중',
+                    shop: { state: '정상' },
                     AND: [
                         { saleEndDate: { gte: startOfTheDate(new Date()) } },
                         { saleEndDate: { lte: endOfTheDate(new Date()) } }
@@ -212,6 +214,7 @@ export const filteredItems = queryField(t => t.list.field('filteredItems', {
                 category2: category2 || undefined,
                 name: keyword ? { contains: keyword } : undefined,
                 state: '판매중',
+                shop: { state: '정상' },
                 type: getType(ctx)
             },
             orderBy: {
@@ -269,7 +272,8 @@ export const zzimItems = queryField(t => t.list.field('zzimItems', {
                         category1: category1 || undefined,
                         category2: category2 || undefined,
                         state: { in: ['판매중', '재고없음'] },
-                        type: getType(ctx)
+                        type: getType(ctx),
+                        shop: { state: '정상' },
                     }
                 }
             }
@@ -296,7 +300,8 @@ export const recommendedItems = queryField(t => t.list.field('recommendedItems',
             where: {
                 state: '판매중',
                 sale: { gte: 10 },
-                type: getType(ctx)
+                type: getType(ctx),
+                shop: { state: '정상' },
             },
             orderBy: {
                 likeNum: 'desc'
@@ -324,7 +329,8 @@ export const shopItems = queryField(t => t.list.field('shopItems', {
             where: {
                 shopId,
                 state: { in: ['판매중', '재고없음'] },
-                type: getType(ctx)
+                type: getType(ctx),
+                shop: { state: '정상' },
             },
             orderBy: {
                 createdAt: orderBy === '최신순' ? 'desc' : undefined,

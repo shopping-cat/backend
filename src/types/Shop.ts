@@ -161,3 +161,9 @@ export const Shop = objectType({
         })
     }
 })
+
+export type ShopState =
+    '가입요청' |
+    '정상' |
+    '정지' |
+    '탈퇴'

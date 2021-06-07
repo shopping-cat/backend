@@ -4,7 +4,7 @@
 import { idArg, intArg, mutationField, nonNull, queryField, stringArg } from "nexus"
 import addPoint from "../../utils/addPoint"
 
-export const addUserPoint = mutationField('addUserPoint', {
+const addUserPoint = mutationField('addUserPoint', {
     type: 'User',
     args: {
         point: nonNull(intArg()),

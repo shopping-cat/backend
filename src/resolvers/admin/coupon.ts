@@ -6,7 +6,7 @@ import errorFormat from "../../utils/errorFormat";
 const cc = require('coupon-code');
 
 
-export const createCoupon = mutationField(t => t.field('createCoupon', {
+const createCoupon = mutationField(t => t.field('createCoupon', {
     type: 'Coupon',
     args: {
         image: nonNull(stringArg()),
