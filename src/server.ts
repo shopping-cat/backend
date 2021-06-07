@@ -31,17 +31,6 @@ if (process.env.NODE_ENV === 'production') {
   app.use(morgan('dev')) //log 용
 }
 // 기타 미들웨어
-const CORS_WHITE_LIST = ['https://shoppingcat.kr', 'https://seller.shoppingcat.kr', 'https://admin.shoppingcat.kr', 'http://localhost:3000']
-app.use(cors({
-  credentials: true,
-  origin: (origin, callback) => {
-    if (CORS_WHITE_LIST.includes(origin || '')) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  }
-}))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser(process.env.COOKIE_SECRET))
@@ -80,20 +69,22 @@ const sellerServer = new ApolloServer({
 adminServer.applyMiddleware({
   app,
   path: '/graphql/admin',
-  cors: false,
-})
-
-appServer.applyMiddleware({
-  app,
-  path: '/graphql/app',
-  cors: false
+  cors: { credentials: true, origin: process.env.NODE_ENV === 'production' ? 'https://admin.shoppingcat.kr' : 'http://localhost:3000' }
 })
 
 sellerServer.applyMiddleware({
   app,
   path: '/graphql/seller',
-  cors: false
+  cors: { credentials: true, origin: process.env.NODE_ENV === 'production' ? 'https://seller.shoppingcat.kr' : 'http://localhost:3000' }
 })
+
+appServer.applyMiddleware({
+  app,
+  path: '/graphql/app',
+  cors: { credentials: true }
+})
+
+
 
 
 const port = process.env.NODE_ENV === 'production' ? 80 : 8080
