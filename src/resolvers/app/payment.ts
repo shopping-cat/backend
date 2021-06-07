@@ -90,7 +90,7 @@ export const createPayment = mutationField(t => t.field('createPayment', {
             const uid = `${new Date().getTime()}` // payment id & 주문번호
             const cartItems = await ctx.prisma.cartItem.findMany({
                 where: { id: { in: cartItemIds }, userId: user.id },
-                include: { item: true }
+                include: { item: { include: { shop: true } } }
             })
             const ordersTemp = []
             if (cartItems.length === 0) throw errorFormat('아이템이 존재하지 않습니다')
@@ -107,6 +107,10 @@ export const createPayment = mutationField(t => t.field('createPayment', {
             for (const i in cartItems) {
                 const cartItem = cartItems[i]
                 if (cartItem.item.state !== '판매중') throw errorFormat('판매중인 상품이 아닙니다')
+                if (cartItem.item.type !== 'both' && user.type !== cartItem.item.type) throw errorFormat(`해당상품은 ${cartItem.item.type === 'cat' ? '고양이' : '강아지'} 전용 상품입니다.`)
+                if (!cartItem.item.shop) throw errorFormat(`${cartItem.item.name} 상품은 삭제된 상점의 제품입니다`)
+                if (cartItem.item.shop.state !== '정상') throw errorFormat(`${cartItem.item.name} 상품의 상점은 현재 ${cartItem.item.shop.state} 상태입니다.`)
+
                 // 기본금에 세일 적용
                 let itemPrice = salePrice(cartItem.item.sale, cartItem.item.price)
                 let optionPrice = 0
