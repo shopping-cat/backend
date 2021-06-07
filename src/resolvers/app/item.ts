@@ -82,7 +82,7 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
                 where: {
                     createdAt: { gte: dayjs().add(-1, 'day').toDate() },
                     state: { in: ['구매접수', '배송중'] },
-                    item: { type, shop: { state: '정상' }, }
+                    item: { type: { in: [type, 'both'] }, shop: { state: '정상' }, }
                 },
                 count: true,
                 orderBy: {
@@ -96,7 +96,7 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
                 try {
                     const user = await getIUser(ctx)
                     const items = await ctx.prisma.userRecentViewItem.findMany({
-                        where: { userId: user.id, item: { type, shop: { state: '정상' }, } },
+                        where: { userId: user.id, item: { type: { in: [type, 'both'] }, shop: { state: '정상' }, } },
                         include: { item: true },
                         orderBy: { createdAt: 'desc' },
                         take: 10
@@ -114,7 +114,7 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
                         { saleStartDate: { gte: startOfTheDate(new Date()) } },
                         { saleStartDate: { lte: endOfTheDate(new Date()) } }
                     ],
-                    type
+                    type: { in: [type, 'both'] }
                 },
                 orderBy: {
                     sale: 'desc'
@@ -129,7 +129,7 @@ export const homeItems = queryField(t => t.list.field('homeItems', {
                         { saleEndDate: { gte: startOfTheDate(new Date()) } },
                         { saleEndDate: { lte: endOfTheDate(new Date()) } }
                     ],
-                    type
+                    type: { in: [type, 'both'] }
                 },
                 orderBy: {
                     sale: 'desc'
@@ -215,7 +215,7 @@ export const filteredItems = queryField(t => t.list.field('filteredItems', {
                 name: keyword ? { contains: keyword } : undefined,
                 state: '판매중',
                 shop: { state: '정상' },
-                type: getType(ctx)
+                type: { in: [getType(ctx), 'both'] }
             },
             orderBy: {
                 price: orderBy === '저가순' ? 'asc' : orderBy === '고가순' ? 'desc' : undefined,
@@ -243,7 +243,7 @@ export const filteredItemsCount = queryField(t => t.field('filteredItemsCount', 
                 category2: category2 || undefined,
                 name: keyword ? { contains: keyword } : undefined,
                 state: '판매중',
-                type: getType(ctx)
+                type: { in: [getType(ctx), 'both'] }
             }
         })
         return count
@@ -272,7 +272,7 @@ export const zzimItems = queryField(t => t.list.field('zzimItems', {
                         category1: category1 || undefined,
                         category2: category2 || undefined,
                         state: { in: ['판매중', '재고없음'] },
-                        type: getType(ctx),
+                        type: { in: [getType(ctx), 'both'] },
                         shop: { state: '정상' },
                     }
                 }
@@ -300,7 +300,7 @@ export const recommendedItems = queryField(t => t.list.field('recommendedItems',
             where: {
                 state: '판매중',
                 sale: { gte: 10 },
-                type: getType(ctx),
+                type: { in: [getType(ctx), 'both'] },
                 shop: { state: '정상' },
             },
             orderBy: {
@@ -329,7 +329,7 @@ export const shopItems = queryField(t => t.list.field('shopItems', {
             where: {
                 shopId,
                 state: { in: ['판매중', '재고없음'] },
-                type: getType(ctx),
+                type: { in: [getType(ctx), 'both'] },
                 shop: { state: '정상' },
             },
             orderBy: {
