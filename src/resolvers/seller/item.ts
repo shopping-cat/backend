@@ -3,6 +3,7 @@ import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable,
 import getISeller from "../../utils/getISeller"
 import { ItemOption, ItemRequireInformation } from "../../types"
 import errorFormat from "../../utils/errorFormat"
+import { ItemImage } from ".prisma/client"
 
 export const item = queryField(t => t.field('item', {
     type: 'Item',
@@ -107,6 +108,16 @@ export const createItem = mutationField(t => t.field('createItem', {
 
         const seller = await getISeller(ctx)
 
+        // 이미지는 CreateMany를 사용해야 정렬이됨 그래서 새로 복사.
+        const imagesTemp: ItemImage[] = []
+        for (const imageId of images) {
+            const image = await ctx.prisma.itemImage.findUnique({
+                where: { id: imageId }
+            })
+            if (!image) continue
+            imagesTemp.push(image)
+        }
+
         const item = await ctx.prisma.item.create({
             data: {
                 shop: { connect: { id: seller.shopId } },
@@ -120,7 +131,11 @@ export const createItem = mutationField(t => t.field('createItem', {
                 extraDeliveryPrice,
                 option: option as ItemOption,
                 requireInformation: requireInformation as ItemRequireInformation,
-                images: { connect: images.map((v: number) => ({ id: v })) },
+                images: {
+                    createMany: {
+                        data: imagesTemp.map(v => ({ uri: v.uri }))
+                    }
+                },
                 type
             }
         })
@@ -210,7 +225,21 @@ export const updateItem = mutationField(t => t.field('updateItem', {
         if (item.shopId !== seller.shopId) throw errorFormat('권한이 없습니다.')
         if (item.targetItem) throw errorFormat('잘못된 접근입니다.')
 
+
+        // 이미지는 CreateMany를 사용해야 정렬이됨 그래서 새로 복사.
+        const imagesTemp: ItemImage[] = []
+        for (const imageId of images) {
+            const image = await ctx.prisma.itemImage.findUnique({
+                where: { id: imageId }
+            })
+            if (!image) continue
+            imagesTemp.push(image)
+        }
+
         if (item.state === '상품등록요청') {
+            // 초기 상품등록 심사 다이렉트 업데이트
+
+
             await ctx.prisma.item.update({
                 where: { id },
                 data: {
@@ -226,14 +255,17 @@ export const updateItem = mutationField(t => t.field('updateItem', {
                     option: option as ItemOption,
                     requireInformation: requireInformation as ItemRequireInformation,
                     images: {
-                        disconnect: item.images.map((v) => ({ id: v.id })),
-                        connect: images.map((v: number) => ({ id: v }))
+                        set: [],
+                        createMany: {
+                            data: imagesTemp.map(v => ({ uri: v.uri }))
+                        }
                     },
                     type
                 }
             })
         }
         else if (item.updateItem) {
+            // 상품 업데이트 심사시에 심사할 데이터 다이렉트 업데이트
             await ctx.prisma.item.update({
                 where: { id: item.updateItem.id },
                 data: {
@@ -249,15 +281,17 @@ export const updateItem = mutationField(t => t.field('updateItem', {
                     option: option as ItemOption,
                     requireInformation: requireInformation as ItemRequireInformation,
                     images: {
-                        disconnect: item.updateItem.images.map((v) => ({ id: v.id })),
-                        connect: images.map((v: number) => ({ id: v }))
+                        set: [],
+                        createMany: {
+                            data: imagesTemp.map(v => ({ uri: v.uri }))
+                        }
                     },
                     type
                 }
             })
         }
         else {
-            // 기존 아이템 이미지 이미지 복사본 생성
+            // 평범한 상테일때 심사요청을 위해 데이터 복제 테이블 생성
             await ctx.prisma.item.update({
                 where: { id },
                 data: {
@@ -276,7 +310,7 @@ export const updateItem = mutationField(t => t.field('updateItem', {
                             requireInformation: requireInformation as ItemRequireInformation,
                             images: {
                                 createMany: {
-                                    data: item.images.map(v => ({ uri: v.uri }))
+                                    data: imagesTemp.map(v => ({ uri: v.uri }))
                                 }
                             },
                             type
