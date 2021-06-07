@@ -71,3 +71,64 @@ export const rejectRegistRequestItem = mutationField(t => t.field('rejectRegistR
         })
     }
 }))
+
+export const approveUpdateRequestItem = mutationField(t => t.field('approveUpdateRequestItem', {
+    type: 'Item',
+    args: {
+        id: nonNull(intArg())
+    },
+    resolve: async (_, { id }, ctx) => {
+        const prevItem = await ctx.prisma.item.findUnique({
+            where: { id },
+            include: {
+                updateItem: {
+                    include: { images: true }
+                }
+            }
+        })
+        if (!prevItem) throw errorFormat('없는 상품입니다')
+        if (!prevItem.updateItem) throw errorFormat('업데이트할 데이터가 없습니다')
+
+        const { category1, category2, html, name, option, price, images, requireInformation, deliveryPrice, extraDeliveryPrice, sale, type } = prevItem.updateItem
+
+        return ctx.prisma.item.update({
+            where: { id },
+            data: {
+                category1, category2, html, name, option, price, requireInformation, deliveryPrice, extraDeliveryPrice, sale, type,
+                images: {
+                    set: images.map(v => ({ id: v.id }))
+                },
+                updateItem: {
+                    delete: true
+                }
+            }
+        })
+    }
+}))
+
+export const rejectUpdateRequestItem = mutationField(t => t.field('rejectUpdateRequestItem', {
+    type: 'Item',
+    args: {
+        id: nonNull(intArg())
+    },
+    resolve: async (_, { id }, ctx) => {
+        const prevItem = await ctx.prisma.item.findUnique({
+            where: { id },
+            include: {
+                updateItem: true
+            }
+        })
+
+        if (!prevItem) throw errorFormat('없는 상품입니다')
+        if (!prevItem.updateItem) throw errorFormat('업데이트할 데이터가 없습니다')
+
+        return ctx.prisma.item.update({
+            where: { id },
+            data: {
+                updateItem: {
+                    delete: true
+                }
+            }
+        })
+    }
+}))
