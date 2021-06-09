@@ -243,6 +243,7 @@ export const filteredItemsCount = queryField(t => t.field('filteredItemsCount', 
                 category2: category2 || undefined,
                 name: keyword ? { contains: keyword } : undefined,
                 state: '판매중',
+                shop: { state: '정상' },
                 type: { in: [getType(ctx), 'both'] }
             }
         })

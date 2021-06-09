@@ -1,6 +1,35 @@
-import { intArg, mutationField, nonNull, queryField } from "nexus";
+import { inputObjectType, intArg, mutationField, nonNull, queryField } from "nexus";
 import { sellerAuth } from "../../lib/firebase";
 import errorFormat from "../../utils/errorFormat";
+import objectNullToUndefind from "../../utils/objectNullToUndefind";
+
+export const shops = queryField(t => t.list.field('shops', {
+    type: 'Shop',
+    resolve: (_, { }, ctx) => {
+        return ctx.prisma.shop.findMany()
+    }
+}))
+
+export const updateShop = mutationField(t => t.field('updateShop', {
+    type: 'Shop',
+    args: {
+        id: nonNull(intArg()),
+        input: nonNull(inputObjectType({
+            name: 'UpdateShopInput',
+            definition: (t) => {
+                t.nullable.string('state')
+            }
+        }))
+    },
+    resolve: async (_, { id, input }, ctx) => {
+        const shops = await ctx.prisma.shop.update({
+            where: { id },
+            data: objectNullToUndefind(input)
+        })
+        return shops
+    }
+}))
+
 
 export const shop = queryField(t => t.field('shop', {
     type: 'Shop',
@@ -13,6 +42,7 @@ export const shop = queryField(t => t.field('shop', {
         return shop
     }
 }))
+
 
 export const createRequestShops = queryField(t => t.list.field('createRequestShops', {
     type: 'Shop',
