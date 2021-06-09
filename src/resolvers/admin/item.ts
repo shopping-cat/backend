@@ -1,6 +1,15 @@
 import { idArg, intArg, mutationField, nonNull, queryField, stringArg, nullable, list, arg, inputObjectType } from "nexus"
 import errorFormat from "../../utils/errorFormat"
+import objectNullToUndefind from "../../utils/objectNullToUndefind"
 
+
+export const items = queryField(t => t.list.field('items', {
+    type: 'Item',
+    resolve: async (_, { }, ctx) => {
+        const items = await ctx.prisma.item.findMany()
+        return items
+    }
+}))
 
 export const item = queryField(t => t.field('item', {
     type: 'Item',
@@ -12,6 +21,25 @@ export const item = queryField(t => t.field('item', {
             where: { id }
         })
         return item
+    }
+}))
+
+export const updateItem = mutationField(t => t.field('updateItem', {
+    type: 'Item',
+    args: {
+        id: nonNull(intArg()),
+        input: nonNull(inputObjectType({
+            name: 'UpdateItemInput',
+            definition: (t) => {
+                t.nullable.string('state')
+            }
+        }))
+    },
+    resolve: async (_, { id, input }, ctx) => {
+        return ctx.prisma.item.update({
+            where: { id },
+            data: objectNullToUndefind(input)
+        })
     }
 }))
 

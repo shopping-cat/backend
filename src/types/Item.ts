@@ -141,6 +141,7 @@ export const Item = objectType({
 export type ItemState =
     '판매중' |
     '판매중지' |
+    '판매정지' |
     '재고없음' |
     '상품등록요청'
 
