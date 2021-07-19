@@ -48,7 +48,7 @@ export const kakaoTokenToFirebaseToken = queryField(t => t.nonNull.field('kakaoT
         } catch (error) {
             if (error.code !== 'auth/user-not-found') throw error
             if (isCat(ctx)) await catUserAuth.createUser({ ...properties, uid: kakaoUserId })
-            else dogUserAuth.updateUser(kakaoUserId, properties)
+            else await dogUserAuth.updateUser(kakaoUserId, properties)
         }
 
         // 파이어베이스 토큰 생성
